@@ -12,10 +12,8 @@ import "./page.css";
 
 export default function SubirCertificadoPage() {
   const [formData, setFormData] = useState({
-    titulo: "",
-    estudiante: "",
-    fecha: "",
-    credencialId: "",
+    entidad: "",
+    horas: "",
   });
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -60,7 +58,7 @@ export default function SubirCertificadoPage() {
     setSuccess(false);
 
     // 3. Verificación manual estricta de todos los campos obligatorios
-    if (!formData.titulo || !formData.estudiante || !formData.fecha || !formData.credencialId || !file) {
+    if (!formData.entidad || !formData.horas || !file) {
       setError("Todos los campos marcados con asterisco (*) son completamente obligatorios.");
       return;
     }
@@ -73,7 +71,7 @@ export default function SubirCertificadoPage() {
 
       setSuccess(true);
       // Limpieza del formulario tras éxito
-      setFormData({ titulo: "", estudiante: "", fecha: "", credencialId: "" });
+      setFormData({ entidad: "", horas: "" });
       setFile(null);
     } catch (err) {
       setError("Ocurrió un error inesperado al procesar el certificado. Inténtalo de nuevo.");
@@ -85,20 +83,28 @@ export default function SubirCertificadoPage() {
   return (
     <section className="fp-page fp-page--shell">
       <DashboardSidebar
-        active="analytics"
+        active="credentials"
         header={
-          <div className="fp-sidebar__section fp-stack-md">
+          <>
+            <div className="fp-sidebar__section fp-sidebar__section--plain">
+              <div className="fp-headline-md" style={{ color: "var(--fp-primary)", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                <MaterialIcon>workspace_premium</MaterialIcon>
+                MyCertify
+              </div>
+            </div>
+            <div className="fp-sidebar__section fp-stack-md">
             <div className="fp-sidebar__profile">
+              <div className="fp-sidebar__avatar-placeholder">
+                <MaterialIcon>person</MaterialIcon>
+              </div>
               <div className="fp-stack-xs">
-                <h2 className="fp-headline-md" style={{ margin: 0, color: "var(--fp-primary)" }}>
-                  Professional Tier
-                </h2>
-                <p className="fp-body-sm fp-muted" style={{ margin: 0 }}>
-                  Verified Member
+                <p className="fp-label-md" style={{ margin: 0, color: "var(--fp-on-surface)" }}>
+                  Alex Morgan
                 </p>
               </div>
             </div>
           </div>
+          </>
         }
         footer={
           <Link className="fp-sidebar__link fp-label-md" href="/frontend">
@@ -130,18 +136,18 @@ export default function SubirCertificadoPage() {
               <h2 className="fp-headline-md" style={{ margin: 0 }}>Datos de la Certificación</h2>
 
               <div className="fp-field">
-                <label className="fp-field__label fp-label-md" htmlFor="titulo">
-                  Título del Certificado o Curso *
+                <label className="fp-field__label fp-label-md" htmlFor="entidad">
+                  Entidad / Plataforma de Expedición *
                 </label>
                 <div className="fp-input-wrap">
-                  <span className="fp-input-icon"><MaterialIcon>school</MaterialIcon></span>
+                  <span className="fp-input-icon"><MaterialIcon>account_balance</MaterialIcon></span>
                   <input
                     type="text"
-                    id="titulo"
-                    name="titulo"
-                    value={formData.titulo}
+                    id="entidad"
+                    name="entidad"
+                    value={formData.entidad}
                     onChange={handleInputChange}
-                    placeholder="Ej. Diplomado en Desarrollo Frontend"
+                    placeholder="Ej. Coursera, Udemy, Universidad XYZ"
                     className="fp-input"
                     required
                   />
@@ -149,53 +155,21 @@ export default function SubirCertificadoPage() {
               </div>
 
               <div className="fp-field">
-                <label className="fp-field__label fp-label-md" htmlFor="estudiante">
-                  Nombre Completo del Alumno *
+                <label className="fp-field__label fp-label-md" htmlFor="horas">
+                  Cantidad de Horas *
                 </label>
                 <div className="fp-input-wrap">
-                  <span className="fp-input-icon"><MaterialIcon>person</MaterialIcon></span>
+                  <span className="fp-input-icon"><MaterialIcon>schedule</MaterialIcon></span>
                   <input
-                    type="text"
-                    id="estudiante"
-                    name="estudiante"
-                    value={formData.estudiante}
+                    type="number"
+                    id="horas"
+                    name="horas"
+                    value={formData.horas}
                     onChange={handleInputChange}
-                    placeholder="Ej. Carlos Mendoza"
+                    placeholder="Ej. 40"
                     className="fp-input"
                     required
-                  />
-                </div>
-              </div>
-
-              <div className="fp-grid-two">
-                <div className="fp-field">
-                  <label className="fp-field__label fp-label-md" htmlFor="fecha">
-                    Fecha de Emisión *
-                  </label>
-                  <input
-                    type="date"
-                    id="fecha"
-                    name="fecha"
-                    value={formData.fecha}
-                    onChange={handleInputChange}
-                    className="fp-input"
-                    required
-                  />
-                </div>
-
-                <div className="fp-field">
-                  <label className="fp-field__label fp-label-md" htmlFor="credencialId">
-                    ID único de Credencial *
-                  </label>
-                  <input
-                    type="text"
-                    id="credencialId"
-                    name="credencialId"
-                    value={formData.credencialId}
-                    onChange={handleInputChange}
-                    placeholder="Ej. CERT-2026-8891"
-                    className="fp-input"
-                    required
+                    min="1"
                   />
                 </div>
               </div>

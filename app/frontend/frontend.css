@@ -607,6 +607,46 @@ body {
   color: var(--fp-primary-fixed-dim);
 }
 
+.fp-logout-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  animation: fp-fade-in 200ms ease-out both;
+}
+
+.fp-logout-modal {
+  background: color-mix(in srgb, var(--fp-surface-container-lowest) 90%, transparent);
+  border: 1px solid color-mix(in srgb, var(--fp-outline-variant) 60%, transparent);
+  border-radius: var(--fp-radius-xl);
+  padding: 2rem;
+  width: 90%;
+  max-width: 24rem;
+  box-shadow: var(--fp-shadow-panel);
+  animation: fp-scale-up 200ms ease-out both;
+}
+
+.fp-logout-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+@keyframes fp-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fp-scale-up {
+  from { opacity: 0; transform: scale(0.95) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
 .fp-app-shell {
   display: flex;
   min-height: 100vh;
@@ -658,6 +698,27 @@ body {
   object-fit: cover;
   overflow: hidden;
   background: var(--fp-surface-container-high);
+}
+
+.fp-sidebar__avatar-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--fp-surface-container-high) 80%, transparent);
+  color: var(--fp-on-surface-variant);
+  flex-shrink: 0;
+}
+
+.fp-sidebar__avatar-placeholder--large {
+  width: 4rem;
+  height: 4rem;
+}
+
+.fp-sidebar__avatar-placeholder--large .fp-icon {
+  font-size: 2rem;
 }
 
 .fp-sidebar__avatar--large {
@@ -756,6 +817,14 @@ body {
 .fp-shell-content {
   flex: 1;
   padding: 2rem;
+  background:
+    radial-gradient(
+      circle at top right,
+      color-mix(in srgb, var(--fp-primary-fixed) 20%, transparent),
+      transparent 50%
+    ),
+    var(--fp-background);
+  border-radius: var(--fp-radius-xl) 0 0 0;
 }
 
 .fp-two-column {

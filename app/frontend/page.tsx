@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 import { MaterialIcon } from "./_components/material-icon";
@@ -8,49 +9,44 @@ import "./page.css";
 const features = [
   {
     icon: "qr_code_2",
-    title: "Perfil verificable con QR",
-    copy: "Comparte tu hoja de vida con un QR que abre un perfil claro, confiable y listo para ser revisado por reclutadores.",
+    title: "Perfiles con QR",
+    copy: "Comparte tu portafolio de certificaciones al instante. Un escaneo es suficiente para que cualquier empleador verifique tus credenciales de forma segura.",
   },
   {
-    icon: "upload_file",
-    title: "Certificados organizados",
-    copy: "Ordena cursos, diplomas y constancias en una experiencia visual que muestra mejor tu recorrido y tus fortalezas.",
+    icon: "description",
+    title: "Certificados Organizados",
+    copy: "Olvídate de los PDFs perdidos. Centraliza diplomas, cursos y reconocimientos en un solo lugar, categorizados y siempre listos para descargar o compartir.",
   },
   {
-    icon: "monitoring",
-    title: "Analítica para reclutadores",
-    copy: "Ayuda a que una empresa entienda rápido en qué te especializas y qué tan sólido es tu perfil sin pedir pasos extra.",
-  },
-];
-
-const pillars = [
-  {
-    title: "Qué es el proyecto",
-    copy: "CertifyPro convierte certificados dispersos en una presencia profesional que se siente ordenada, creíble y fácil de compartir.",
-  },
-  {
-    title: "Qué hace",
-    copy: "Te permite registrar formación, clasificar intereses, mostrar evidencia académica y entregar un perfil público pensado para oportunidades reales.",
-  },
-  {
-    title: "Por qué genera confianza",
-    copy: "Se basa en evidencia documental, estructura profesional y una experiencia clara para que tus logros hablen con más fuerza.",
+    icon: "dashboard",
+    title: "Dashboard Interno",
+    copy: "Gestiona todos tus logros y documentos desde un panel centralizado diseñado para tu crecimiento.",
   },
 ];
 
 const flowSteps = [
-  "Crea tu cuenta profesional.",
-  "Inicia sesión y completa tu información académica.",
-  "Selecciona tus áreas de interés y especialización.",
-  "Accede al panel, sube certificados y comparte tu QR.",
+  {
+    number: "1",
+    title: "Regístrate",
+    copy: "Crea tu cuenta gratuita usando solo tu correo electrónico.",
+  },
+  {
+    number: "2",
+    title: "Sube tus logros",
+    copy: "Sube tus logros. Añade diplomas y certificados de cursos.",
+  },
+  {
+    number: "3",
+    title: "Comparte",
+    copy: "Comparte. Genera un perfil público con código QR para tu CV o redes.",
+  },
 ];
 
 export default function FrontendIndexPage() {
   return (
-    <section className="fp-page" style={{ position: "relative" }}>
-      <ThemeToggle floating />
-
+    <section className="fp-page">
       <main className="fp-landing">
+        {/* ─── Navbar ─── */}
         <header className="fp-landing__nav">
           <div className="fp-brand">
             <span className="fp-brand__icon fp-brand__icon--round">
@@ -60,185 +56,142 @@ export default function FrontendIndexPage() {
           </div>
 
           <nav className="fp-landing__nav-links fp-body-sm">
-            <a href="#proyecto">Proyecto</a>
-            <a href="#flujo">Flujo</a>
-            <a href="#stack">Confianza</a>
+            <a href="#soluciones" className="fp-nav-link--active">Soluciones</a>
           </nav>
 
           <div className="fp-landing__nav-actions">
-            <Link className="fp-button fp-button--ghost" href="/frontend/iniciar-sesion">
+            <ThemeToggle />
+            <Link className="fp-button fp-button--ghost fp-button--sm" href="/frontend/iniciar-sesion">
               Iniciar sesión
             </Link>
-            <Link className="fp-button fp-button--primary" href="/frontend/registro">
-              Crear cuenta
+            <Link className="fp-button fp-button--accent fp-button--sm" href="/frontend/registro">
+              Empezar
             </Link>
           </div>
         </header>
 
+        {/* ─── Hero Section ─── */}
         <section className="fp-landing__hero">
-          <div className="fp-landing__hero-copy fp-stack-lg">
-            <div className="fp-stack-sm">
-              <span className="fp-index__eyebrow fp-label-sm">
-                Haz que tu perfil se vea serio, actual y verificable
-              </span>
-              <h1 className="fp-display" style={{ margin: 0 }}>
-                Deja de adjuntar certificados sueltos y muestra una historia profesional que sí engancha
-              </h1>
-              <p className="fp-body-lg fp-muted" style={{ margin: 0 }}>
-                CertifyPro reúne tu formación, tus intereses y tus logros en un perfil compartible
-                por QR para que una empresa entienda quién eres, qué sabes y por qué vale la pena
-                entrevistarte.
-              </p>
-            </div>
+          <div className="fp-landing__hero-copy">
+            <span className="fp-hero__badge">
+              <span className="fp-hero__badge-dot" />
+              PLATAFORMA PROFESIONAL
+            </span>
 
-            <div className="fp-index__actions">
-              <Link className="fp-button fp-button--primary" href="/frontend/registro">
-                Crear cuenta
-              </Link>
-              <Link className="fp-button fp-button--secondary" href="./iniciar-sesion/page.tsx">
-                Iniciar sesión
-              </Link>
-            </div>
+            <h1 className="fp-hero__title">
+              Tu trayectoria profesional,{" "}
+              <em className="fp-hero__title-accent">
+                validada y siempre a la mano.
+              </em>
+            </h1>
 
-            <div className="fp-landing__stats">
-              <article className="fp-card fp-landing__stat">
-                <span className="fp-label-sm fp-muted">Más claridad</span>
-                <strong className="fp-headline-md">Tus logros, mejor presentados</strong>
-              </article>
-              <article className="fp-card fp-landing__stat">
-                <span className="fp-label-sm fp-muted">Más confianza</span>
-                <strong className="fp-headline-md">Perfil público verificable</strong>
-              </article>
-              <article className="fp-card fp-landing__stat">
-                <span className="fp-label-sm fp-muted">Más impacto</span>
-                <strong className="fp-headline-md">Un QR que abre tu trayectoria</strong>
-              </article>
+            <p className="fp-hero__subtitle">
+              Organiza, comparte y demuestra tus certificaciones al instante.
+              Conecta con reclutadores y destaca en el mercado laboral con un
+              perfil verificable.
+            </p>
+
+            <div className="fp-hero__actions">
+              <Link className="fp-button fp-button--outline-light" href="/frontend/registro">
+                Crea tu perfil gratis
+              </Link>
+              <Link className="fp-button fp-button--outline-light" href="/frontend/iniciar-sesion">
+                Ver demostración
+              </Link>
             </div>
           </div>
 
-          <aside className="fp-card fp-landing__preview fp-stack-lg">
-            <div className="fp-stack-sm">
-              <span className="fp-label-sm fp-muted">Vista del perfil público</span>
-              <h2 className="fp-headline-md" style={{ margin: 0 }}>
-                Un solo escaneo para entender tu valor profesional
-              </h2>
-            </div>
-
-            <div className="fp-landing__preview-qr">
-              <div className="fp-landing__preview-grid" />
-            </div>
-
-            <div className="fp-stack-sm">
-              <div className="fp-landing__mini-card">
-                <MaterialIcon filled>workspace_premium</MaterialIcon>
-                <div className="fp-stack-xs">
-                  <strong className="fp-label-md">Biografía enfocada en reclutadores</strong>
-                  <span className="fp-body-sm fp-muted">
-                    Resume lo que haces, hacia dónde vas y qué evidencias respaldan tu perfil.
-                  </span>
-                </div>
-              </div>
-              <div className="fp-landing__mini-card">
-                <MaterialIcon filled>insights</MaterialIcon>
-                <div className="fp-stack-xs">
-                  <strong className="fp-label-md">Lectura inmediata del perfil</strong>
-                  <span className="fp-body-sm fp-muted">
-                    Muestra especialización, diversidad de aprendizaje y trayectoria en una sola vista.
-                  </span>
+          <div className="fp-landing__hero-visual">
+            <div className="fp-hero__image-wrapper">
+              <Image
+                src="/hero-landing.png"
+                alt="Equipo profesional trabajando en oficina"
+                width={640}
+                height={440}
+                className="fp-hero__image"
+                priority
+              />
+              <div className="fp-hero__floating-badge">
+                <span className="fp-hero__badge-icon">
+                  <MaterialIcon filled>check_circle</MaterialIcon>
+                </span>
+                <div className="fp-hero__badge-text">
+                  <span className="fp-hero__badge-label">Certificación Validada</span>
+                  <strong className="fp-hero__badge-value">100% Auténtico</strong>
                 </div>
               </div>
             </div>
-          </aside>
+          </div>
         </section>
 
-        <section className="fp-landing__section fp-stack-lg" id="proyecto">
-          <div className="fp-stack-sm">
-            <span className="fp-index__eyebrow fp-label-sm">Qué es y qué hace</span>
-            <h2 className="fp-headline-lg" style={{ margin: 0 }}>
-              Diseñada para que tu formación se vea tan sólida como realmente es
+        {/* ─── Features Section ─── */}
+        <section className="fp-landing__section" id="soluciones">
+          <div className="fp-section__header">
+            <h2 className="fp-section__title">
+              Todo lo que necesitas para destacar
             </h2>
+            <p className="fp-section__subtitle">
+              Herramientas diseñadas para profesionales que quieren mostrar su
+              verdadero valor sin complicaciones técnicas.
+            </p>
           </div>
 
           <div className="fp-landing__features">
             {features.map((feature) => (
-              <article className="fp-card fp-index__card fp-stack-md" key={feature.title}>
-                <div className="fp-landing__feature-icon">
+              <article className="fp-feature-card" key={feature.title}>
+                <div className="fp-feature-card__icon">
                   <MaterialIcon filled>{feature.icon}</MaterialIcon>
                 </div>
-                <h3 className="fp-headline-md" style={{ margin: 0 }}>
-                  {feature.title}
-                </h3>
-                <p className="fp-body-md fp-muted" style={{ margin: 0 }}>
-                  {feature.copy}
-                </p>
+                <h3 className="fp-feature-card__title">{feature.title}</h3>
+                <p className="fp-feature-card__copy">{feature.copy}</p>
               </article>
             ))}
           </div>
         </section>
 
-        <section className="fp-landing__section fp-stack-lg" id="flujo">
-          <div className="fp-stack-sm">
-            <span className="fp-index__eyebrow fp-label-sm">Flujo del usuario</span>
-            <h2 className="fp-headline-lg" style={{ margin: 0 }}>
-              Un recorrido simple, claro y pensado para mostrar progreso
-            </h2>
-          </div>
-
-          <div className="fp-landing__flow">
-            {flowSteps.map((step, index) => (
-              <article className="fp-card fp-landing__flow-step" key={step}>
-                <span className="fp-landing__flow-number">{index + 1}</span>
-                <p className="fp-body-md" style={{ margin: 0 }}>
-                  {step}
-                </p>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section className="fp-landing__section fp-stack-lg" id="stack">
-          <div className="fp-stack-sm">
-            <span className="fp-index__eyebrow fp-label-sm">Base del proyecto</span>
-            <h2 className="fp-headline-lg" style={{ margin: 0 }}>
-              Lo importante no es solo almacenar certificados, sino hacer que generen confianza
-            </h2>
-          </div>
-
-          <div className="fp-landing__pillars">
-            {pillars.map((pillar) => (
-              <article className="fp-card fp-index__card fp-stack-sm" key={pillar.title}>
-                <h3 className="fp-headline-md" style={{ margin: 0 }}>
-                  {pillar.title}
-                </h3>
-                <p className="fp-body-md fp-muted" style={{ margin: 0 }}>
-                  {pillar.copy}
-                </p>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section className="fp-card fp-landing__cta fp-stack-md">
-          <div className="fp-stack-sm">
-            <span className="fp-index__eyebrow fp-label-sm">Empezar demo frontend</span>
-            <h2 className="fp-headline-lg" style={{ margin: 0 }}>
-              Empieza ahora y recorre la experiencia completa del usuario
-            </h2>
-            <p className="fp-body-md" style={{ margin: 0, opacity: 0.92 }}>
-              Esta demo ya conecta la landing, el registro, el inicio de sesión, el onboarding y
-              el dashboard para que puedas evaluar el flujo visual completo.
+        {/* ─── How it works Section ─── */}
+        <section className="fp-landing__section fp-landing__section--flow">
+          <div className="fp-section__header fp-section__header--left">
+            <h2 className="fp-section__title">Cómo funciona</h2>
+            <p className="fp-section__subtitle">
+              Tres pasos sencillos para tomar el control de tu identidad
+              profesional digital.
             </p>
           </div>
 
-          <div className="fp-index__actions">
-            <Link className="fp-button fp-button--primary" href="/frontend/registro">
-              Ir a registrarme
-            </Link>
-            <Link className="fp-button fp-button--ghost" href="/frontend/iniciar-sesion">
-              Ya tengo cuenta
-            </Link>
+          <div className="fp-landing__flow">
+            {flowSteps.map((step) => (
+              <article className="fp-flow-card" key={step.number}>
+                <span className="fp-flow-card__number">{step.number}</span>
+                <h3 className="fp-flow-card__title">{step.title}</h3>
+                <p className="fp-flow-card__copy">{step.copy}</p>
+              </article>
+            ))}
           </div>
         </section>
+
+        {/* ─── Footer ─── */}
+        <footer className="fp-landing__footer">
+          <div className="fp-landing__footer-inner">
+            <div className="fp-landing__footer-left">
+              <div className="fp-brand fp-brand--footer">
+                <span className="fp-brand__icon fp-brand__icon--round fp-brand__icon--sm">
+                  <MaterialIcon filled>verified</MaterialIcon>
+                </span>
+                <span>CertifyPro</span>
+              </div>
+              <span className="fp-footer__copyright">
+                © 2024 CertifyPro Inc. Todos los derechos reservados.
+              </span>
+            </div>
+            <div className="fp-landing__footer-links fp-body-sm">
+              <Link href="/frontend">Política de Privacidad</Link>
+              <Link href="/frontend">Términos de Servicio</Link>
+              <Link href="/frontend">Seguridad</Link>
+              <Link href="/frontend">Contacto</Link>
+            </div>
+          </div>
+        </footer>
       </main>
     </section>
   );

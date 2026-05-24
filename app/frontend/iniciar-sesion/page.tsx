@@ -9,7 +9,6 @@ import "./page.css";
 export default function IniciarSesionPage() {
   return (
     <section className="fp-login-split">
-      <ThemeToggle floating />
       {/* ── Left Panel: Hero image + overlay text ── */}
       <aside className="fp-login-split__hero" aria-hidden="true">
         <img
@@ -46,6 +45,17 @@ export default function IniciarSesionPage() {
 
       {/* ── Right Panel: Login form ── */}
       <main className="fp-login-split__form-area">
+
+        {/* Top nav bar with Home + ThemeToggle */}
+        <nav className="fp-auth-topnav">
+          <Link className="fp-auth-topnav__home" href="/frontend">
+            <MaterialIcon>arrow_back</MaterialIcon>
+            <span>Inicio</span>
+          </Link>
+          <ThemeToggle />
+        </nav>
+
+        <div className="fp-auth-form-center">
         <div className="fp-login-split__form-container">
           <header className="fp-login-split__form-header">
             <h1 className="fp-login-split__form-title">Iniciar Sesión</h1>
@@ -56,7 +66,7 @@ export default function IniciarSesionPage() {
           </header>
           <FlowForm
             className="fp-login-split__form"
-            nextHref="/frontend/informacion-academica"
+            nextHref="/frontend/codigo"
           >
             <div className="fp-field">
               <label
@@ -123,6 +133,7 @@ export default function IniciarSesionPage() {
               Regístrate
             </Link>
           </p>
+        </div>
         </div>
       </main>
     </section>

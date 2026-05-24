@@ -2,8 +2,10 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { MaterialIcon } from "./material-icon";
+import { ThemeToggle } from "./theme-toggle";
+import { LogoutButton } from "./logout-button";
 
-type NavKey = "overview" | "credentials" | "analytics" | "settings";
+type NavKey = "overview" | "credentials" | "my-credentials" | "analytics" | "settings";
 
 type DashboardSidebarProps = {
   active: NavKey;
@@ -17,15 +19,21 @@ const navItems: Array<{
   label: string;
   icon: string;
 }> = [
-  { key: "overview", href: "/frontend/pagina-principal", label: "Overview", icon: "dashboard" },
+  { key: "overview", href: "/frontend/pagina-principal", label: "Resumen", icon: "dashboard" },
   {
     key: "credentials",
     href: "/frontend/subir-certificado",
-    label: "My Credentials",
-    icon: "verified",
+    label: "Emitir Certificado",
+    icon: "upload_file",
   },
-  { key: "analytics", href: "/frontend/codigo-qr", label: "Analytics", icon: "insights" },
-  { key: "settings", href: "/frontend/mi-cuenta", label: "Settings", icon: "settings" },
+  {
+    key: "my-credentials",
+    href: "/frontend/mis-certificados",
+    label: "Mis Certificados",
+    icon: "workspace_premium",
+  },
+  { key: "analytics", href: "/frontend/codigo-qr", label: "Mi Código QR", icon: "qr_code_2" },
+  { key: "settings", href: "/frontend/mi-cuenta", label: "Configuración", icon: "settings" },
 ];
 
 export function DashboardSidebar({
@@ -54,9 +62,17 @@ export function DashboardSidebar({
             <span>{item.label}</span>
           </Link>
         ))}
+        <div style={{ marginTop: "auto", paddingTop: "0.5rem" }}>
+          <LogoutButton />
+        </div>
       </nav>
 
-      <div className="fp-sidebar__footer">{footer}</div>
+      <div className="fp-sidebar__footer">
+        {footer}
+        <div style={{ marginTop: "1rem", display: "flex", justifyContent: "center" }}>
+          <ThemeToggle />
+        </div>
+      </div>
     </aside>
   );
 }

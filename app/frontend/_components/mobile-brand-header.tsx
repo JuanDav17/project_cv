@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { ThemeToggle } from "./theme-toggle";
 
 type MobileBrandHeaderProps = {
   children?: ReactNode;
@@ -10,7 +11,10 @@ export function MobileBrandHeader({ children }: MobileBrandHeaderProps) {
       <div className="fp-headline-md" style={{ color: "var(--fp-primary)", fontWeight: 700 }}>
         CertifyPro
       </div>
-      <div className="fp-mobile-header__actions">{children}</div>
+      <div className="fp-mobile-header__actions">
+        <ThemeToggle />
+        {children}
+      </div>
     </header>
   );
 }

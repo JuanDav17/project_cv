@@ -113,9 +113,8 @@
 /* ── Right form panel ── */
 .fp-login-split__form-area {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
+  flex-direction: column;
+  align-items: stretch;
   background:
     radial-gradient(
       circle at top right,
@@ -123,6 +122,53 @@
       transparent 50%
     ),
     var(--fp-background);
+}
+
+/* Top nav bar (Home button + ThemeToggle) */
+/* Note: .fp-auth-topnav and .fp-auth-topnav__home are defined in registro/page.css
+   but scoped here via the login form area for consistency */
+.fp-login-split__form-area .fp-auth-topnav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  flex-shrink: 0;
+}
+
+.fp-login-split__form-area .fp-auth-topnav__home {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: var(--fp-font-body);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--fp-on-surface-variant);
+  text-decoration: none;
+  padding: 0.5rem 0.9rem;
+  border-radius: var(--fp-radius-full);
+  border: 1px solid color-mix(in srgb, var(--fp-outline-variant) 50%, transparent);
+  background: color-mix(in srgb, var(--fp-surface-container-low) 60%, transparent);
+  transition:
+    color 180ms ease,
+    border-color 180ms ease,
+    background-color 180ms ease,
+    transform 160ms ease;
+}
+
+.fp-login-split__form-area .fp-auth-topnav__home:hover {
+  color: var(--fp-primary);
+  border-color: color-mix(in srgb, var(--fp-primary) 40%, transparent);
+  background: color-mix(in srgb, var(--fp-primary) 6%, transparent);
+  transform: translateX(-2px);
+}
+
+/* Center-wrapper that fills remaining space */
+.fp-login-split__form-area .fp-auth-form-center {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
 }
 
 .fp-login-split__form-container {
@@ -230,7 +276,15 @@
   }
 
   .fp-login-split__form-area {
+    padding: 0;
+  }
+
+  .fp-login-split__form-area .fp-auth-form-center {
     padding: 1.5rem 1rem;
+  }
+
+  .fp-login-split__form-area .fp-auth-topnav {
+    padding: 0.75rem 1rem;
   }
 
   .fp-login-split__form-header {

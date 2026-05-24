@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -15,50 +14,36 @@ import "./page.css";
 type QRColor = "primary" | "secondary" | "tertiary" | "dark";
 
 export default function CodigoQrPage() {
-  // Estado para controlar la personalización del color del QR en tiempo real
-  const [selectedColor, setSelectedColor] = useState<QRColor>("primary");
-
-  const handleCopyLink = async () => {
-    try {
-      await navigator.clipboard.writeText(window.location.href);
-      alert("¡Enlace del perfil copiado al portapapeles!");
-    } catch (err) {
-      console.error("Error al copiar el enlace", err);
-    }
-  };
-
   return (
     <section className="fp-page fp-page--shell">
       <DashboardSidebar
         active="analytics"
         header={
-          <div className="fp-sidebar__section fp-stack-md">
-            <div className="fp-sidebar__profile">
-              <Image
-                alt="Organization Logo"
-                className="fp-sidebar__avatar fp-sidebar__avatar--square"
-                height={40}
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCZvdH6cFBtS3Y26I4jPJkQ1zG3n6yuKp3cyQAPtkXpAPhEb0RcQmd-0uOGtuLvRe5zJWQFwz7cIaqC0pOxctpsGZcgcdaeYfvhx9f46JtsduQ2UyLwDUDViOKPJu77P2tI2cV-oCUbpAgDRJVcd766ziyVbMY4Zbv-x38NcDjGeu2_ogXTNzyuwR1nwmLOX7GBbsy1dyGnC16hMJB1qOFGtYBboiPJKsuQoy3H3QDFUANK5xv-CQT4lPTUvb8MsCbhG05T88PXi8eg"
-                width={40}
-              />
-              <div className="fp-stack-xs">
-                <h2 className="fp-headline-md" style={{ margin: 0, color: "var(--fp-primary)" }}>
-                  Professional Tier
-                </h2>
-                <p className="fp-body-sm fp-muted" style={{ margin: 0 }}>
-                  Verified Member
-                </p>
+          <>
+            <div className="fp-sidebar__section fp-sidebar__section--plain">
+              <div className="fp-headline-md" style={{ color: "var(--fp-primary)", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                <MaterialIcon>workspace_premium</MaterialIcon>
+                MyCertify
               </div>
             </div>
-            <button className="fp-button fp-button--primary fp-button--full" type="button">
-              Upgrade Plan
-            </button>
-          </div>
+            <div className="fp-sidebar__section fp-stack-md">
+              <div className="fp-sidebar__profile">
+                <div className="fp-sidebar__avatar-placeholder">
+                  <MaterialIcon>person</MaterialIcon>
+                </div>
+                <div className="fp-stack-xs">
+                  <p className="fp-label-md" style={{ margin: 0, color: "var(--fp-on-surface)" }}>
+                    Alex Morgan
+                  </p>
+                </div>
+              </div>
+            </div>
+          </>
         }
         footer={
           <Link className="fp-sidebar__link fp-label-md" href="/frontend">
             <MaterialIcon>help</MaterialIcon>
-            <span>Help Center</span>
+            <span>Centro de Ayuda</span>
           </Link>
         }
       />
@@ -75,15 +60,15 @@ export default function CodigoQrPage() {
             </h1>
             <p className="fp-body-lg fp-muted" style={{ margin: 0 }}>
               Comparte tu trayectoria profesional al instante. Personaliza y descarga tu código
-              QR único asociado a tu perfil verificado en CertifyPro.
+              QR único asociado a tu perfil en MyCertify.
             </p>
           </header>
 
           <section className="fp-two-column-qr" style={{ maxWidth: "72rem", margin: "0 auto", width: "100%" }}>
 
-            {/* Contenedor del QR con el modificador dinámico de color */}
+            {/* Contenedor del QR */}
             <article className="fp-card fp-qr-preview fp-stack-md">
-              <div className={`fp-qr-image-frame fp-stack-sm theme-${selectedColor}`}>
+              <div className="fp-qr-image-frame fp-stack-sm theme-primary">
                 <Image
                   alt="QR Code Preview"
                   height={256}
@@ -93,52 +78,12 @@ export default function CodigoQrPage() {
                 />
                 <div className="fp-qr-verified-badge">
                   <MaterialIcon className="fp-label-sm">verified</MaterialIcon>
-                  CertifyPro Verified
+                  MyCertify Verified
                 </div>
               </div>
             </article>
 
             <div className="fp-stack-lg">
-              <article className="fp-card fp-card--panel fp-stack-md">
-                <h2 className="fp-headline-md" style={{ margin: 0 }}>
-                  Personalizar Color
-                </h2>
-                <p className="fp-body-sm fp-muted" style={{ margin: 0 }}>
-                  Selecciona un color de acento para tu código QR que coincida con tu marca
-                  personal.
-                </p>
-                <div className="fp-color-palette">
-                  <button
-                    aria-label="Color Primary"
-                    className={`fp-color-swatch ${selectedColor === "primary" ? "is-selected" : ""}`}
-                    style={{ background: "var(--fp-primary)", color: "var(--fp-primary)" }}
-                    onClick={() => setSelectedColor("primary")}
-                    type="button"
-                  />
-                  <button
-                    aria-label="Color Secondary"
-                    className={`fp-color-swatch ${selectedColor === "secondary" ? "is-selected" : ""}`}
-                    style={{ background: "var(--fp-secondary)", color: "var(--fp-secondary)" }}
-                    onClick={() => setSelectedColor("secondary")}
-                    type="button"
-                  />
-                  <button
-                    aria-label="Color Tertiary"
-                    className={`fp-color-swatch ${selectedColor === "tertiary" ? "is-selected" : ""}`}
-                    style={{ background: "var(--fp-tertiary)", color: "var(--fp-tertiary)" }}
-                    onClick={() => setSelectedColor("tertiary")}
-                    type="button"
-                  />
-                  <button
-                    aria-label="Color Dark"
-                    className={`fp-color-swatch ${selectedColor === "dark" ? "is-selected" : ""}`}
-                    style={{ background: "var(--fp-on-surface)", color: "var(--fp-on-surface)" }}
-                    onClick={() => setSelectedColor("dark")}
-                    type="button"
-                  />
-                </div>
-              </article>
-
               <article className="fp-card fp-card--panel fp-stack-md">
                 <h2 className="fp-headline-md" style={{ margin: 0 }}>
                   Acciones
@@ -147,20 +92,12 @@ export default function CodigoQrPage() {
                   <MaterialIcon>download</MaterialIcon>
                   Descargar QR (PNG)
                 </button>
-                <button
-                  className="fp-button fp-button--secondary fp-button--full"
-                  onClick={handleCopyLink}
-                  type="button"
-                >
-                  <MaterialIcon>content_copy</MaterialIcon>
-                  Copiar Enlace del Perfil
-                </button>
               </article>
 
               <article className="fp-alert-qr">
                 <MaterialIcon>info</MaterialIcon>
                 <p className="fp-body-sm" style={{ margin: 0 }}>
-                  Este código QR es dinámico. Si actualizas tu perfil en CertifyPro, la información
+                  Este código QR es dinámico. Si actualizas tu perfil en MyCertify, la información
                   escaneada se actualizará automáticamente sin necesidad de generar uno nuevo.
                 </p>
               </article>

@@ -1,0 +1,24 @@
+/* ═══════════════════════════════════════════════════
+   Vista de Verificación de Código
+   ═══════════════════════════════════════════════════ */
+
+.fp-input--error {
+  border-color: var(--fp-error) !important;
+}
+
+.fp-input--error:focus {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--fp-error) 22%, transparent) !important;
+}
+
+.fp-input--success {
+  border-color: var(--fp-primary) !important;
+}
+
+.fp-button-reset {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  outline: inherit;
+}

@@ -10,7 +10,6 @@ import "./page.css";
 export default function RegistroPage() {
   return (
     <section className="fp-register-split">
-      <ThemeToggle floating />
 
       {/* ── Left Panel: Hero image + overlay text ── */}
       <aside className="fp-register-split__hero" aria-hidden="true">
@@ -48,6 +47,17 @@ export default function RegistroPage() {
 
       {/* ── Right Panel: Registration form ── */}
       <main className="fp-register-split__form-area">
+
+        {/* Top nav bar with Home + ThemeToggle */}
+        <nav className="fp-auth-topnav">
+          <Link className="fp-auth-topnav__home" href="/frontend">
+            <MaterialIcon>arrow_back</MaterialIcon>
+            <span>Inicio</span>
+          </Link>
+          <ThemeToggle />
+        </nav>
+
+        <div className="fp-auth-form-center">
         <div className="fp-register-split__form-container">
           <header className="fp-register-split__form-header">
             <h1 className="fp-register-split__form-title">Registrarse</h1>
@@ -57,7 +67,7 @@ export default function RegistroPage() {
             </p>
           </header>
 
-          <FlowForm className="fp-register-split__form" nextHref="/frontend/iniciar-sesion">
+          <FlowForm className="fp-register-split__form" nextHref="/frontend/informacion-academica">
             <div className="fp-field">
               <label className="fp-field__label fp-label-md" htmlFor="full-name">
                 Nombre completo
@@ -134,6 +144,7 @@ export default function RegistroPage() {
               Inicia sesión
             </Link>
           </p>
+        </div>
         </div>
       </main>
     </section>
