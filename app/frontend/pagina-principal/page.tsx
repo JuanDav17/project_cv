@@ -6,6 +6,8 @@ import { FrontendFooter } from "../_components/footer";
 import { MaterialIcon } from "../_components/material-icon";
 import { MobileBrandHeader } from "../_components/mobile-brand-header";
 
+import "./page.css";
+
 export default function PaginaPrincipalPage() {
   return (
     <section className="fp-page fp-page--shell">

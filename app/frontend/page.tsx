@@ -3,6 +3,8 @@ import Link from "next/link";
 import { MaterialIcon } from "./_components/material-icon";
 import { ThemeToggle } from "./_components/theme-toggle";
 
+import "./page.css";
+
 const features = [
   {
     icon: "qr_code_2",

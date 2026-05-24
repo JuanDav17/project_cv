@@ -1,0 +1,102 @@
+/* ═══════════════════════════════════════════════════
+   Mi Cuenta (Account Settings)
+   ═══════════════════════════════════════════════════ */
+
+.fp-settings-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 2rem;
+  animation: fp-fade-in-up 600ms ease-out both;
+}
+
+.fp-settings-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Settings Card Enhancements */
+.fp-card--panel {
+  background: color-mix(in srgb, var(--fp-surface-container-lowest) 70%, transparent);
+  border: 1px solid color-mix(in srgb, var(--fp-outline-variant) 60%, transparent);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  backdrop-filter: blur(12px);
+  transition: transform 300ms ease, box-shadow 300ms ease;
+}
+
+.fp-card--panel:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--fp-shadow-soft);
+  border-color: color-mix(in srgb, var(--fp-primary) 20%, transparent);
+}
+
+/* Settings Toggle (Modernized) */
+.fp-settings-toggle {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: var(--fp-radius-default);
+  transition: background-color 200ms ease;
+}
+
+.fp-settings-toggle:hover {
+  background: color-mix(in srgb, var(--fp-surface-container) 40%, transparent);
+}
+
+.fp-settings-toggle input {
+  display: none;
+}
+
+.fp-settings-toggle__track {
+  position: relative;
+  width: 3rem;
+  height: 1.5rem;
+  margin-top: 0.125rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--fp-outline-variant) 50%, transparent);
+  transition: background-color 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+  flex-shrink: 0;
+}
+
+.fp-settings-toggle__thumb {
+  position: absolute;
+  top: 0.125rem;
+  left: 0.125rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+  transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1), background-color 300ms ease;
+}
+
+.fp-settings-toggle input:checked + .fp-settings-toggle__track {
+  background: linear-gradient(90deg, var(--fp-primary), var(--fp-secondary));
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.fp-settings-toggle input:checked + .fp-settings-toggle__track .fp-settings-toggle__thumb {
+  transform: translateX(1.5rem);
+}
+
+.fp-settings-toggle:active .fp-settings-toggle__thumb {
+  width: 1.5rem;
+}
+
+.fp-settings-toggle input:checked:active + .fp-settings-toggle__track .fp-settings-toggle__thumb {
+  transform: translateX(1.25rem);
+}
+
+@keyframes fp-fade-in-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 1024px) {
+  .fp-settings-grid {
+    grid-template-columns: 1fr;
+  }
+}

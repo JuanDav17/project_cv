@@ -6,6 +6,8 @@ import { MaterialIcon } from "../_components/material-icon";
 import { OnboardingStepper } from "../_components/onboarding-stepper";
 import { ThemeToggle } from "../_components/theme-toggle";
 
+import "./page.css";
+
 export default function InformacionAcademicaPage() {
   return (
     <section className="fp-page fp-page--onboarding">

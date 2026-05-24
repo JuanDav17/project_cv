@@ -6,6 +6,9 @@ import { InterestGrid } from "../_components/interest-grid";
 import { MaterialIcon } from "../_components/material-icon";
 import { OnboardingStepper } from "../_components/onboarding-stepper";
 
+import "../informacion-academica/page.css"; // Shared onboarding styles
+import "./page.css";
+
 const interests = [
   { id: "frontend", label: "Frontend", icon: "code" },
   { id: "backend", label: "Backend", icon: "terminal" },

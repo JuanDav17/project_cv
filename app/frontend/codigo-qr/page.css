@@ -1,0 +1,177 @@
+/* ═══════════════════════════════════════════════════
+   Código QR (Vista Específica Modular)
+   ═══════════════════════════════════════════════════ */
+
+.fp-two-column-qr {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2rem;
+  align-items: start;
+}
+
+/* Tarjeta contenedora con efecto de desenfoque y animación de entrada */
+.fp-qr-preview {
+  position: relative;
+  min-height: 25rem;
+  padding: 2rem;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--fp-surface-container-lowest) 70%, transparent);
+  border: 1px solid color-mix(in srgb, var(--fp-outline-variant) 50%, transparent);
+  backdrop-filter: blur(12px);
+  animation: fp-qr-fade-in 700ms ease-out both;
+}
+
+.fp-qr-preview::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg,
+      color-mix(in srgb, var(--fp-secondary-container) 28%, transparent),
+      transparent);
+  opacity: 0.6;
+}
+
+.fp-qr-preview>* {
+  position: relative;
+}
+
+/* Marco del código QR con soporte de color dinámico basado en clases */
+.fp-qr-image-frame {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px solid var(--qr-accent-color, var(--fp-outline-variant));
+  border-radius: var(--fp-radius-xl);
+  padding: 1.5rem;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+  transition:
+    transform 300ms cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 300ms ease,
+    border-color 250ms ease;
+}
+
+/* Mapeo de los estados de color seleccionables */
+.fp-qr-image-frame.theme-primary {
+  --qr-accent-color: var(--fp-primary);
+}
+
+.fp-qr-image-frame.theme-secondary {
+  --qr-accent-color: var(--fp-secondary);
+}
+
+.fp-qr-image-frame.theme-tertiary {
+  --qr-accent-color: var(--fp-tertiary);
+}
+
+.fp-qr-image-frame.theme-dark {
+  --qr-accent-color: var(--fp-on-surface);
+}
+
+.fp-qr-preview:hover .fp-qr-image-frame {
+  transform: scale(1.04) translateY(-4px);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.12);
+}
+
+.fp-qr-image-frame img {
+  width: 16rem;
+  height: 16rem;
+  object-fit: cover;
+  border-radius: 0.5rem;
+}
+
+/* Badge de verificación interno */
+.fp-qr-verified-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--qr-accent-color, var(--fp-primary));
+  font-weight: 700;
+  transition: color 250ms ease;
+}
+
+/* Paleta de selección circular */
+.fp-color-palette {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.fp-color-swatch {
+  width: 3rem;
+  height: 3rem;
+  border-radius: var(--fp-radius-full);
+  border: 3px solid transparent;
+  cursor: pointer;
+  transition:
+    transform 250ms cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 250ms ease,
+    box-shadow 250ms ease;
+}
+
+.fp-color-swatch:hover {
+  transform: scale(1.12);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+.fp-color-swatch.is-selected {
+  border-color: #ffffff;
+  box-shadow: 0 0 0 3px currentColor, 0 6px 16px rgba(0, 0, 0, 0.15);
+  transform: scale(1.08);
+}
+
+/* Alerta informativa local */
+.fp-alert-qr {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.25rem;
+  border-radius: var(--fp-radius-lg);
+  border: 1px solid color-mix(in srgb, var(--fp-primary) 20%, transparent);
+  background: color-mix(in srgb, var(--fp-primary-container) 12%, transparent);
+  color: var(--fp-on-surface-variant);
+  backdrop-filter: blur(8px);
+  animation: fp-qr-fade-in 700ms ease-out 300ms both;
+}
+
+.fp-alert-qr span {
+  color: var(--fp-primary);
+  flex-shrink: 0;
+}
+
+/* Animaciones */
+@keyframes fp-qr-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Adaptación responsiva localizada */
+@media (max-width: 1024px) {
+  .fp-two-column-qr {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .fp-qr-preview {
+    min-height: 18rem;
+    padding: 1.5rem;
+  }
+
+  .fp-qr-image-frame img {
+    width: 12rem;
+    height: 12rem;
+  }
+}

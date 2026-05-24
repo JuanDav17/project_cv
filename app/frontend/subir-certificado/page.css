@@ -1,0 +1,95 @@
+/* ═══════════════════════════════════════════════════
+   Subir Certificado (Vista Específica)
+   ═══════════════════════════════════════════════════ */
+
+/* Layout de dos columnas heredado del ecosistema de vistas */
+.fp-two-column {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2rem;
+  align-items: start;
+}
+
+/* Caja contenedora para la subida de archivos */
+.fp-upload-box {
+  position: relative;
+}
+
+/* Área interactiva drag-and-drop */
+.fp-dropzone {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3.5rem 1.5rem;
+  border: 2px dashed color-mix(in srgb, var(--fp-outline-variant) 50%, transparent);
+  border-radius: var(--fp-radius-lg);
+  background: color-mix(in srgb, var(--fp-surface-container-lowest) 40%, transparent);
+  text-align: center;
+  cursor: pointer;
+  transition:
+    border-color 200ms ease,
+    background-color 200ms ease,
+    transform 200ms ease;
+}
+
+.fp-dropzone:hover {
+  border-color: var(--fp-primary);
+  background: color-mix(in srgb, var(--fp-primary-fixed) 25%, transparent);
+  transform: translateY(-2px);
+}
+
+.fp-dropzone.is-filled {
+  border-color: var(--fp-primary);
+  border-style: solid;
+  background: color-mix(in srgb, var(--fp-primary-fixed) 40%, transparent);
+}
+
+/* Input oculto nativo que cubre toda el área interactiva */
+.fp-dropzone__input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.fp-dropzone__content {
+  pointer-events: none;
+  align-items: center;
+}
+
+.fp-dropzone__icon {
+  font-size: 3.2rem;
+  color: var(--fp-outline);
+  transition: color 200ms ease;
+}
+
+.fp-dropzone:hover .fp-dropzone__icon,
+.fp-dropzone.is-filled .fp-dropzone__icon {
+  color: var(--fp-primary);
+}
+
+/* Variaciones del componente Alert exclusivas para esta vista */
+.fp-alert--error {
+  border-color: color-mix(in srgb, var(--fp-error) 35%, transparent);
+  background: color-mix(in srgb, var(--fp-error-container) 45%, transparent);
+  color: var(--fp-error);
+}
+
+.fp-alert--success {
+  border-color: color-mix(in srgb, var(--fp-primary) 35%, transparent);
+  background: color-mix(in srgb, var(--fp-primary-fixed) 50%, transparent);
+  color: var(--fp-primary-container);
+}
+
+/* Media query local para pantallas móviles y tablets pequeñas */
+@media (max-width: 1024px) {
+  .fp-two-column {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}

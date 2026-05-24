@@ -1,0 +1,151 @@
+/* ═══════════════════════════════════════════════════
+   Onboarding Layout & Stepper
+   ═══════════════════════════════════════════════════ */
+
+.fp-page--onboarding {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: 
+    radial-gradient(circle at top right, color-mix(in srgb, var(--fp-primary-container) 15%, transparent), transparent 40%),
+    radial-gradient(circle at bottom left, color-mix(in srgb, var(--fp-secondary-container) 15%, transparent), transparent 40%),
+    var(--fp-background);
+}
+
+.fp-onboarding-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  border-bottom: 1px solid color-mix(in srgb, var(--fp-outline-variant) 40%, transparent);
+  background: color-mix(in srgb, var(--fp-surface-container-lowest) 70%, transparent);
+  backdrop-filter: blur(20px);
+}
+
+.fp-onboarding-topbar__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  width: min(100%, 80rem);
+  margin: 0 auto;
+}
+
+.fp-onboarding-main {
+  flex: 1;
+  width: min(100%, 50rem);
+  margin: 0 auto;
+  padding: 4rem 1.5rem;
+  animation: fp-fade-in-up 600ms ease-out both;
+}
+
+/* Stepper Modernization */
+.fp-stepper {
+  position: relative;
+  margin-bottom: 2rem;
+}
+
+.fp-stepper__track,
+.fp-stepper__progress {
+  position: absolute;
+  top: 1.5rem;
+  left: 0;
+  height: 4px;
+  width: 100%;
+  transform: translateY(-50%);
+  border-radius: 999px;
+}
+
+.fp-stepper__track {
+  background: color-mix(in srgb, var(--fp-outline-variant) 30%, transparent);
+}
+
+.fp-stepper__progress {
+  background: linear-gradient(90deg, var(--fp-primary), var(--fp-secondary));
+  transition: width 400ms cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--fp-primary) 40%, transparent);
+}
+
+.fp-stepper__items {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.fp-stepper__item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.fp-stepper__circle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  border: 4px solid var(--fp-background);
+  background: var(--fp-surface-container-highest);
+  color: var(--fp-on-surface-variant);
+  font-weight: 700;
+  transition: all 300ms ease;
+  z-index: 2;
+}
+
+.fp-stepper__circle--done {
+  background: var(--fp-primary);
+  color: var(--fp-on-primary);
+  border-color: color-mix(in srgb, var(--fp-primary-fixed) 50%, transparent);
+}
+
+.fp-stepper__circle--current {
+  background: var(--fp-primary-container);
+  color: var(--fp-on-primary-container);
+  border-color: var(--fp-primary-fixed);
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--fp-primary) 20%, transparent);
+  transform: scale(1.1);
+}
+
+.fp-stepper__label {
+  text-align: center;
+  white-space: nowrap;
+  font-family: var(--fp-font-body);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--fp-on-surface-variant);
+  transition: color 300ms ease;
+}
+
+.fp-stepper__label--active {
+  color: var(--fp-primary);
+  font-weight: 700;
+}
+
+.fp-stepper__mobile {
+  margin-top: 1.5rem;
+  text-align: center;
+  display: none;
+  font-weight: 700;
+  color: var(--fp-primary);
+}
+
+@keyframes fp-fade-in-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 768px) {
+  .fp-onboarding-main {
+    padding: 2rem 1rem;
+  }
+  .fp-stepper__label {
+    display: none;
+  }
+  .fp-stepper__mobile {
+    display: block;
+  }
+}
