@@ -95,7 +95,7 @@ export default function FrontendIndexPage() {
               <Link className="fp-button fp-button--primary" href="/frontend/registro">
                 Crear cuenta
               </Link>
-              <Link className="fp-button fp-button--secondary" href="/frontend/iniciar-sesion">
+              <Link className="fp-button fp-button--secondary" href="./iniciar-sesion/page.tsx">
                 Iniciar sesión
               </Link>
             </div>

@@ -10,7 +10,6 @@ export default function IniciarSesionPage() {
   return (
     <section className="fp-login-split">
       <ThemeToggle floating />
-
       {/* ── Left Panel: Hero image + overlay text ── */}
       <aside className="fp-login-split__hero" aria-hidden="true">
         <img
@@ -26,7 +25,7 @@ export default function IniciarSesionPage() {
             <div className="fp-login-split__hero-logo">
               <MaterialIcon filled>school</MaterialIcon>
             </div>
-            <span className="fp-login-split__hero-brand-name">CertifyPro</span>
+            <span className="fp-login-split__hero-brand-name">MyCertify</span>
           </div>
 
           <div className="fp-login-split__hero-copy">
@@ -34,13 +33,13 @@ export default function IniciarSesionPage() {
               Bienvenido a&hellip;
             </h2>
             <p className="fp-login-split__hero-subtitle">
-              Tu plataforma integral para gestionar, validar y compartir tus
-              certificaciones profesionales de manera segura y eficiente.
+              Tu plataforma integral para subir, validar y compartir tus
+              certificaciones profesionales de manera rapida y ordenada.
             </p>
           </div>
 
           <p className="fp-login-split__hero-footer">
-            Certificaciones verificadas al instante
+            Certificaciones al instante.
           </p>
         </div>
       </aside>
@@ -55,7 +54,6 @@ export default function IniciarSesionPage() {
               panel de certificaciones.
             </p>
           </header>
-
           <FlowForm
             className="fp-login-split__form"
             nextHref="/frontend/informacion-academica"
@@ -108,20 +106,7 @@ export default function IniciarSesionPage() {
               </div>
             </div>
 
-            <label className="fp-checkbox-row">
-              <input
-                type="checkbox"
-                className="fp-checkbox"
-                id="login-remember"
-                defaultChecked
-              />
-              <span className="fp-body-sm">Recuérdame</span>
-            </label>
-
-            <button
-              className="fp-button fp-button--primary fp-button--full"
-              type="submit"
-            >
+            <button className="fp-button fp-button--primary fp-button--full" type="submit">
               Acceder
             </button>
           </FlowForm>

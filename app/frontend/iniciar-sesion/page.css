@@ -140,6 +140,7 @@
   line-height: 1.15;
   margin: 0 0 0.65rem;
   color: var(--fp-primary);
+  text-align: center;
 }
 
 .fp-login-split__form-desc {

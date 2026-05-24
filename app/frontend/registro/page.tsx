@@ -3,6 +3,7 @@ import Link from "next/link";
 import { FlowForm } from "../_components/flow-form";
 import { MaterialIcon } from "../_components/material-icon";
 import { ThemeToggle } from "../_components/theme-toggle";
+import { MdEmail } from "react-icons/md";
 
 import "./page.css";
 
@@ -26,7 +27,7 @@ export default function RegistroPage() {
             <div className="fp-register-split__hero-logo">
               <MaterialIcon filled>school</MaterialIcon>
             </div>
-            <span className="fp-register-split__hero-brand-name">CertifyPro</span>
+            <span className="fp-register-split__hero-brand-name">MyCertify</span>
           </div>
 
           <div className="fp-register-split__hero-copy">
@@ -34,13 +35,13 @@ export default function RegistroPage() {
               Crea tu perfil profesional
             </h2>
             <p className="fp-register-split__hero-subtitle">
-              Únete a miles de profesionales que ya validan, organizan y
-              comparten sus certificaciones con empresas verificadas en nuestra plataforma.
+              Únete a miles de profesionales que ya suben, organizan y
+              comparten sus certificaciones en sus hpjas de vida con diferentes empresas.
             </p>
           </div>
 
           <p className="fp-register-split__hero-footer">
-            Tu carrera, respaldada por evidencia.
+            Tu conocimiento, respaldado por evidencia.
           </p>
         </div>
       </aside>
@@ -51,7 +52,7 @@ export default function RegistroPage() {
           <header className="fp-register-split__form-header">
             <h1 className="fp-register-split__form-title">Registrarse</h1>
             <p className="fp-register-split__form-desc">
-              Empieza a gestionar y verificar tus certificaciones profesionales
+              Empieza a gestionar y enseñar tus certificaciones profesionales
               hoy mismo. Solo toma unos minutos.
             </p>
           </header>
@@ -85,7 +86,7 @@ export default function RegistroPage() {
                 <input
                   id="register-email"
                   className="fp-input"
-                  placeholder="maria@empresa.com"
+                  placeholder="maria@example.com"
                   type="email"
                 />
               </div>
@@ -105,12 +106,6 @@ export default function RegistroPage() {
                   placeholder="••••••••"
                   type="password"
                 />
-              </div>
-              <div className="fp-password-meter">
-                <div className="fp-password-meter__track">
-                  <div className="fp-password-meter__fill" style={{ width: "33%" }} />
-                </div>
-                <span className="fp-body-sm fp-muted">Debe tener al menos 8 caracteres</span>
               </div>
             </div>
 
