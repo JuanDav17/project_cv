@@ -1,7 +1,12 @@
 "use client";
 
-import { useState, ChangeEvent, FormEvent } from "react";
+import { useEffect, useState, ChangeEvent, FormEvent } from "react";
 import Link from "next/link";
+
+import { me } from "@/lib/api/auth";
+import { createCertificate } from "@/lib/api/certificados";
+import { ApiError } from "@/lib/api/http";
+
 import { DashboardSidebar } from "../_components/dashboard-sidebar";
 import { FrontendFooter } from "../_components/footer";
 import { MaterialIcon } from "../_components/material-icon";
@@ -11,6 +16,7 @@ import { MobileBrandHeader } from "../_components/mobile-brand-header";
 import "./page.css";
 
 export default function SubirCertificadoPage() {
+  const [userName, setUserName] = useState("Usuario");
   const [formData, setFormData] = useState({
     entidad: "",
     horas: "",
@@ -19,6 +25,12 @@ export default function SubirCertificadoPage() {
   const [error, setError] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [success, setSuccess] = useState(false);
+
+  useEffect(() => {
+    me()
+      .then((profile) => setUserName(profile.nombre_completo || "Usuario"))
+      .catch(() => setUserName("Usuario"));
+  }, []);
 
   // Manejador para los campos de texto obligatorios
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -66,15 +78,24 @@ export default function SubirCertificadoPage() {
     setIsUploading(true);
 
     try {
-      // Simulación de persistencia segura (Supabase / Upstash)
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const payload = new FormData();
+      payload.append("entidad", formData.entidad);
+      payload.append("horas", formData.horas);
+      payload.append("archivo", file);
+      payload.append("visibilidad", "publico");
+
+      await createCertificate(payload);
 
       setSuccess(true);
       // Limpieza del formulario tras éxito
       setFormData({ entidad: "", horas: "" });
       setFile(null);
-    } catch (err) {
-      setError("Ocurrió un error inesperado al procesar el certificado. Inténtalo de nuevo.");
+    } catch (requestError) {
+      setError(
+        requestError instanceof ApiError
+          ? requestError.message
+          : "Ocurrió un error inesperado al procesar el certificado. Inténtalo de nuevo.",
+      );
     } finally {
       setIsUploading(false);
     }
@@ -99,7 +120,7 @@ export default function SubirCertificadoPage() {
               </div>
               <div className="fp-stack-xs">
                 <p className="fp-label-md" style={{ margin: 0, color: "var(--fp-on-surface)" }}>
-                  Alex Morgan
+                  {userName}
                 </p>
               </div>
             </div>

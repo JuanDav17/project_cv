@@ -16,6 +16,34 @@ CREATE table usuarios (
     CONSTRAINT chk_estado CHECK (estado IN ('activo','inactivo','suspendido'))
 );
 
+-- Tabla codigos_verificacion
+CREATE TABLE codigos_verificacion (
+    id_codigo UUID PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+    id_usuario UUID NOT NULL REFERENCES public.usuarios(id_usuario) ON DELETE CASCADE,
+    correo_destino VARCHAR(255),
+    codigo_hash VARCHAR(64) NOT NULL,
+    token_hash VARCHAR(64) UNIQUE,
+    proposito VARCHAR(30) NOT NULL DEFAULT 'login',
+    expira_en TIMESTAMP NOT NULL,
+    usado BOOLEAN NOT NULL DEFAULT FALSE,
+    fecha_creacion TIMESTAMP NOT NULL DEFAULT NOW(),
+    fecha_uso TIMESTAMP,
+    CONSTRAINT chk_proposito_codigo CHECK (proposito IN ('login','email','password_reset'))
+);
+CREATE INDEX idx_codigos_usuario ON public.codigos_verificacion(id_usuario);
+CREATE INDEX idx_codigos_vigentes ON public.codigos_verificacion(id_usuario, proposito, usado, expira_en);
+
+-- Tabla sesiones_recuperacion_contrasena
+CREATE TABLE sesiones_recuperacion_contrasena (
+    id_sesion UUID PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+    id_usuario UUID NOT NULL REFERENCES public.usuarios(id_usuario) ON DELETE CASCADE,
+    token_hash VARCHAR(64) UNIQUE NOT NULL,
+    expira_en TIMESTAMP NOT NULL,
+    fecha_creacion TIMESTAMP NOT NULL DEFAULT NOW()
+);
+CREATE INDEX idx_recuperacion_usuario ON public.sesiones_recuperacion_contrasena(id_usuario);
+CREATE INDEX idx_recuperacion_token ON public.sesiones_recuperacion_contrasena(token_hash);
+
 -- Tabla instituciones
 CREATE TABLE instituciones (
     id_institucion UUID PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
@@ -166,3 +194,99 @@ CREATE TABLE certificado_areas (
     id_area UUID NOT NULL REFERENCES public.areas_conocimiento(id_area),
     PRIMARY KEY (id_certificado, id_area)
 );
+
+-- ==========================================
+-- 4. CONFIGURACION SUPABASE OPCIONAL
+-- ==========================================
+-- Este bloque se ejecuta en Supabase. En PostgreSQL plano se omite si no existen
+-- los esquemas auth/storage.
+
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM pg_namespace WHERE nspname = 'storage') THEN
+        EXECUTE $sql$
+            INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+            VALUES ('certificados', 'certificados', false, 1048576, ARRAY['application/pdf'])
+            ON CONFLICT (id) DO UPDATE
+            SET public = EXCLUDED.public,
+                file_size_limit = EXCLUDED.file_size_limit,
+                allowed_mime_types = EXCLUDED.allowed_mime_types
+        $sql$;
+    END IF;
+END $$;
+
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM pg_namespace WHERE nspname = 'auth') THEN
+        ALTER TABLE public.usuarios ENABLE ROW LEVEL SECURITY;
+        ALTER TABLE public.perfiles_usuario ENABLE ROW LEVEL SECURITY;
+        ALTER TABLE public.certificados ENABLE ROW LEVEL SECURITY;
+        ALTER TABLE public.archivos_certificado ENABLE ROW LEVEL SECURITY;
+        ALTER TABLE public.codigos_verificacion ENABLE ROW LEVEL SECURITY;
+        ALTER TABLE public.sesiones_recuperacion_contrasena ENABLE ROW LEVEL SECURITY;
+        ALTER TABLE public.instituciones ENABLE ROW LEVEL SECURITY;
+        ALTER TABLE public.niveles_formacion ENABLE ROW LEVEL SECURITY;
+        ALTER TABLE public.areas_conocimiento ENABLE ROW LEVEL SECURITY;
+        ALTER TABLE public.carreras ENABLE ROW LEVEL SECURITY;
+        ALTER TABLE public.etiquetas ENABLE ROW LEVEL SECURITY;
+        ALTER TABLE public.certificado_etiquetas ENABLE ROW LEVEL SECURITY;
+        ALTER TABLE public.certificado_carreras ENABLE ROW LEVEL SECURITY;
+        ALTER TABLE public.certificado_areas ENABLE ROW LEVEL SECURITY;
+
+        IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'usuarios' AND policyname = 'usuarios_select_own') THEN
+            EXECUTE 'CREATE POLICY usuarios_select_own ON public.usuarios FOR SELECT TO authenticated USING (id_usuario = auth.uid())';
+        END IF;
+
+        IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'perfiles_usuario' AND policyname = 'perfiles_select_own') THEN
+            EXECUTE 'CREATE POLICY perfiles_select_own ON public.perfiles_usuario FOR SELECT TO authenticated USING (id_usuario = auth.uid())';
+        END IF;
+
+        IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'perfiles_usuario' AND policyname = 'perfiles_update_own') THEN
+            EXECUTE 'CREATE POLICY perfiles_update_own ON public.perfiles_usuario FOR UPDATE TO authenticated USING (id_usuario = auth.uid()) WITH CHECK (id_usuario = auth.uid())';
+        END IF;
+
+        IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'certificados' AND policyname = 'certificados_select_own') THEN
+            EXECUTE 'CREATE POLICY certificados_select_own ON public.certificados FOR SELECT TO authenticated USING (id_usuario = auth.uid())';
+        END IF;
+
+        IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'certificados' AND policyname = 'certificados_insert_own') THEN
+            EXECUTE 'CREATE POLICY certificados_insert_own ON public.certificados FOR INSERT TO authenticated WITH CHECK (id_usuario = auth.uid())';
+        END IF;
+
+        IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'certificados' AND policyname = 'certificados_update_own') THEN
+            EXECUTE 'CREATE POLICY certificados_update_own ON public.certificados FOR UPDATE TO authenticated USING (id_usuario = auth.uid()) WITH CHECK (id_usuario = auth.uid())';
+        END IF;
+
+        IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'certificados' AND policyname = 'certificados_delete_own') THEN
+            EXECUTE 'CREATE POLICY certificados_delete_own ON public.certificados FOR DELETE TO authenticated USING (id_usuario = auth.uid())';
+        END IF;
+
+        IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'archivos_certificado' AND policyname = 'archivos_select_own') THEN
+            EXECUTE 'CREATE POLICY archivos_select_own ON public.archivos_certificado FOR SELECT TO authenticated USING (EXISTS (SELECT 1 FROM public.certificados c WHERE c.id_certificado = archivos_certificado.id_certificado AND c.id_usuario = auth.uid()))';
+        END IF;
+
+        IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'instituciones' AND policyname = 'instituciones_select_authenticated') THEN
+            EXECUTE 'CREATE POLICY instituciones_select_authenticated ON public.instituciones FOR SELECT TO authenticated USING (true)';
+        END IF;
+
+        IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'instituciones' AND policyname = 'instituciones_insert_authenticated') THEN
+            EXECUTE 'CREATE POLICY instituciones_insert_authenticated ON public.instituciones FOR INSERT TO authenticated WITH CHECK (true)';
+        END IF;
+
+        IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'niveles_formacion' AND policyname = 'niveles_select_authenticated') THEN
+            EXECUTE 'CREATE POLICY niveles_select_authenticated ON public.niveles_formacion FOR SELECT TO authenticated USING (true)';
+        END IF;
+
+        IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'areas_conocimiento' AND policyname = 'areas_select_authenticated') THEN
+            EXECUTE 'CREATE POLICY areas_select_authenticated ON public.areas_conocimiento FOR SELECT TO authenticated USING (true)';
+        END IF;
+
+        IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'carreras' AND policyname = 'carreras_select_authenticated') THEN
+            EXECUTE 'CREATE POLICY carreras_select_authenticated ON public.carreras FOR SELECT TO authenticated USING (true)';
+        END IF;
+
+        IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'etiquetas' AND policyname = 'etiquetas_select_authenticated') THEN
+            EXECUTE 'CREATE POLICY etiquetas_select_authenticated ON public.etiquetas FOR SELECT TO authenticated USING (true)';
+        END IF;
+    END IF;
+END $$;

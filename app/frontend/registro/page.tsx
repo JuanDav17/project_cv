@@ -1,17 +1,66 @@
-import Link from "next/link";
+"use client";
 
-import { FlowForm } from "../_components/flow-form";
+import { FormEvent, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+
+import { register } from "@/lib/api/auth";
+import { ApiError } from "@/lib/api/http";
+
 import { MaterialIcon } from "../_components/material-icon";
 import { ThemeToggle } from "../_components/theme-toggle";
-import { MdEmail } from "react-icons/md";
 
 import "./page.css";
 
 export default function RegistroPage() {
+  const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setError("");
+    setSuccess("");
+
+    const formData = new FormData(event.currentTarget);
+    const acceptedTerms = formData.get("terms") === "on";
+
+    if (!acceptedTerms) {
+      setError("Debes aceptar los terminos para crear la cuenta.");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const response = await register({
+        fullName: String(formData.get("fullName") ?? ""),
+        email: String(formData.get("email") ?? ""),
+        password: String(formData.get("password") ?? ""),
+      });
+
+      if (response.sessionReady) {
+        router.push("/frontend/informacion-academica");
+        return;
+      }
+
+      setSuccess(
+        "Cuenta creada. Confirma tu correo en Supabase y luego inicia sesion.",
+      );
+    } catch (requestError) {
+      setError(
+        requestError instanceof ApiError
+          ? requestError.message
+          : "No se pudo crear la cuenta.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <section className="fp-register-split">
-
-      {/* ── Left Panel: Hero image + overlay text ── */}
       <aside className="fp-register-split__hero" aria-hidden="true">
         <img
           className="fp-register-split__hero-img"
@@ -34,8 +83,8 @@ export default function RegistroPage() {
               Crea tu perfil profesional
             </h2>
             <p className="fp-register-split__hero-subtitle">
-              Únete a miles de profesionales que ya suben, organizan y
-              comparten sus certificaciones en sus hpjas de vida con diferentes empresas.
+              Unifica tus certificados, respalda tu hoja de vida y comparte tu
+              trayectoria con empresas por medio de un perfil verificable.
             </p>
           </div>
 
@@ -45,10 +94,7 @@ export default function RegistroPage() {
         </div>
       </aside>
 
-      {/* ── Right Panel: Registration form ── */}
       <main className="fp-register-split__form-area">
-
-        {/* Top nav bar with Home + ThemeToggle */}
         <nav className="fp-auth-topnav">
           <Link className="fp-auth-topnav__home" href="/frontend">
             <MaterialIcon>arrow_back</MaterialIcon>
@@ -58,93 +104,134 @@ export default function RegistroPage() {
         </nav>
 
         <div className="fp-auth-form-center">
-        <div className="fp-register-split__form-container">
-          <header className="fp-register-split__form-header">
-            <h1 className="fp-register-split__form-title">Registrarse</h1>
-            <p className="fp-register-split__form-desc">
-              Empieza a gestionar y enseñar tus certificaciones profesionales
-              hoy mismo. Solo toma unos minutos.
+          <div className="fp-register-split__form-container">
+            <header className="fp-register-split__form-header">
+              <h1 className="fp-register-split__form-title">Registrarse</h1>
+              <p className="fp-register-split__form-desc">
+                Empieza a gestionar y compartir tus certificaciones
+                profesionales. Solo toma unos minutos.
+              </p>
+            </header>
+
+            <form className="fp-register-split__form" onSubmit={handleSubmit}>
+              <div className="fp-field">
+                <label className="fp-field__label fp-label-md" htmlFor="full-name">
+                  Nombre completo
+                </label>
+                <div className="fp-input-wrap">
+                  <span className="fp-input-icon">
+                    <MaterialIcon>badge</MaterialIcon>
+                  </span>
+                  <input
+                    id="full-name"
+                    name="fullName"
+                    className="fp-input"
+                    placeholder="Maria Garcia"
+                    type="text"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="fp-field">
+                <label
+                  className="fp-field__label fp-label-md"
+                  htmlFor="register-email"
+                >
+                  Correo electronico
+                </label>
+                <div className="fp-input-wrap">
+                  <span className="fp-input-icon">
+                    <MaterialIcon>mail</MaterialIcon>
+                  </span>
+                  <input
+                    id="register-email"
+                    name="email"
+                    className="fp-input"
+                    placeholder="maria@example.com"
+                    type="email"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="fp-field">
+                <label
+                  className="fp-field__label fp-label-md"
+                  htmlFor="register-password"
+                >
+                  Contrasena
+                </label>
+                <div className="fp-input-wrap">
+                  <span className="fp-input-icon">
+                    <MaterialIcon>lock</MaterialIcon>
+                  </span>
+                  <input
+                    id="register-password"
+                    name="password"
+                    className="fp-input"
+                    placeholder="********"
+                    type="password"
+                    minLength={8}
+                    required
+                  />
+                </div>
+              </div>
+
+              <label className="fp-checkbox-row">
+                <input className="fp-checkbox" name="terms" type="checkbox" />
+                <span className="fp-body-sm fp-muted">
+                  Acepto los{" "}
+                  <Link className="fp-link fp-link--strong" href="/frontend">
+                    Terminos de Servicio
+                  </Link>{" "}
+                  y la{" "}
+                  <Link className="fp-link fp-link--strong" href="/frontend">
+                    Politica de Privacidad
+                  </Link>
+                </span>
+              </label>
+
+              {error && (
+                <div className="fp-alert fp-alert--error">
+                  <MaterialIcon>error_outline</MaterialIcon>
+                  <p className="fp-body-sm" style={{ margin: 0 }}>
+                    {error}
+                  </p>
+                </div>
+              )}
+
+              {success && (
+                <div className="fp-alert fp-alert--success">
+                  <MaterialIcon>check_circle_outline</MaterialIcon>
+                  <p className="fp-body-sm" style={{ margin: 0 }}>
+                    {success}
+                  </p>
+                </div>
+              )}
+
+              <button
+                className="fp-button fp-button--primary fp-button--full"
+                type="submit"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Creando cuenta..." : "Crear cuenta"}
+              </button>
+            </form>
+
+            <p
+              className="fp-body-sm fp-muted"
+              style={{ margin: "1.5rem 0 0", textAlign: "center" }}
+            >
+              Ya tienes una cuenta?{" "}
+              <Link
+                className="fp-link fp-link--strong"
+                href="/frontend/iniciar-sesion"
+              >
+                Inicia sesion
+              </Link>
             </p>
-          </header>
-
-          <FlowForm className="fp-register-split__form" nextHref="/frontend/informacion-academica">
-            <div className="fp-field">
-              <label className="fp-field__label fp-label-md" htmlFor="full-name">
-                Nombre completo
-              </label>
-              <div className="fp-input-wrap">
-                <span className="fp-input-icon">
-                  <MaterialIcon>badge</MaterialIcon>
-                </span>
-                <input
-                  id="full-name"
-                  className="fp-input"
-                  placeholder="María García"
-                  type="text"
-                />
-              </div>
-            </div>
-
-            <div className="fp-field">
-              <label className="fp-field__label fp-label-md" htmlFor="register-email">
-                Correo electrónico
-              </label>
-              <div className="fp-input-wrap">
-                <span className="fp-input-icon">
-                  <MaterialIcon>mail</MaterialIcon>
-                </span>
-                <input
-                  id="register-email"
-                  className="fp-input"
-                  placeholder="maria@example.com"
-                  type="email"
-                />
-              </div>
-            </div>
-
-            <div className="fp-field">
-              <label className="fp-field__label fp-label-md" htmlFor="register-password">
-                Contraseña
-              </label>
-              <div className="fp-input-wrap">
-                <span className="fp-input-icon">
-                  <MaterialIcon>lock</MaterialIcon>
-                </span>
-                <input
-                  id="register-password"
-                  className="fp-input"
-                  placeholder="••••••••"
-                  type="password"
-                />
-              </div>
-            </div>
-
-            <label className="fp-checkbox-row">
-              <input className="fp-checkbox" type="checkbox" />
-              <span className="fp-body-sm fp-muted">
-                Acepto los{" "}
-                <Link className="fp-link fp-link--strong" href="/frontend">
-                  Términos de Servicio
-                </Link>{" "}
-                y la{" "}
-                <Link className="fp-link fp-link--strong" href="/frontend">
-                  Política de Privacidad
-                </Link>
-              </span>
-            </label>
-
-            <button className="fp-button fp-button--primary fp-button--full" type="submit">
-              Crear cuenta
-            </button>
-          </FlowForm>
-
-          <p className="fp-body-sm fp-muted" style={{ margin: "1.5rem 0 0", textAlign: "center" }}>
-            ¿Ya tienes una cuenta?{" "}
-            <Link className="fp-link fp-link--strong" href="/frontend/iniciar-sesion">
-              Inicia sesión
-            </Link>
-          </p>
-        </div>
+          </div>
         </div>
       </main>
     </section>

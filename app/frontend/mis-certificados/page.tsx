@@ -1,30 +1,47 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
+import { me } from "@/lib/api/auth";
+import {
+  listCertificates,
+  type CertificateDto,
+} from "@/lib/api/certificados";
+
 import { DashboardSidebar } from "../_components/dashboard-sidebar";
 import { MaterialIcon } from "../_components/material-icon";
 import { MobileBrandHeader } from "../_components/mobile-brand-header";
 import "./page.css";
 
-const certificates = [
-  {
-    id: "1",
-    entidad: "Coursera",
-    horas: 40,
-    fecha: "Mayo 2026"
-  },
-  {
-    id: "2",
-    entidad: "Udemy",
-    horas: 25,
-    fecha: "Abril 2026"
-  },
-  {
-    id: "3",
-    entidad: "Google Actívate",
-    horas: 120,
-    fecha: "Marzo 2026"
-  }
-];
-
 export default function MisCertificadosPage() {
+  const [certificates, setCertificates] = useState<CertificateDto[]>([]);
+  const [userName, setUserName] = useState("Usuario");
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let isMounted = true;
+
+    Promise.all([listCertificates(), me()])
+      .then(([certificateData, profile]) => {
+        if (!isMounted) return;
+        setCertificates(certificateData);
+        setUserName(profile.nombre_completo || "Usuario");
+      })
+      .catch(() => {
+        if (isMounted) {
+          setError("No se pudieron cargar tus certificados.");
+        }
+      })
+      .finally(() => {
+        if (isMounted) setIsLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   return (
     <section className="fp-page fp-page--shell">
       <DashboardSidebar
@@ -44,7 +61,7 @@ export default function MisCertificadosPage() {
                 </div>
                 <div className="fp-stack-xs">
                   <p className="fp-label-md" style={{ margin: 0, color: "var(--fp-on-surface)" }}>
-                    Alex Morgan
+                    {userName}
                   </p>
                 </div>
               </div>
@@ -56,7 +73,7 @@ export default function MisCertificadosPage() {
       <main className="fp-shell-main">
         <MobileBrandHeader>
           <MaterialIcon>notifications</MaterialIcon>
-          <div className="fp-sidebar__avatar-placeholder" style={{ width: '32px', height: '32px' }}>
+          <div className="fp-sidebar__avatar-placeholder" style={{ width: "32px", height: "32px" }}>
             <MaterialIcon className="fp-label-md">person</MaterialIcon>
           </div>
         </MobileBrandHeader>
@@ -71,23 +88,54 @@ export default function MisCertificadosPage() {
             </p>
           </header>
 
+          {isLoading && (
+            <div className="fp-alert">
+              <MaterialIcon>hourglass_empty</MaterialIcon>
+              <p className="fp-body-sm" style={{ margin: 0 }}>
+                Cargando certificados...
+              </p>
+            </div>
+          )}
+
+          {error && (
+            <div className="fp-alert fp-alert--error">
+              <MaterialIcon>error_outline</MaterialIcon>
+              <p className="fp-body-sm" style={{ margin: 0 }}>
+                {error}
+              </p>
+            </div>
+          )}
+
+          {!isLoading && !error && certificates.length === 0 && (
+            <div className="fp-alert">
+              <MaterialIcon>info</MaterialIcon>
+              <p className="fp-body-sm" style={{ margin: 0 }}>
+                Aun no has subido certificados.
+              </p>
+            </div>
+          )}
+
           <div className="fp-certificates-grid">
             {certificates.map((cert) => (
-              <article key={cert.id} className="fp-cert-card">
+              <article key={cert.id_certificado} className="fp-cert-card">
                 <div className="fp-cert-card__image">
                   <MaterialIcon className="fp-cert-card__image-icon">workspace_premium</MaterialIcon>
                 </div>
                 <div className="fp-cert-card__content">
                   <h3 className="fp-headline-md" style={{ margin: 0, color: "var(--fp-on-surface)" }}>
-                    {cert.entidad}
+                    {cert.titulo_certificado}
                   </h3>
                   <div className="fp-cert-card__meta fp-body-sm">
+                    <MaterialIcon style={{ fontSize: "1.1rem" }}>account_balance</MaterialIcon>
+                    <span>{cert.entidad}</span>
+                  </div>
+                  <div className="fp-cert-card__meta fp-body-sm">
                     <MaterialIcon style={{ fontSize: "1.1rem" }}>schedule</MaterialIcon>
-                    <span>{cert.horas} Horas</span>
+                    <span>{cert.duracion_horas} Horas</span>
                   </div>
                   <div className="fp-cert-card__meta fp-body-sm">
                     <MaterialIcon style={{ fontSize: "1.1rem" }}>event</MaterialIcon>
-                    <span>{cert.fecha}</span>
+                    <span>{cert.fecha_display}</span>
                   </div>
 
                   <div className="fp-cert-card__actions">

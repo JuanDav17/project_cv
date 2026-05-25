@@ -1,19 +1,63 @@
 "use client";
 
-import Image from "next/image";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import QRCode from "qrcode";
+
+import { getProfile } from "@/lib/api/perfil";
 
 import { DashboardSidebar } from "../_components/dashboard-sidebar";
 import { FrontendFooter } from "../_components/footer";
 import { MaterialIcon } from "../_components/material-icon";
 import { MobileBrandHeader } from "../_components/mobile-brand-header";
 
-// Importación directa del archivo CSS exclusivo de la vista
 import "./page.css";
 
-type QRColor = "primary" | "secondary" | "tertiary" | "dark";
-
 export default function CodigoQrPage() {
+  const [userName, setUserName] = useState("Usuario");
+  const [publicUrl, setPublicUrl] = useState("");
+  const [qrDataUrl, setQrDataUrl] = useState("");
+
+  useEffect(() => {
+    let isMounted = true;
+
+    getProfile()
+      .then((profile) => {
+        if (!isMounted) return;
+        const nextPublicUrl = `${window.location.origin}/u/${profile.slug_publico}`;
+        setUserName(profile.nombre_completo || "Usuario");
+        setPublicUrl(nextPublicUrl);
+        return QRCode.toDataURL(nextPublicUrl, {
+          width: 256,
+          margin: 2,
+          errorCorrectionLevel: "M",
+          color: {
+            dark: "#111827",
+            light: "#ffffff",
+          },
+        });
+      })
+      .then((dataUrl) => {
+        if (isMounted && dataUrl) setQrDataUrl(dataUrl);
+      })
+      .catch(() => {
+        if (isMounted) setPublicUrl("");
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const handleDownload = () => {
+    if (!qrDataUrl) return;
+
+    const link = document.createElement("a");
+    link.href = qrDataUrl;
+    link.download = "mycertify-qr.png";
+    link.click();
+  };
+
   return (
     <section className="fp-page fp-page--shell">
       <DashboardSidebar
@@ -33,7 +77,7 @@ export default function CodigoQrPage() {
                 </div>
                 <div className="fp-stack-xs">
                   <p className="fp-label-md" style={{ margin: 0, color: "var(--fp-on-surface)" }}>
-                    Alex Morgan
+                    {userName}
                   </p>
                 </div>
               </div>
@@ -59,23 +103,26 @@ export default function CodigoQrPage() {
               Tu Perfil en un Escaneo
             </h1>
             <p className="fp-body-lg fp-muted" style={{ margin: 0 }}>
-              Comparte tu trayectoria profesional al instante. Personaliza y descarga tu código
-              QR único asociado a tu perfil en MyCertify.
+              Comparte tu trayectoria profesional al instante. Personaliza y descarga tu codigo
+              QR unico asociado a tu perfil en MyCertify.
             </p>
           </header>
 
           <section className="fp-two-column-qr" style={{ maxWidth: "72rem", margin: "0 auto", width: "100%" }}>
-
-            {/* Contenedor del QR */}
             <article className="fp-card fp-qr-preview fp-stack-md">
               <div className="fp-qr-image-frame fp-stack-sm theme-primary">
-                <Image
-                  alt="QR Code Preview"
-                  height={256}
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuBUGJkg0uVZofmR0Hu-i1MxgV6-dywgUwHaURFFB7pHJbOzJkC0oSy-UJt6dp00p3sxbuJOOWIQbd8Qm3-jgTJczW_PgwQLZ-lK9h6tIF065wj-JrNIB_dqdlLEG2-VG0yY2u0PYv6Z0166l1O-7v4s98WGprZNlv2Hsx5kT-9oAn5jlZybLgkKWr5e9fFkchacrFtPxjM79kwX3qhY5iuv8PSwFhPUmQkTaFt3sc2fUhX_drW8QH21lhl4gpfCXA5F-cii6N_smCOh"
-                  width={256}
-                  priority
-                />
+                {qrDataUrl ? (
+                  <img
+                    alt="QR Code Preview"
+                    height={256}
+                    src={qrDataUrl}
+                    width={256}
+                  />
+                ) : (
+                  <div className="fp-stack-sm" style={{ minHeight: 256, display: "grid", placeItems: "center" }}>
+                    <MaterialIcon>hourglass_empty</MaterialIcon>
+                  </div>
+                )}
                 <div className="fp-qr-verified-badge">
                   <MaterialIcon className="fp-label-sm">verified</MaterialIcon>
                   MyCertify Verified
@@ -88,17 +135,28 @@ export default function CodigoQrPage() {
                 <h2 className="fp-headline-md" style={{ margin: 0 }}>
                   Acciones
                 </h2>
-                <button className="fp-button fp-button--primary fp-button--full" type="button">
+                <button
+                  className="fp-button fp-button--primary fp-button--full"
+                  type="button"
+                  onClick={handleDownload}
+                  disabled={!qrDataUrl}
+                >
                   <MaterialIcon>download</MaterialIcon>
                   Descargar QR (PNG)
                 </button>
+                {publicUrl && (
+                  <Link className="fp-button fp-button--secondary fp-button--full" href={publicUrl}>
+                    <MaterialIcon>visibility</MaterialIcon>
+                    Ver perfil publico
+                  </Link>
+                )}
               </article>
 
               <article className="fp-alert-qr">
                 <MaterialIcon>info</MaterialIcon>
                 <p className="fp-body-sm" style={{ margin: 0 }}>
-                  Este código QR es dinámico. Si actualizas tu perfil en MyCertify, la información
-                  escaneada se actualizará automáticamente sin necesidad de generar uno nuevo.
+                  Este codigo QR apunta a tu URL publica. Si actualizas tu perfil o certificados
+                  publicos, la informacion escaneada se actualizara automaticamente.
                 </p>
               </article>
             </div>

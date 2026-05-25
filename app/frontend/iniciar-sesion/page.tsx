@@ -1,15 +1,55 @@
-import Link from "next/link";
+"use client";
 
-import { FlowForm } from "../_components/flow-form";
+import { FormEvent, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+
+import { login } from "@/lib/api/auth";
+import { ApiError } from "@/lib/api/http";
+
 import { MaterialIcon } from "../_components/material-icon";
 import { ThemeToggle } from "../_components/theme-toggle";
 
 import "./page.css";
 
 export default function IniciarSesionPage() {
+  const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setError("");
+    setIsSubmitting(true);
+
+    const formData = new FormData(event.currentTarget);
+
+    try {
+      const response = await login({
+        email: String(formData.get("email") ?? ""),
+        password: String(formData.get("password") ?? ""),
+      });
+
+      if (response.devCode) {
+        sessionStorage.setItem("mycertify-dev-code", response.devCode);
+      } else {
+        sessionStorage.removeItem("mycertify-dev-code");
+      }
+
+      router.push("/frontend/codigo");
+    } catch (requestError) {
+      setError(
+        requestError instanceof ApiError
+          ? requestError.message
+          : "No se pudo iniciar sesion.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <section className="fp-login-split">
-      {/* ── Left Panel: Hero image + overlay text ── */}
       <aside className="fp-login-split__hero" aria-hidden="true">
         <img
           className="fp-login-split__hero-img"
@@ -43,10 +83,7 @@ export default function IniciarSesionPage() {
         </div>
       </aside>
 
-      {/* ── Right Panel: Login form ── */}
       <main className="fp-login-split__form-area">
-
-        {/* Top nav bar with Home + ThemeToggle */}
         <nav className="fp-auth-topnav">
           <Link className="fp-auth-topnav__home" href="/frontend">
             <MaterialIcon>arrow_back</MaterialIcon>
@@ -56,84 +93,98 @@ export default function IniciarSesionPage() {
         </nav>
 
         <div className="fp-auth-form-center">
-        <div className="fp-login-split__form-container">
-          <header className="fp-login-split__form-header">
-            <h1 className="fp-login-split__form-title">Iniciar Sesión</h1>
-            <p className="fp-login-split__form-desc">
-              ¡Bienvenido de nuevo! Ingresa tus credenciales para acceder a tu
-              panel de certificaciones.
-            </p>
-          </header>
-          <FlowForm
-            className="fp-login-split__form"
-            nextHref="/frontend/codigo"
-          >
-            <div className="fp-field">
-              <label
-                className="fp-field__label fp-label-md"
-                htmlFor="login-email"
-              >
-                Correo electrónico
-              </label>
-              <div className="fp-input-wrap">
-                <span className="fp-input-icon">
-                  <MaterialIcon>mail</MaterialIcon>
-                </span>
-                <input
-                  id="login-email"
-                  className="fp-input"
-                  placeholder="nombre@empresa.com"
-                  type="email"
-                />
-              </div>
-            </div>
-
-            <div className="fp-field">
-              <div className="fp-field__row">
+          <div className="fp-login-split__form-container">
+            <header className="fp-login-split__form-header">
+              <h1 className="fp-login-split__form-title">Iniciar Sesion</h1>
+              <p className="fp-login-split__form-desc">
+                Ingresa tus credenciales para acceder a tu panel de
+                certificaciones.
+              </p>
+            </header>
+            <form className="fp-login-split__form" onSubmit={handleSubmit}>
+              <div className="fp-field">
                 <label
                   className="fp-field__label fp-label-md"
-                  htmlFor="login-password"
+                  htmlFor="login-email"
                 >
-                  Contraseña
+                  Correo electronico
                 </label>
-                <Link
-                  className="fp-link fp-link--strong fp-label-md"
-                  href="/frontend"
-                >
-                  ¿Olvidaste tu contraseña?
-                </Link>
+                <div className="fp-input-wrap">
+                  <span className="fp-input-icon">
+                    <MaterialIcon>mail</MaterialIcon>
+                  </span>
+                  <input
+                    id="login-email"
+                    name="email"
+                    className="fp-input"
+                    placeholder="nombre@empresa.com"
+                    type="email"
+                    required
+                  />
+                </div>
               </div>
-              <div className="fp-input-wrap">
-                <span className="fp-input-icon">
-                  <MaterialIcon>lock</MaterialIcon>
-                </span>
-                <input
-                  id="login-password"
-                  className="fp-input"
-                  type="password"
-                  placeholder="••••••••"
-                />
+
+              <div className="fp-field">
+                <div className="fp-field__row">
+                  <label
+                    className="fp-field__label fp-label-md"
+                    htmlFor="login-password"
+                  >
+                    Contrasena
+                  </label>
+                  <Link
+                    className="fp-link fp-link--strong fp-label-md"
+                    href="/frontend/recuperar-contrasena"
+                  >
+                    Olvidaste tu contrasena?
+                  </Link>
+                </div>
+                <div className="fp-input-wrap">
+                  <span className="fp-input-icon">
+                    <MaterialIcon>lock</MaterialIcon>
+                  </span>
+                  <input
+                    id="login-password"
+                    name="password"
+                    className="fp-input"
+                    type="password"
+                    placeholder="********"
+                    required
+                  />
+                </div>
               </div>
-            </div>
 
-            <button className="fp-button fp-button--primary fp-button--full" type="submit">
-              Acceder
-            </button>
-          </FlowForm>
+              {error && (
+                <div className="fp-alert fp-alert--error">
+                  <MaterialIcon>error_outline</MaterialIcon>
+                  <p className="fp-body-sm" style={{ margin: 0 }}>
+                    {error}
+                  </p>
+                </div>
+              )}
 
-          <p
-            className="fp-body-sm fp-muted"
-            style={{ margin: "1.5rem 0 0", textAlign: "center" }}
-          >
-            ¿No tienes una cuenta?{" "}
-            <Link
-              className="fp-link fp-link--strong"
-              href="/frontend/registro"
+              <button
+                className="fp-button fp-button--primary fp-button--full"
+                type="submit"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Validando..." : "Acceder"}
+              </button>
+            </form>
+
+            <p
+              className="fp-body-sm fp-muted"
+              style={{ margin: "1.5rem 0 0", textAlign: "center" }}
             >
-              Regístrate
-            </Link>
-          </p>
-        </div>
+              No tienes una cuenta?{" "}
+              <Link
+                className="fp-link fp-link--strong"
+                href="/frontend/registro"
+              >
+                Registrate
+              </Link>
+            </p>
+          </div>
         </div>
       </main>
     </section>
