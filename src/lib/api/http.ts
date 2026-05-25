@@ -25,7 +25,7 @@ export class ApiError extends Error {
 }
 
 export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`/backend/api${path}`, {
+  const response = await fetch(`/api${path}`, {
     ...init,
     credentials: "include",
     headers: {

@@ -41,7 +41,7 @@ para el envio de codigos de verificacion.
 
 ```txt
 app/
-  backend/api/                  # API routes de Next.js
+  api/                          # API routes de Next.js
   frontend/                     # Pantallas privadas/publicas de la UI
   u/[slug]/                     # Perfil publico escaneable por QR
 
@@ -250,20 +250,20 @@ Frontend:
 
 Backend:
 
-- `POST /backend/api/auth/register`
-- `POST /backend/api/auth/login`
-- `POST /backend/api/auth/verify-code`
-- `POST /backend/api/auth/password-reset/request`
-- `POST /backend/api/auth/password-reset/verify`
-- `POST /backend/api/auth/password-reset/confirm`
-- `POST /backend/api/auth/logout`
-- `GET /backend/api/auth/me`
-- `GET /backend/api/perfil`
-- `PUT /backend/api/perfil`
-- `GET /backend/api/certificados`
-- `POST /backend/api/certificados`
-- `GET /backend/api/certificados/:id`
-- `GET /backend/api/public/perfiles/:slug`
+- `POST /api/auth/register`
+- `POST /api/auth/login`
+- `POST /api/auth/verify-code`
+- `POST /api/auth/password-reset/request`
+- `POST /api/auth/password-reset/verify`
+- `POST /api/auth/password-reset/confirm`
+- `POST /api/auth/logout`
+- `GET /api/auth/me`
+- `GET /api/perfil`
+- `PUT /api/perfil`
+- `GET /api/certificados`
+- `POST /api/certificados`
+- `GET /api/certificados/:id`
+- `GET /api/public/perfiles/:slug`
 
 ## Certificados y Storage
 

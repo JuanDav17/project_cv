@@ -4,7 +4,7 @@ export const AUTH_VERIFIED_COOKIE = "mycertify-auth-verified";
 
 const authCookieOptions = {
   httpOnly: true,
-  sameSite: "lax" as const,
+  sameSite: "strict" as const,
   secure: process.env.NODE_ENV === "production",
   path: "/",
 };

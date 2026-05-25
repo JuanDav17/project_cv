@@ -49,8 +49,8 @@ export function validatePdfFile(file: File | null) {
     throw new BackendError("Debes adjuntar el PDF del certificado.", 400, "FILE_REQUIRED");
   }
 
-  if (file.type !== CERTIFICATE_PDF_MIME) {
-    throw new BackendError("El archivo debe ser un PDF.", 400, "INVALID_FILE_TYPE");
+  if (file.type !== CERTIFICATE_PDF_MIME || !file.name.toLowerCase().endsWith(".pdf")) {
+    throw new BackendError("El archivo debe ser un PDF y tener extension .pdf.", 400, "INVALID_FILE_TYPE");
   }
 
   if (file.size <= 0 || file.size > MAX_CERTIFICATE_FILE_BYTES) {

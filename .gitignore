@@ -45,3 +45,9 @@ coverage/
 
 # Ignorar archivos SQL
 *.db
+
+# Supabase local
+supabase/.temp/
+supabase/.branches/
+*.sqlite
+

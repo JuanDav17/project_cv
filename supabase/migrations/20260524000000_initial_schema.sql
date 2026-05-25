@@ -32,7 +32,6 @@ CREATE TABLE codigos_verificacion (
 );
 CREATE INDEX idx_codigos_usuario ON public.codigos_verificacion(id_usuario);
 CREATE INDEX idx_codigos_vigentes ON public.codigos_verificacion(id_usuario, proposito, usado, expira_en);
-CREATE UNIQUE INDEX idx_codigos_token ON public.codigos_verificacion(token_hash);
 
 -- Tabla sesiones_recuperacion_contrasena
 CREATE TABLE sesiones_recuperacion_contrasena (
