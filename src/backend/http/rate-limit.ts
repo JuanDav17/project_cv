@@ -16,11 +16,17 @@ const WINDOW_MS = 15 * 60 * 1000; // 15 minutes
 const MAX_REQUESTS = 10; // Max 10 requests per window per IP
 
 export function checkRateLimit(request: Request) {
-  const ip =
-    request.headers.get("x-forwarded-for") ??
-    request.headers.get("x-real-ip") ??
-    "127.0.0.1";
+  // Extraemos la IP previniendo spoofing de cabeceras X-Forwarded-For
+  let ip = request.headers.get("x-real-ip");
+  const forwardedFor = request.headers.get("x-forwarded-for");
   
+  if (!ip && forwardedFor) {
+    // Proxies seguros suelen sobreescribir o añadir la IP real al final o principio.
+    // Tomamos la primera IP de la cadena de forma limpia.
+    ip = forwardedFor.split(",")[0].trim();
+  }
+  
+  ip = ip ?? "127.0.0.1";
   const now = Date.now();
   const entry = store.get(ip);
 

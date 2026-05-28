@@ -17,7 +17,7 @@ export default function InformacionAcademicaPage() {
             <span className="fp-brand__icon fp-brand__icon--round">
               <MaterialIcon filled>workspace_premium</MaterialIcon>
             </span>
-            <span>CertifyPro</span>
+            <span>MyCertify</span>
           </div>
           <ThemeToggle />
         </div>

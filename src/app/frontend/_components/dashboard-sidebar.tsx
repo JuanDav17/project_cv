@@ -5,7 +5,7 @@ import { MaterialIcon } from "./material-icon";
 import { ThemeToggle } from "./theme-toggle";
 import { LogoutButton } from "./logout-button";
 
-type NavKey = "overview" | "credentials" | "my-credentials" | "analytics" | "settings";
+type NavKey = "overview" | "credentials" | "my-credentials" | "statistics" | "analytics" | "settings" | "legal";
 
 type DashboardSidebarProps = {
   active: NavKey;
@@ -31,6 +31,12 @@ const navItems: Array<{
     href: "/frontend/mis-certificados",
     label: "Mis Certificados",
     icon: "workspace_premium",
+  },
+  {
+    key: "statistics",
+    href: "/frontend/dashboard",
+    label: "Dashboard",
+    icon: "insights",
   },
   { key: "analytics", href: "/frontend/codigo-qr", label: "Mi Código QR", icon: "qr_code_2" },
   { key: "settings", href: "/frontend/mi-cuenta", label: "Configuración", icon: "settings" },

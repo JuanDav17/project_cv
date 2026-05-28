@@ -24,6 +24,9 @@ export type CertificateDto = {
   visibilidad: "publico" | "privado";
   verificado_plataforma: boolean;
   destacado: boolean;
+  tema?: string | null;
+  tipo_certificado?: string | null;
+  color?: string | null;
   archivo?: {
     id_archivo: string;
     nombre_archivo: string;
@@ -55,6 +58,9 @@ type CertificateRecord = {
   verificado_plataforma: boolean;
   destacado: boolean;
   fecha_creacion: string;
+  tema?: string | null;
+  tipo_certificado?: string | null;
+  color?: string | null;
   instituciones: InstitutionRecord | InstitutionRecord[] | null;
   archivos_certificado?: FileRecord[] | null;
 };
@@ -98,6 +104,9 @@ function mapCertificate(record: CertificateRecord): CertificateDto {
     visibilidad: record.visibilidad,
     verificado_plataforma: record.verificado_plataforma,
     destacado: record.destacado,
+    tema: record.tema,
+    tipo_certificado: record.tipo_certificado,
+    color: record.color,
     archivo: file
       ? {
           id_archivo: file.id_archivo,
@@ -180,6 +189,9 @@ export async function listCurrentUserCertificates() {
         "verificado_plataforma",
         "destacado",
         "fecha_creacion",
+        "tema",
+        "tipo_certificado",
+        "color",
         "instituciones(nombre_institucion)",
         "archivos_certificado(id_archivo,nombre_archivo,ruta_archivo,tamano_bytes,es_actual)",
       ].join(","),
@@ -215,6 +227,9 @@ export async function getCurrentUserCertificate(id: string) {
         "verificado_plataforma",
         "destacado",
         "fecha_creacion",
+        "tema",
+        "tipo_certificado",
+        "color",
         "instituciones(nombre_institucion)",
         "archivos_certificado(id_archivo,nombre_archivo,ruta_archivo,tamano_bytes,es_actual)",
       ].join(","),
@@ -293,6 +308,18 @@ export async function createCurrentUserCertificate(formData: FormData) {
           ? String(formData.get("fecha_emision")).trim()
           : null,
       visibilidad: parseVisibility(formData.get("visibilidad")),
+      tema:
+        typeof formData.get("tema") === "string"
+          ? String(formData.get("tema")).trim() || null
+          : null,
+      tipo_certificado:
+        typeof formData.get("tipo_certificado") === "string"
+          ? String(formData.get("tipo_certificado")).trim() || null
+          : null,
+      color:
+        typeof formData.get("color") === "string"
+          ? String(formData.get("color")).trim() || null
+          : null,
     })
     .select("id_certificado")
     .single();
@@ -349,4 +376,60 @@ export async function createCurrentUserCertificate(formData: FormData) {
   }
 
   return getCurrentUserCertificate(certificate.id_certificado as string);
+}
+
+export async function deleteCurrentUserCertificate(id: string) {
+  const { user } = await getAuthenticatedUser();
+  const admin = createAdminSupabaseClient();
+
+  // Verificar que el certificado pertenece al usuario
+  const { data: certData, error: certLookupError } = await admin
+    .from("certificados")
+    .select("id_certificado")
+    .eq("id_certificado", id)
+    .eq("id_usuario", user.id)
+    .maybeSingle();
+
+  if (certLookupError || !certData) {
+    throw new BackendError(
+      "Certificado no encontrado o no pertenece al usuario.",
+      404,
+      "CERTIFICATE_NOT_FOUND",
+      certLookupError?.message,
+    );
+  }
+
+  // 1. Obtener las rutas de los archivos del storage
+  const { data: fileRecords } = await admin
+    .from("archivos_certificado")
+    .select("ruta_archivo")
+    .eq("id_certificado", id);
+
+  if (fileRecords && fileRecords.length > 0) {
+    const paths = fileRecords.map((f: any) => f.ruta_archivo);
+    // Borrar del storage
+    await admin.storage.from(CERTIFICADOS_BUCKET).remove(paths);
+  }
+
+  // 2. Borrar registros de archivos_certificado (FK sin CASCADE)
+  await admin
+    .from("archivos_certificado")
+    .delete()
+    .eq("id_certificado", id);
+
+  // 3. Borrar el certificado
+  const { error } = await admin
+    .from("certificados")
+    .delete()
+    .eq("id_certificado", id)
+    .eq("id_usuario", user.id);
+
+  if (error) {
+    throw new BackendError(
+      "No se pudo eliminar el certificado.",
+      500,
+      "CERTIFICATE_DELETE_FAILED",
+      error.message,
+    );
+  }
 }

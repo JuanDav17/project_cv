@@ -250,7 +250,7 @@ export default function MiCuentaPage() {
                   </div>
 
                   <button className="fp-button fp-button--secondary fp-button--full" type="button">
-                    Actualizar Contrasena
+                    Actualizar Contraseña
                   </button>
                 </div>
               </article>

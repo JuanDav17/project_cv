@@ -12,6 +12,7 @@ import { MaterialIcon } from "../_components/material-icon";
 import { MobileBrandHeader } from "../_components/mobile-brand-header";
 
 import "./page.css";
+import "../mis-certificados/page.css";
 
 export default function PaginaPrincipalPage() {
   const [profile, setProfile] = useState<AuthProfile | null>(null);
@@ -146,6 +147,50 @@ export default function PaginaPrincipalPage() {
                 Subir ahora
               </Link>
             </article>
+          </section>
+
+          <section className="fp-stack-md" style={{ marginTop: "1rem" }}>
+            <h2 className="fp-headline-md" style={{ margin: 0, display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              <MaterialIcon>history</MaterialIcon>
+              Últimos certificados
+            </h2>
+            
+            {certificates.length === 0 ? (
+              <div className="fp-alert">
+                <MaterialIcon>info</MaterialIcon>
+                <p className="fp-body-sm" style={{ margin: 0 }}>
+                  Aún no tienes certificados subidos.
+                </p>
+              </div>
+            ) : (
+              <div className="fp-certificates-grid" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))" }}>
+                {certificates.slice(0, 3).map((cert: any) => (
+                  <article key={cert.id_certificado} className="fp-cert-card" style={{ borderColor: cert.color }}>
+                    <div className="fp-cert-card__image" style={{ backgroundColor: cert.color ? `${cert.color}22` : undefined }}>
+                      <MaterialIcon className="fp-cert-card__image-icon" style={{ color: cert.color }}>workspace_premium</MaterialIcon>
+                    </div>
+                    <div className="fp-cert-card__content">
+                      <h3 className="fp-headline-md" style={{ margin: 0, color: "var(--fp-on-surface)" }}>
+                        {cert.titulo_certificado}
+                      </h3>
+                      <div className="fp-cert-card__meta fp-body-sm">
+                        <MaterialIcon style={{ fontSize: "1.1rem" }}>account_balance</MaterialIcon>
+                        <span>{cert.entidad}</span>
+                      </div>
+                      <div className="fp-cert-card__meta fp-body-sm">
+                        <MaterialIcon style={{ fontSize: "1.1rem" }}>schedule</MaterialIcon>
+                        <span>{cert.duracion_horas} Horas</span>
+                      </div>
+                      <div className="fp-cert-card__actions">
+                        <Link href="/frontend/mis-certificados" className="fp-button fp-button--secondary fp-button--full">
+                          Ver detalles
+                        </Link>
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
           </section>
         </div>
 

@@ -4,10 +4,10 @@ import "./frontend/frontend.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "CertifyPro Frontend",
-    template: "%s | CertifyPro Frontend",
+    default: "MyCertify Frontend",
+    template: "%s | MyCertify Frontend",
   },
-  description: "Frontend UI for the CertifyPro certification platform.",
+  description: "Frontend UI for the MyCertify certification platform.",
 };
 
 export default function RootLayout({

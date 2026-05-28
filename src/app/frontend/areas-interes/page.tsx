@@ -34,7 +34,7 @@ export default function AreasInteresPage() {
             <span className="fp-brand__icon fp-brand__icon--round">
               <MaterialIcon filled>verified</MaterialIcon>
             </span>
-            <span>CertifyPro</span>
+            <span>MyCertify</span>
           </div>
 
           <Link className="fp-button fp-button--ghost fp-label-md" href="/frontend">

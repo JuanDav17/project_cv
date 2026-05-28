@@ -19,3 +19,9 @@ export function getCertificate(id: string) {
   return apiFetch<CertificateDto>(`/certificados/${id}`);
 }
 
+export function deleteCertificate(id: string) {
+  return apiFetch<{ success: boolean }>(`/certificados/${id}`, {
+    method: "DELETE",
+  });
+}
+

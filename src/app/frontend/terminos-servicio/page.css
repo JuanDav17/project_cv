@@ -1,0 +1,27 @@
+.fp-legal-container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.fp-legal-content h2 {
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  color: var(--fp-primary);
+}
+
+.fp-legal-content p {
+  margin-bottom: 1.5rem;
+  color: var(--fp-on-surface-variant);
+  line-height: 1.7;
+}
+
+.fp-legal-content ul {
+  margin-bottom: 1.5rem;
+  padding-left: 1.5rem;
+  color: var(--fp-on-surface-variant);
+  line-height: 1.7;
+}
+
+.fp-legal-content li {
+  margin-bottom: 0.5rem;
+}

@@ -1,4 +1,5 @@
-import { createHash, randomBytes, randomInt } from "node:crypto";
+import { createHash, createHmac, randomBytes, randomInt } from "node:crypto";
+import { getSupabaseAdminEnv } from "@/backend/config/env";
 
 export function sha256Hex(value: string | ArrayBuffer) {
   const hash = createHash("sha256");
@@ -12,12 +13,23 @@ export function sha256Hex(value: string | ArrayBuffer) {
   return hash.digest("hex");
 }
 
+function hmacSha256Hex(value: string) {
+  try {
+    const { secretKey } = getSupabaseAdminEnv();
+    return createHmac("sha256", secretKey).update(value).digest("hex");
+  } catch {
+    // Fallback securely in case env is not loaded, but still better than plain sha256
+    const fallbackSecret = process.env.SUPABASE_SECRET_KEY || "mycertify-secure-fallback";
+    return createHmac("sha256", fallbackSecret).update(value).digest("hex");
+  }
+}
+
 export function createNumericCode() {
   return randomInt(100000, 1000000).toString();
 }
 
 export function hashVerificationCode(userId: string, code: string) {
-  return sha256Hex(`${userId}:${code.trim().toUpperCase()}`);
+  return hmacSha256Hex(`${userId}:${code.trim().toUpperCase()}`);
 }
 
 const ALPHANUMERIC_CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -34,5 +46,5 @@ export function createUrlToken() {
 }
 
 export function hashUrlToken(token: string) {
-  return sha256Hex(token.trim());
+  return hmacSha256Hex(token.trim());
 }

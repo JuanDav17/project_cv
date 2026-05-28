@@ -9,7 +9,7 @@ export function MobileBrandHeader({ children }: MobileBrandHeaderProps) {
   return (
     <header className="fp-mobile-header">
       <div className="fp-headline-md" style={{ color: "var(--fp-primary)", fontWeight: 700 }}>
-        CertifyPro
+        MyCertify
       </div>
       <div className="fp-mobile-header__actions">
         <ThemeToggle />

@@ -52,7 +52,7 @@ export default function FrontendIndexPage() {
             <span className="fp-brand__icon fp-brand__icon--round">
               <MaterialIcon filled>verified</MaterialIcon>
             </span>
-            <span>CertifyPro</span>
+            <span>MyCertify</span>
           </div>
 
           <nav className="fp-landing__nav-links fp-body-sm">
@@ -178,16 +178,16 @@ export default function FrontendIndexPage() {
                 <span className="fp-brand__icon fp-brand__icon--round fp-brand__icon--sm">
                   <MaterialIcon filled>verified</MaterialIcon>
                 </span>
-                <span>CertifyPro</span>
+                <span>MyCertify</span>
               </div>
               <span className="fp-footer__copyright">
-                © 2024 CertifyPro Inc. Todos los derechos reservados.
+                © 2024 MyCertify Inc. Todos los derechos reservados.
               </span>
             </div>
             <div className="fp-landing__footer-links fp-body-sm">
-              <Link href="/frontend">Política de Privacidad</Link>
-              <Link href="/frontend">Términos de Servicio</Link>
-              <Link href="/frontend">Seguridad</Link>
+              <Link href="/frontend/terminos-condiciones">Términos y Condiciones</Link>
+              <Link href="/frontend/terminos-servicio">Términos de Servicio</Link>
+              <Link href="/frontend/seguridad">Seguridad</Link>
               <Link href="/frontend">Contacto</Link>
             </div>
           </div>

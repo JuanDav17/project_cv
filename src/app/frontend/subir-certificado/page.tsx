@@ -19,7 +19,11 @@ export default function SubirCertificadoPage() {
   const [userName, setUserName] = useState("Usuario");
   const [formData, setFormData] = useState({
     entidad: "",
+    tema: "",
+    descripcion: "",
+    tipo_certificado: "",
     horas: "",
+    color: "#4f46e5", // Default color
   });
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -80,7 +84,11 @@ export default function SubirCertificadoPage() {
     try {
       const payload = new FormData();
       payload.append("entidad", formData.entidad);
+      payload.append("tema", formData.tema);
+      payload.append("descripcion", formData.descripcion);
+      payload.append("tipo_certificado", formData.tipo_certificado);
       payload.append("horas", formData.horas);
+      payload.append("color", formData.color);
       payload.append("archivo", file);
       payload.append("visibilidad", "publico");
 
@@ -88,7 +96,7 @@ export default function SubirCertificadoPage() {
 
       setSuccess(true);
       // Limpieza del formulario tras éxito
-      setFormData({ entidad: "", horas: "" });
+      setFormData({ entidad: "", tema: "", descripcion: "", tipo_certificado: "", horas: "", color: "#4f46e5" });
       setFile(null);
     } catch (requestError) {
       setError(
@@ -176,6 +184,67 @@ export default function SubirCertificadoPage() {
               </div>
 
               <div className="fp-field">
+                <label className="fp-field__label fp-label-md" htmlFor="tema">
+                  Tema
+                </label>
+                <div className="fp-input-wrap">
+                  <span className="fp-input-icon"><MaterialIcon>category</MaterialIcon></span>
+                  <input
+                    type="text"
+                    id="tema"
+                    name="tema"
+                    value={formData.tema}
+                    onChange={handleInputChange}
+                    placeholder="Ej. Desarrollo Web, Marketing"
+                    className="fp-input"
+                    maxLength={50}
+                  />
+                </div>
+              </div>
+
+              <div className="fp-field">
+                <label className="fp-field__label fp-label-md" htmlFor="descripcion">
+                  Descripción
+                </label>
+                <div className="fp-input-wrap" style={{ alignItems: "flex-start" }}>
+                  <span className="fp-input-icon" style={{ marginTop: "0.5rem" }}><MaterialIcon>description</MaterialIcon></span>
+                  <textarea
+                    id="descripcion"
+                    name="descripcion"
+                    value={formData.descripcion}
+                    onChange={(e: any) => handleInputChange(e)}
+                    placeholder="Breve descripción del curso..."
+                    className="fp-input"
+                    style={{ minHeight: "80px", resize: "vertical" }}
+                    maxLength={300}
+                  />
+                </div>
+              </div>
+
+              <div className="fp-field">
+                <label className="fp-field__label fp-label-md" htmlFor="tipo_certificado">
+                  Tipo de certificado
+                </label>
+                <div className="fp-input-wrap">
+                  <span className="fp-input-icon"><MaterialIcon>school</MaterialIcon></span>
+                  <select
+                    id="tipo_certificado"
+                    name="tipo_certificado"
+                    value={formData.tipo_certificado}
+                    onChange={(e: any) => handleInputChange(e)}
+                    className="fp-input"
+                  >
+                    <option value="" disabled>Selecciona un tipo</option>
+                    <option value="Masterclass">Masterclass</option>
+                    <option value="Jornadas">Jornadas</option>
+                    <option value="Curso introductorio">Curso introductorio</option>
+                    <option value="Curso especializado">Curso especializado</option>
+                    <option value="Diplomado">Diplomado</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="fp-field">
                 <label className="fp-field__label fp-label-md" htmlFor="horas">
                   Cantidad de Horas *
                 </label>
@@ -191,6 +260,23 @@ export default function SubirCertificadoPage() {
                     className="fp-input"
                     required
                     min="1"
+                  />
+                </div>
+              </div>
+
+              <div className="fp-field">
+                <label className="fp-field__label fp-label-md" htmlFor="color">
+                  Color (Personalizable)
+                </label>
+                <div className="fp-input-wrap" style={{ padding: "0.25rem 0.5rem" }}>
+                  <input
+                    type="color"
+                    id="color"
+                    name="color"
+                    value={formData.color}
+                    onChange={handleInputChange}
+                    className="fp-input"
+                    style={{ height: "40px", padding: "0", cursor: "pointer", border: "none" }}
                   />
                 </div>
               </div>
