@@ -158,6 +158,7 @@ CREATE TABLE perfiles_usuario (
     url_github VARCHAR(255),
     url_portafolio VARCHAR(255),
     avatar_url VARCHAR(500),
+    areas_interes JSONB DEFAULT '[]'::jsonb,
     fecha_actualizacion TIMESTAMP NOT NULL DEFAULT NOW()
 );
 CREATE UNIQUE INDEX idx_perfiles_slug ON public.perfiles_usuario(slug_publico);

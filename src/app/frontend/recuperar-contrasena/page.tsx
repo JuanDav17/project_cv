@@ -141,7 +141,7 @@ export default function RecuperarContrasenaPage() {
       setError(
         requestError instanceof ApiError
           ? requestError.message
-          : "No se pudo actualizar la contrasena.",
+          : "No se pudo actualizar la contraseña.",
       );
     } finally {
       setLoading(false);
@@ -173,7 +173,7 @@ export default function RecuperarContrasenaPage() {
             </h2>
             <p className="fp-login-split__hero-subtitle">
               Te enviaremos un codigo seguro de un solo uso para que puedas
-              crear una nueva contrasena.
+              crear una nueva contraseña.
             </p>
           </div>
 
@@ -196,7 +196,7 @@ export default function RecuperarContrasenaPage() {
           <div className="fp-login-split__form-container">
             <header className="fp-login-split__form-header">
               <h1 className="fp-login-split__form-title">
-                Recuperar Contrasena
+                Recuperar Contraseña
               </h1>
               <p className="fp-login-split__form-desc">
                 {step === "request" &&
@@ -299,7 +299,7 @@ export default function RecuperarContrasenaPage() {
               <form className="fp-login-split__form" onSubmit={handleConfirm}>
                 <div className="fp-field">
                   <label className="fp-field__label fp-label-md" htmlFor="new-password">
-                    Nueva contrasena
+                    Nueva contraseña
                   </label>
                   <div className="fp-input-wrap">
                     <span className="fp-input-icon">
@@ -319,7 +319,7 @@ export default function RecuperarContrasenaPage() {
 
                 <div className="fp-field">
                   <label className="fp-field__label fp-label-md" htmlFor="repeat-password">
-                    Repetir contrasena
+                    Repetir contraseña
                   </label>
                   <div className="fp-input-wrap">
                     <span className="fp-input-icon">

@@ -11,12 +11,21 @@ export function OnboardingStepper({
   labels,
   mobileLabel,
 }: OnboardingStepperProps) {
-  const progressWidth = `${((currentStep - 1) / (labels.length - 1)) * 100}%`;
+  const totalSteps = labels.length;
+  // La línea del track va del 12.5% (centro del 1er círculo) al 87.5% (centro del último).
+  // El width del progress debe ser: inset_izq + ratio * (100% - 2*inset_izq)
+  const trackInset = 12.5; // % — coincide con el CSS
+  const ratio = (currentStep - 1) / (totalSteps - 1);
+  const progressWidth = currentStep === 1 ? "0%" : `${trackInset + ratio * (100 - 2 * trackInset)}%`;
 
   return (
-    <div className="fp-stepper fp-stack-md">
+    <div className="fp-stepper">
+      {/* Líneas de fondo y progreso — delimitadas al espacio entre círculos */}
       <div className="fp-stepper__track" />
-      <div className="fp-stepper__progress" style={{ width: progressWidth }} />
+      <div
+        className="fp-stepper__progress"
+        style={{ width: progressWidth }}
+      />
 
       <div className="fp-stepper__items">
         {labels.map((label, index) => {
@@ -35,7 +44,11 @@ export function OnboardingStepper({
                   .filter(Boolean)
                   .join(" ")}
               >
-                {isDone ? <MaterialIcon className="fp-label-sm">check</MaterialIcon> : step}
+                {isDone ? (
+                  <MaterialIcon className="fp-label-sm">check</MaterialIcon>
+                ) : (
+                  step
+                )}
               </div>
               <span
                 className={[

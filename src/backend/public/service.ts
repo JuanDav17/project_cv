@@ -13,6 +13,7 @@ type PublicProfileRecord = {
   ciudad: string | null;
   pais: string | null;
   avatar_url: string | null;
+  areas_interes: Array<{ id: string; label: string; icon: string; custom?: boolean }> | null;
 };
 
 type PublicCertificateRecord = {
@@ -71,6 +72,7 @@ export async function getPublicProfileBySlug(slug: string) {
         "ciudad",
         "pais",
         "avatar_url",
+        "areas_interes",
       ].join(","),
     )
     .eq("slug_publico", slug)

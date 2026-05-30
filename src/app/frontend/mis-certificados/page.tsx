@@ -2,7 +2,7 @@
 
 import { useEffect, useState, ChangeEvent } from "react";
 
-import { me } from "@/lib/api/auth";
+import { me, type AuthProfile } from "@/lib/api/auth";
 import {
   listCertificates,
   deleteCertificate,
@@ -22,6 +22,7 @@ interface CertificateExtended extends CertificateDto {
 
 export default function MisCertificadosPage() {
   const [certificates, setCertificates] = useState<CertificateExtended[]>([]);
+  const [profile, setProfile] = useState<AuthProfile | null>(null);
   const [userName, setUserName] = useState("Usuario");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
@@ -41,10 +42,11 @@ export default function MisCertificadosPage() {
     let isMounted = true;
 
     Promise.all([listCertificates(), me()])
-      .then(([certificateData, profile]) => {
+      .then(([certificateData, profileData]) => {
         if (!isMounted) return;
         setCertificates(certificateData as CertificateExtended[]);
-        setUserName(profile.nombre_completo || "Usuario");
+        setProfile(profileData);
+        setUserName(profileData.nombre_completo || "Usuario");
       })
       .catch(() => {
         if (isMounted) {
@@ -92,8 +94,13 @@ export default function MisCertificadosPage() {
                 </div>
                 <div className="fp-stack-xs">
                   <p className="fp-label-md" style={{ margin: 0, color: "var(--fp-on-surface)" }}>
-                    {userName}
+                    {profile?.nombre_completo ?? "Usuario"}
                   </p>
+                  {profile?.titulo_profesional && (
+                    <p className="fp-body-sm fp-muted" style={{ margin: 0, fontSize: "0.75rem" }}>
+                      {profile.titulo_profesional}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>

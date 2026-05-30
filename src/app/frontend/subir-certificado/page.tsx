@@ -3,7 +3,7 @@
 import { useEffect, useState, ChangeEvent, FormEvent } from "react";
 import Link from "next/link";
 
-import { me } from "@/lib/api/auth";
+import { me, type AuthProfile } from "@/lib/api/auth";
 import { createCertificate } from "@/lib/api/certificados";
 import { ApiError } from "@/lib/api/http";
 
@@ -16,7 +16,7 @@ import { MobileBrandHeader } from "../_components/mobile-brand-header";
 import "./page.css";
 
 export default function SubirCertificadoPage() {
-  const [userName, setUserName] = useState("Usuario");
+  const [profile, setProfile] = useState<AuthProfile | null>(null);
   const [formData, setFormData] = useState({
     entidad: "",
     tema: "",
@@ -32,8 +32,8 @@ export default function SubirCertificadoPage() {
 
   useEffect(() => {
     me()
-      .then((profile) => setUserName(profile.nombre_completo || "Usuario"))
-      .catch(() => setUserName("Usuario"));
+      .then((profileData) => setProfile(profileData))
+      .catch(() => setProfile(null));
   }, []);
 
   // Manejador para los campos de texto obligatorios
@@ -128,8 +128,13 @@ export default function SubirCertificadoPage() {
               </div>
               <div className="fp-stack-xs">
                 <p className="fp-label-md" style={{ margin: 0, color: "var(--fp-on-surface)" }}>
-                  {userName}
+                  {profile?.nombre_completo ?? "Usuario"}
                 </p>
+                {profile?.titulo_profesional && (
+                  <p className="fp-body-sm fp-muted" style={{ margin: 0, fontSize: "0.75rem" }}>
+                    {profile.titulo_profesional}
+                  </p>
+                )}
               </div>
             </div>
           </div>

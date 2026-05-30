@@ -834,7 +834,6 @@ body {
   align-items: start;
 }
 
-/* El componente base .fp-alert permanece para alertas generales */
 .fp-alert {
   display: flex;
   align-items: flex-start;
@@ -844,6 +843,24 @@ body {
   border: 1px solid var(--fp-outline-variant);
   background: var(--fp-surface-container-low);
   color: var(--fp-on-surface-variant);
+}
+
+.fp-alert--error {
+  border-color: color-mix(in srgb, var(--fp-error) 45%, transparent);
+  background: color-mix(in srgb, var(--fp-error-container) 40%, transparent);
+  color: var(--fp-on-surface);
+}
+
+.fp-alert--success {
+  border-color: color-mix(in srgb, var(--fp-primary) 45%, transparent);
+  background: color-mix(in srgb, var(--fp-primary-fixed) 40%, transparent);
+  color: var(--fp-on-surface);
+}
+
+.fp-alert--warning {
+  border-color: color-mix(in srgb, var(--fp-tertiary) 50%, transparent);
+  background: color-mix(in srgb, var(--fp-tertiary-container) 30%, transparent);
+  color: var(--fp-on-surface);
 }
 
 .fp-divider {

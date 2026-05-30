@@ -615,3 +615,25 @@ export async function getCurrentSessionProfile() {
   const { user } = await getAuthenticatedUser();
   return ensureUserRecords(user);
 }
+
+export async function updateCurrentPassword(passwordInput: string) {
+  const password = validatePassword(passwordInput);
+  const { user } = await getAuthenticatedUser();
+  const admin = createAdminSupabaseClient();
+  
+  const { error: updateError } = await admin.auth.admin.updateUserById(
+    user.id,
+    { password },
+  );
+
+  if (updateError) {
+    throw new BackendError(
+      "No se pudo actualizar la contrasena.",
+      500,
+      "PASSWORD_UPDATE_FAILED",
+      updateError.message,
+    );
+  }
+
+  return { passwordUpdated: true };
+}

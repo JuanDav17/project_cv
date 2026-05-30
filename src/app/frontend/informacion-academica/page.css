@@ -33,44 +33,62 @@
 
 .fp-onboarding-main {
   flex: 1;
-  width: min(100%, 50rem);
+  width: min(100%, 52rem);
   margin: 0 auto;
   padding: 4rem 1.5rem;
   animation: fp-fade-in-up 600ms ease-out both;
 }
 
-/* Stepper Modernization */
+/* ─── Stepper ────────────────────────────────────────────────── */
+
+/*
+  La línea horizontal va del centro del círculo 1 al centro del círculo 4.
+  Con 4 items en grid de 4 columnas iguales, cada item ocupa 25%.
+  El centro del 1er item está al 12.5% → usamos ese valor como inset lateral.
+*/
 .fp-stepper {
   position: relative;
   margin-bottom: 2rem;
 }
 
-.fp-stepper__track,
+/* Fondo de la línea */
+.fp-stepper__track {
+  position: absolute;
+  top: 1.5rem; /* mitad de los 3rem de altura del círculo */
+  left: 12.5%;
+  right: 12.5%;
+  height: 4px;
+  transform: translateY(-50%);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--fp-outline-variant) 35%, transparent);
+}
+
+/* Línea de progreso — width se controla con style inline (% del padre .fp-stepper) */
 .fp-stepper__progress {
   position: absolute;
   top: 1.5rem;
-  left: 0;
+  left: 12.5%;
   height: 4px;
-  width: 100%;
   transform: translateY(-50%);
   border-radius: 999px;
-}
-
-.fp-stepper__track {
-  background: color-mix(in srgb, var(--fp-outline-variant) 30%, transparent);
-}
-
-.fp-stepper__progress {
   background: linear-gradient(90deg, var(--fp-primary), var(--fp-secondary));
-  transition: width 400ms cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 0 10px color-mix(in srgb, var(--fp-primary) 40%, transparent);
+  transition: width 400ms cubic-bezier(0.4, 0, 0.2, 1);
+  /* width se aplica desde inline style como porcentaje de .fp-stepper (padre).
+     Con el track que va del 12.5% al 87.5% (75% del ancho total),
+     la barra de progreso se calcula en onboarding-stepper.tsx como:
+     progressWidth = ((paso-1)/(total-1)) * 75% + "offset de inicio"
+     → simplificado: el componente TSX emite width relativo al contenedor. */
+  max-width: 75%; /* No puede ir más allá del track */
 }
 
+/* Grid de pasos */
 .fp-stepper__items {
   position: relative;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0.75rem;
+  z-index: 1;
 }
 
 .fp-stepper__item {
@@ -81,6 +99,7 @@
   gap: 0.75rem;
 }
 
+/* Círculo del paso */
 .fp-stepper__circle {
   display: inline-flex;
   align-items: center;
@@ -94,6 +113,7 @@
   font-weight: 700;
   transition: all 300ms ease;
   z-index: 2;
+  position: relative;
 }
 
 .fp-stepper__circle--done {
@@ -110,14 +130,18 @@
   transform: scale(1.1);
 }
 
+/* Etiqueta */
 .fp-stepper__label {
   text-align: center;
-  white-space: nowrap;
+  white-space: normal;
+  word-break: break-word;
   font-family: var(--fp-font-body);
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 600;
   color: var(--fp-on-surface-variant);
   transition: color 300ms ease;
+  max-width: 7rem;
+  line-height: 1.25;
 }
 
 .fp-stepper__label--active {
@@ -125,6 +149,7 @@
   font-weight: 700;
 }
 
+/* Label mobile */
 .fp-stepper__mobile {
   margin-top: 1.5rem;
   text-align: center;
@@ -133,10 +158,14 @@
   color: var(--fp-primary);
 }
 
+/* ─── Animaciones ────────────────────────────────────────────── */
+
 @keyframes fp-fade-in-up {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* ─── Responsive ─────────────────────────────────────────────── */
 
 @media (max-width: 768px) {
   .fp-onboarding-main {

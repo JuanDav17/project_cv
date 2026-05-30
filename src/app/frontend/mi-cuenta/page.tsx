@@ -4,24 +4,63 @@ import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 
 import { getProfile, updateProfile, type ProfileDto } from "@/lib/api/perfil";
+import { type InterestArea } from "@/lib/api/areas-interes";
 import { ApiError } from "@/lib/api/http";
 
 import { DashboardSidebar } from "../_components/dashboard-sidebar";
 import { FrontendFooter } from "../_components/footer";
+import { LucideIconByName } from "../_components/custom-interest-dialog";
 import { MaterialIcon } from "../_components/material-icon";
 import { MobileBrandHeader } from "../_components/mobile-brand-header";
 
 import "./page.css";
 
+/* ─── Helper: icono del área (Material o Lucide) ───────────── */
+
+function AreaIcon({ icon }: { icon: string }) {
+  // Mapa de corrección para íconos que no cargan bien en Material Icons
+  const iconFixMap: Record<string, string> = {
+    "terminal": "Terminal", // usa lucide
+    "code": "Code2", // usa lucide
+    "design_services": "palette", // material icon más seguro
+    "architecture": "domain", // material icon más seguro
+    "cloud_sync": "cloud", // material icon más seguro
+    "checklist": "list_alt" // material icon más seguro
+  };
+  
+  const mappedIcon = iconFixMap[icon] || icon;
+
+  const isLucide =
+    mappedIcon.charAt(0) === mappedIcon.charAt(0).toUpperCase() &&
+    mappedIcon.charAt(0) !== mappedIcon.charAt(0).toLowerCase() &&
+    !mappedIcon.includes("_");
+
+  if (isLucide) {
+    return <LucideIconByName name={mappedIcon} size={16} />;
+  }
+  return <MaterialIcon style={{ fontSize: "1rem" }}>{mappedIcon}</MaterialIcon>;
+}
+
+/* ─── Página ─────────────────────────────────────────────────── */
+
 export default function MiCuentaPage() {
   const [profile, setProfile] = useState<ProfileDto | null>(null);
+  const [interests, setInterests] = useState<InterestArea[]>([]);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
+  const [passwordError, setPasswordError] = useState("");
+  const [passwordSuccess, setPasswordSuccess] = useState("");
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+
   useEffect(() => {
     getProfile()
-      .then(setProfile)
+      .then((p) => {
+        setProfile(p);
+        setInterests(p.areas_interes || []);
+      })
       .catch(() => setError("No se pudo cargar tu perfil."));
   }, []);
 
@@ -53,6 +92,48 @@ export default function MiCuentaPage() {
     }
   };
 
+  const handleUpdatePassword = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setPasswordError("");
+    setPasswordSuccess("");
+    
+    const formData = new FormData(event.currentTarget);
+    const newPassword = String(formData.get("newPassword") ?? "");
+    const repeatPassword = String(formData.get("repeatPassword") ?? "");
+
+    if (newPassword !== repeatPassword) {
+      setPasswordError("Las contraseñas nuevas no coinciden.");
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      setPasswordError("La contraseña debe tener al menos 8 caracteres.");
+      return;
+    }
+
+    setIsUpdatingPassword(true);
+    try {
+      const res = await fetch("/api/auth/password", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: newPassword }),
+      });
+      
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || "No se pudo actualizar la contraseña");
+      }
+      
+      setPasswordSuccess("Contraseña actualizada exitosamente.");
+      setTimeout(() => setShowPasswordModal(false), 2000); // Close after 2s
+      event.currentTarget.reset();
+    } catch (err: any) {
+      setPasswordError(err.message);
+    } finally {
+      setIsUpdatingPassword(false);
+    }
+  };
+
   const displayName = profile?.nombre_completo ?? "Usuario";
 
   return (
@@ -76,6 +157,11 @@ export default function MiCuentaPage() {
                   <p className="fp-label-md" style={{ margin: 0, color: "var(--fp-on-surface)" }}>
                     {displayName}
                   </p>
+                  {profile?.titulo_profesional && (
+                    <p className="fp-body-sm fp-muted" style={{ margin: 0, fontSize: "0.75rem" }}>
+                      {profile.titulo_profesional}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
@@ -99,167 +185,278 @@ export default function MiCuentaPage() {
         <div className="fp-shell-content fp-stack-xl">
           <header className="fp-section-intro fp-stack-sm">
             <h1 className="fp-headline-lg" style={{ margin: 0 }}>
-              Configuracion de la Cuenta
+              Configuración de la Cuenta
             </h1>
             <p className="fp-body-md fp-muted" style={{ margin: 0 }}>
               Gestiona tu perfil y preferencias de seguridad.
             </p>
           </header>
 
-          <section className="fp-settings-grid">
-            <article className="fp-card fp-card--panel fp-stack-lg">
-              <div className="fp-stack-sm">
-                <h2 className="fp-headline-md" style={{ margin: 0, display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                  <MaterialIcon style={{ color: "var(--fp-primary)" }}>person</MaterialIcon>
-                  Informacion Personal
-                </h2>
-                <p className="fp-body-sm fp-muted" style={{ margin: 0 }}>
-                  Actualiza tus datos basicos de perfil.
-                </p>
-              </div>
+          {/* ── Layout: 3 secciones ── */}
+          <div className="fp-settings-layout">
 
-              <div className="fp-divider" />
+            {/* Fila superior: Información Personal + Seguridad */}
+            <div className="fp-settings-top-row">
 
-              <form key={profile?.id_usuario ?? "loading"} className="fp-stack-lg" onSubmit={handleSubmit}>
-                <div className="fp-grid-two">
-                  <div className="fp-field">
-                    <label className="fp-field__label fp-label-md" htmlFor="first-name">
-                      Nombres
-                    </label>
-                    <input
-                      id="first-name"
-                      name="nombres"
-                      className="fp-input"
-                      defaultValue={profile?.nombres ?? ""}
-                      type="text"
-                      required
-                    />
-                  </div>
-                  <div className="fp-field">
-                    <label className="fp-field__label fp-label-md" htmlFor="last-name">
-                      Apellidos
-                    </label>
-                    <input
-                      id="last-name"
-                      name="apellidos"
-                      className="fp-input"
-                      defaultValue={profile?.apellidos ?? ""}
-                      type="text"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="fp-field">
-                  <label className="fp-field__label fp-label-md" htmlFor="account-email">
-                    Direccion de Correo Electronico
-                  </label>
-                  <input
-                    id="account-email"
-                    className="fp-input"
-                    defaultValue={profile?.correo ?? ""}
-                    type="email"
-                    readOnly
-                  />
+              {/* Tarjeta: Información Personal */}
+              <article className="fp-card fp-card--panel fp-stack-lg fp-settings-personal">
+                <div className="fp-stack-sm">
+                  <h2 className="fp-headline-md" style={{ margin: 0, display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                    <MaterialIcon style={{ color: "var(--fp-primary)" }}>person</MaterialIcon>
+                    Información Personal
+                  </h2>
                   <p className="fp-body-sm fp-muted" style={{ margin: 0 }}>
-                    Este correo viene de Supabase Auth.
+                    Actualiza tus datos básicos de perfil.
                   </p>
                 </div>
 
-                <div className="fp-field">
-                  <label className="fp-field__label fp-label-md" htmlFor="title">
-                    Titulo Profesional
-                  </label>
-                  <input
-                    id="title"
-                    name="titulo_profesional"
-                    className="fp-input"
-                    defaultValue={profile?.titulo_profesional ?? ""}
-                    placeholder="Ej. Ingeniero de Software"
-                    type="text"
-                  />
+                <div className="fp-divider" />
+
+                <form key={profile?.id_usuario ?? "loading"} className="fp-stack-lg" onSubmit={handleSubmit}>
+                  <div className="fp-grid-two">
+                    <div className="fp-field">
+                      <label className="fp-field__label fp-label-md" htmlFor="first-name">
+                        Nombres
+                      </label>
+                      <input
+                        id="first-name"
+                        name="nombres"
+                        className="fp-input"
+                        defaultValue={profile?.nombres ?? ""}
+                        type="text"
+                        required
+                      />
+                    </div>
+                    <div className="fp-field">
+                      <label className="fp-field__label fp-label-md" htmlFor="last-name">
+                        Apellidos
+                      </label>
+                      <input
+                        id="last-name"
+                        name="apellidos"
+                        className="fp-input"
+                        defaultValue={profile?.apellidos ?? ""}
+                        type="text"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="fp-field">
+                    <label className="fp-field__label fp-label-md" htmlFor="account-email">
+                      Dirección de Correo Electrónico
+                    </label>
+                    <input
+                      id="account-email"
+                      className="fp-input"
+                      defaultValue={profile?.correo ?? ""}
+                      type="email"
+                      readOnly
+                    />
+                    <p className="fp-body-sm fp-muted" style={{ margin: 0 }}>
+                    </p>
+                  </div>
+
+                  <div className="fp-field">
+                    <label className="fp-field__label fp-label-md" htmlFor="title">
+                      Título Profesional
+                    </label>
+                    <input
+                      id="title"
+                      name="titulo_profesional"
+                      className="fp-input"
+                      defaultValue={profile?.titulo_profesional ?? ""}
+                      placeholder="Ej. Ingeniero de Software"
+                      type="text"
+                    />
+                    <p className="fp-body-sm fp-muted" style={{ margin: 0 }}>
+                      ¿Quieres actualizar tu titulo?{" "}
+                      <Link href="/frontend/informacion-academica" className="fp-link">
+                        ¡Hazlo aqui!
+                      </Link>
+                    </p>
+                  </div>
+
+                  {error && (
+                    <div className="fp-alert fp-alert--error">
+                      <MaterialIcon>error_outline</MaterialIcon>
+                      <p className="fp-body-sm" style={{ margin: 0 }}>{error}</p>
+                    </div>
+                  )}
+
+                  {success && (
+                    <div className="fp-alert fp-alert--success">
+                      <MaterialIcon>check_circle_outline</MaterialIcon>
+                      <p className="fp-body-sm" style={{ margin: 0 }}>{success}</p>
+                    </div>
+                  )}
+
+                  <div className="fp-divider" />
+
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1rem" }}>
+                    <button type="button" className="fp-button fp-button--ghost" onClick={() => { setPasswordError(""); setPasswordSuccess(""); setShowPasswordModal(true); }}>
+                      <MaterialIcon>lock</MaterialIcon>
+                      Actualizar contraseña
+                    </button>
+                    <button className="fp-button fp-button--primary" type="submit" disabled={isSaving}>
+                      {isSaving ? "Guardando..." : "Guardar Cambios"}
+                    </button>
+                  </div>
+                </form>
+              </article>
+
+              {/* Tarjeta: Áreas de Interés (ahora en la fila superior) */}
+              <article className="fp-card fp-card--panel fp-stack-lg fp-settings-interests">
+                <div className="fp-settings-interests__header">
+                  <div className="fp-stack-sm">
+                    <h2 className="fp-headline-md" style={{ margin: 0, display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                      <MaterialIcon style={{ color: "var(--fp-primary)" }}>interests</MaterialIcon>
+                      Áreas de Interés
+                    </h2>
+                    <p className="fp-body-sm fp-muted" style={{ margin: 0 }}>
+                      Las áreas profesionales que definen tu perfil en MyCertify.
+                    </p>
+                  </div>
+                  <Link href="/frontend/areas-interes" className="fp-button fp-button--ghost">
+                    <MaterialIcon>edit</MaterialIcon>
+                    Editar
+                  </Link>
                 </div>
-
-                {error && (
-                  <div className="fp-alert fp-alert--error">
-                    <MaterialIcon>error_outline</MaterialIcon>
-                    <p className="fp-body-sm" style={{ margin: 0 }}>
-                      {error}
-                    </p>
-                  </div>
-                )}
-
-                {success && (
-                  <div className="fp-alert fp-alert--success">
-                    <MaterialIcon>check_circle_outline</MaterialIcon>
-                    <p className="fp-body-sm" style={{ margin: 0 }}>
-                      {success}
-                    </p>
-                  </div>
-                )}
 
                 <div className="fp-divider" />
 
-                <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                  <button className="fp-button fp-button--primary" type="submit" disabled={isSaving}>
-                    {isSaving ? "Guardando..." : "Guardar Cambios"}
-                  </button>
-                </div>
-              </form>
-            </article>
-
-            <div className="fp-settings-column">
-              <article className="fp-card fp-card--panel fp-stack-md">
-                <h2 className="fp-headline-md" style={{ margin: 0, display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                  <MaterialIcon style={{ color: "var(--fp-primary)" }}>lock</MaterialIcon>
-                  Seguridad
-                </h2>
-
-                <div className="fp-divider" />
-
-                <div className="fp-stack-md">
-                  <div className="fp-field">
-                    <label className="fp-field__label fp-label-md" htmlFor="current-password">
-                      Contrasena Actual
-                    </label>
-                    <input id="current-password" className="fp-input" placeholder="********" type="password" />
+                {interests.length === 0 ? (
+                  <div className="fp-settings-interests__empty">
+                    <MaterialIcon style={{ fontSize: "2.5rem", color: "var(--fp-outline)" }}>interests</MaterialIcon>
+                    <p className="fp-body-md fp-muted" style={{ margin: 0, textAlign: "center" }}>
+                      Aún no has seleccionado áreas de interés.
+                    </p>
+                    <Link href="/frontend/areas-interes" className="fp-button fp-button--soft">
+                      <MaterialIcon>add</MaterialIcon>
+                      Completar perfil
+                    </Link>
                   </div>
-
-                  <div className="fp-field">
-                    <label className="fp-field__label fp-label-md" htmlFor="new-password">
-                      Nueva Contrasena
-                    </label>
-                    <input
-                      id="new-password"
-                      className="fp-input"
-                      placeholder="Nueva contrasena segura"
-                      type="password"
-                    />
+                ) : (
+                  <div className="fp-interests-display">
+                    {interests.map((area) => (
+                      <div key={area.id} className="fp-interest-tag">
+                        <span className="fp-interest-tag__icon">
+                          <AreaIcon icon={area.icon} />
+                        </span>
+                        <span className="fp-interest-tag__label">{area.label}</span>
+                        {area.custom && (
+                          <span className="fp-interest-tag__badge">Personalizada</span>
+                        )}
+                      </div>
+                    ))}
                   </div>
-
-                  <div className="fp-field">
-                    <label className="fp-field__label fp-label-md" htmlFor="repeat-new-password">
-                      Repetir Nueva Contrasena
-                    </label>
-                    <input
-                      id="repeat-new-password"
-                      className="fp-input"
-                      placeholder="Repetir nueva contrasena segura"
-                      type="password"
-                    />
-                  </div>
-
-                  <button className="fp-button fp-button--secondary fp-button--full" type="button">
-                    Actualizar Contraseña
-                  </button>
-                </div>
+                )}
               </article>
             </div>
-          </section>
+          </div>
         </div>
 
         <FrontendFooter />
       </main>
+
+      {/* Modal de Actualizar Contraseña */}
+      {showPasswordModal && (
+        <div style={{
+          position: "fixed",
+          top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: "rgba(0, 0, 0, 0.5)",
+          zIndex: 9999,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "1rem",
+          backdropFilter: "blur(4px)"
+        }}>
+          <article className="fp-card fp-card--panel fp-stack-md" style={{ width: "100%", maxWidth: "440px" }}>
+            <h2 className="fp-headline-md" style={{ margin: 0, display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              <MaterialIcon style={{ color: "var(--fp-primary)" }}>lock</MaterialIcon>
+              Actualizar Contraseña
+            </h2>
+
+            <div className="fp-divider" />
+
+            <form className="fp-stack-md" onSubmit={handleUpdatePassword}>
+              <div className="fp-field">
+                <label className="fp-field__label fp-label-md" htmlFor="current-password">
+                  Contraseña Actual
+                </label>
+                <input 
+                  id="current-password" 
+                  name="currentPassword"
+                  className="fp-input" 
+                  placeholder="••••••••" 
+                  type="password" 
+                  required
+                />
+              </div>
+
+              <div className="fp-field">
+                <label className="fp-field__label fp-label-md" htmlFor="new-password">
+                  Nueva Contraseña
+                </label>
+                <input
+                  id="new-password"
+                  name="newPassword"
+                  className="fp-input"
+                  placeholder="Nueva contraseña segura"
+                  type="password"
+                  required
+                />
+              </div>
+
+              <div className="fp-field">
+                <label className="fp-field__label fp-label-md" htmlFor="repeat-new-password">
+                  Repetir Nueva Contraseña
+                </label>
+                <input
+                  id="repeat-new-password"
+                  name="repeatPassword"
+                  className="fp-input"
+                  placeholder="Repetir nueva contraseña"
+                  type="password"
+                  required
+                />
+              </div>
+
+              {passwordError && (
+                <div className="fp-alert fp-alert--error">
+                  <MaterialIcon>error_outline</MaterialIcon>
+                  <p className="fp-body-sm" style={{ margin: 0 }}>{passwordError}</p>
+                </div>
+              )}
+
+              {passwordSuccess && (
+                <div className="fp-alert fp-alert--success">
+                  <MaterialIcon>check_circle_outline</MaterialIcon>
+                  <p className="fp-body-sm" style={{ margin: 0 }}>{passwordSuccess}</p>
+                </div>
+              )}
+
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: "1rem", marginTop: "1rem" }}>
+                <button 
+                  type="button" 
+                  className="fp-button fp-button--ghost" 
+                  onClick={() => setShowPasswordModal(false)}
+                >
+                  Cancelar
+                </button>
+                <button 
+                  className="fp-button fp-button--primary" 
+                  type="submit" 
+                  disabled={isUpdatingPassword}
+                >
+                  {isUpdatingPassword ? "Actualizando..." : "Actualizar contraseña"}
+                </button>
+              </div>
+            </form>
+          </article>
+        </div>
+      )}
     </section>
   );
 }

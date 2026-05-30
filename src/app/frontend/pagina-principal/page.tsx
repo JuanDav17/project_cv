@@ -73,6 +73,11 @@ export default function PaginaPrincipalPage() {
                   <p className="fp-label-md" style={{ margin: 0, color: "var(--fp-on-surface)" }}>
                     {profile?.nombre_completo ?? "Usuario"}
                   </p>
+                  {profile?.titulo_profesional && (
+                    <p className="fp-body-sm fp-muted" style={{ margin: 0, fontSize: "0.75rem" }}>
+                      {profile.titulo_profesional}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>

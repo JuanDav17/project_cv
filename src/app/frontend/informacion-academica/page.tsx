@@ -1,5 +1,9 @@
+"use client";
+
+import { useRef, useState, useEffect } from "react";
 import Link from "next/link";
 
+import { getProfile, updateProfile, type ProfileDto } from "@/lib/api/perfil";
 import { FlowForm } from "../_components/flow-form";
 import { FrontendFooter } from "../_components/footer";
 import { MaterialIcon } from "../_components/material-icon";
@@ -9,6 +13,47 @@ import { ThemeToggle } from "../_components/theme-toggle";
 import "./page.css";
 
 export default function InformacionAcademicaPage() {
+  const careerInputRef = useRef<HTMLInputElement>(null);
+  const educationRef = useRef<HTMLSelectElement>(null);
+  const programRef = useRef<HTMLSelectElement>(null);
+
+  const [error, setError] = useState("");
+  const [defaultCareer, setDefaultCareer] = useState("");
+  const [currentProfile, setCurrentProfile] = useState<ProfileDto | null>(null);
+
+  // Pre-popular el título con el valor guardado en el perfil
+  useEffect(() => {
+    getProfile()
+      .then((profile) => {
+        setCurrentProfile(profile);
+        if (profile.titulo_profesional) {
+          setDefaultCareer(profile.titulo_profesional);
+        }
+      })
+      .catch(() => {
+        // Sin sesión o error: no pre-populamos, silencioso
+      });
+  }, []);
+
+  const handleBeforeSubmit = async () => {
+    const titulo = careerInputRef.current?.value?.trim() ?? "";
+    if (!titulo) return; // Si no llenó, no guardamos (el campo no es obligatorio aquí)
+
+    setError("");
+    try {
+      if (currentProfile) {
+        await updateProfile({
+          nombres: currentProfile.nombres,
+          apellidos: currentProfile.apellidos,
+          titulo_profesional: titulo,
+        });
+      }
+    } catch {
+      setError("No se pudo guardar el título profesional. Intenta de nuevo.");
+      throw new Error("save failed");
+    }
+  };
+
   return (
     <section className="fp-page fp-page--onboarding">
       <header className="fp-onboarding-topbar">
@@ -45,13 +90,17 @@ export default function InformacionAcademicaPage() {
           </h2>
           <div className="fp-divider" />
 
-          <FlowForm className="fp-stack-xl" nextHref="/frontend/areas-interes">
+          <FlowForm
+            className="fp-stack-xl"
+            nextHref="/frontend/areas-interes"
+            onBeforeSubmit={handleBeforeSubmit}
+          >
             <div className="fp-field">
               <label className="fp-field__label fp-label-md" htmlFor="education-level">
                 Nivel de Formación
               </label>
               <div className="fp-select-wrap">
-                <select id="education-level" className="fp-select" defaultValue="">
+                <select id="education-level" ref={educationRef} className="fp-select" defaultValue="">
                   <option disabled value="">
                     Selecciona tu nivel más alto alcanzado
                   </option>
@@ -75,13 +124,14 @@ export default function InformacionAcademicaPage() {
                 Programas
               </label>
               <div className="fp-select-wrap">
-                <select id="program-type" className="fp-select" defaultValue="">
+                <select id="program-type" ref={programRef} className="fp-select" defaultValue="">
                   <option disabled value="">
-                    Selecciona un tipo de programa
+                    Selecciona un tipo de programa extra que hayas realizado
                   </option>
                   <option>Diplomado</option>
                   <option>Bootcamp</option>
                   <option>Otros</option>
+                  <option>Ninguno</option>
                 </select>
                 <span className="fp-select-wrap__icon">
                   <MaterialIcon>expand_more</MaterialIcon>
@@ -95,19 +145,31 @@ export default function InformacionAcademicaPage() {
               </label>
               <div className="fp-input-wrap">
                 <span className="fp-input-icon">
-                  <MaterialIcon>search</MaterialIcon>
+                  <MaterialIcon>school</MaterialIcon>
                 </span>
                 <input
                   id="career"
+                  ref={careerInputRef}
                   className="fp-input"
                   placeholder="Ej. Ingeniería de Software, Diseño Gráfico..."
                   type="text"
+                  defaultValue={defaultCareer}
+                  key={defaultCareer} // Fuerza re-render cuando el valor cambia
                 />
               </div>
               <p className="fp-body-sm fp-muted" style={{ margin: 0 }}>
-                Comienza a escribir para ver sugerencias.
+                Este título aparecerá en tu perfil público como "Título Profesional".
               </p>
             </div>
+
+            {error && (
+              <div className="fp-alert fp-alert--error">
+                <MaterialIcon>error_outline</MaterialIcon>
+                <p className="fp-body-sm" style={{ margin: 0 }}>
+                  {error}
+                </p>
+              </div>
+            )}
 
             <div className="fp-divider" />
 

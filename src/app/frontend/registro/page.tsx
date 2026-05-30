@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 
 import { register } from "@/lib/api/auth";
 import { ApiError } from "@/lib/api/http";
+import { Eye, EyeOff } from "lucide-react";
 
 import { MaterialIcon } from "../_components/material-icon";
 import { ThemeToggle } from "../_components/theme-toggle";
@@ -17,6 +18,7 @@ export default function RegistroPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -171,10 +173,30 @@ export default function RegistroPage() {
                     name="password"
                     className="fp-input"
                     placeholder="********"
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     minLength={8}
                     required
+                    style={{ paddingRight: "3rem" }}
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    style={{
+                      position: "absolute",
+                      right: "1rem",
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      color: "var(--fp-muted)",
+                      display: "flex",
+                      padding: 0
+                    }}
+                    aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                  >
+                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
                 </div>
               </div>
 

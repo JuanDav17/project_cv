@@ -1,15 +1,25 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
 
+import { getProfile, updateProfile, type ProfileDto } from "@/lib/api/perfil";
+import { type InterestArea } from "@/lib/api/areas-interes";
+
+import { CustomInterestDialog } from "../_components/custom-interest-dialog";
 import { FrontendFooter } from "../_components/footer";
 import { FlowForm } from "../_components/flow-form";
-import { InterestGrid } from "../_components/interest-grid";
+import { InterestGrid, type InterestItem } from "../_components/interest-grid";
 import { MaterialIcon } from "../_components/material-icon";
 import { OnboardingStepper } from "../_components/onboarding-stepper";
+import { ThemeToggle } from "../_components/theme-toggle";
 
-import "../informacion-academica/page.css"; // Shared onboarding styles
+import "../informacion-academica/page.css";
 import "./page.css";
 
-const interests = [
+/* ─── Áreas predefinidas ─────────────────────────────────────── */
+
+const PREDEFINED_INTERESTS: InterestItem[] = [
   { id: "frontend", label: "Frontend", icon: "code" },
   { id: "backend", label: "Backend", icon: "terminal" },
   { id: "pentester", label: "Pentester", icon: "bug_report" },
@@ -25,65 +35,219 @@ const interests = [
   { id: "otros", label: "Otros", icon: "more_horiz" },
 ];
 
+const MIN_SELECTIONS = 3;
+
+/* ─── Página ─────────────────────────────────────────────────── */
+
 export default function AreasInteresPage() {
+  const [allInterests, setAllInterests] = useState<InterestItem[]>(PREDEFINED_INTERESTS);
+  const [selectedItems, setSelectedItems] = useState<InterestItem[]>([]);
+  const [showDialog, setShowDialog] = useState(false);
+  const [validationError, setValidationError] = useState(false);
+
+  const [currentProfile, setCurrentProfile] = useState<ProfileDto | null>(null);
+
+  // Cargar selecciones previas desde el perfil del usuario (DB)
+  useEffect(() => {
+    getProfile()
+      .then((profile) => {
+        setCurrentProfile(profile);
+        const saved = profile.areas_interes || [];
+        if (saved.length === 0) return;
+
+    // Re-construir lista: predefinidas + las personalizadas guardadas
+    const customSaved = saved.filter((a) => a.custom);
+    const customAsItems: InterestItem[] = customSaved.map((a) => ({
+      id: a.id,
+      label: a.label,
+      icon: a.icon,
+      custom: true,
+    }));
+
+    // Insertar las personalizadas antes de "Otros"
+    const withCustom = [
+      ...PREDEFINED_INTERESTS.filter((i) => i.id !== "otros"),
+      ...customAsItems,
+      PREDEFINED_INTERESTS.find((i) => i.id === "otros")!,
+    ];
+    setAllInterests(withCustom);
+
+    // Restaurar seleccionadas
+    const savedIds = new Set(saved.map((a) => a.id));
+    const restored = withCustom.filter((i) => savedIds.has(i.id) && i.id !== "otros");
+    setSelectedItems(restored);
+      })
+      .catch(() => {
+        // Ignorar si falla la carga del perfil
+      });
+  }, []);
+
+  const selectedIds = selectedItems.map((i) => i.id);
+  const selectionCount = selectedItems.length;
+  const canContinue = selectionCount >= MIN_SELECTIONS;
+
+  const handleSelectionChange = (items: InterestItem[]) => {
+    setSelectedItems(items);
+    if (items.length >= MIN_SELECTIONS) {
+      setValidationError(false);
+    }
+  };
+
+  const handleAddCustom = (area: InterestArea) => {
+    const newItem: InterestItem = {
+      id: area.id,
+      label: area.label,
+      icon: area.icon,
+      custom: true,
+    };
+
+    // Añadir antes del chip "Otros"
+    setAllInterests((prev) => {
+      const othersIndex = prev.findIndex((i) => i.id === "otros");
+      const copy = [...prev];
+      copy.splice(othersIndex, 0, newItem);
+      return copy;
+    });
+
+    // Auto-seleccionar la nueva área
+    setSelectedItems((prev) => [...prev, newItem]);
+    if (selectionCount + 1 >= MIN_SELECTIONS) {
+      setValidationError(false);
+    }
+  };
+
+  const handleBeforeSubmit = async () => {
+    if (!canContinue) {
+      setValidationError(true);
+      throw new Error("not enough selections");
+    }
+
+    // Persistir en la base de datos a través de updateProfile
+    const toSave: InterestArea[] = selectedItems.map((item) => ({
+      id: item.id,
+      label: item.label,
+      icon: item.icon,
+      custom: item.custom,
+    }));
+    
+    if (currentProfile) {
+      await updateProfile({
+        nombres: currentProfile.nombres,
+        apellidos: currentProfile.apellidos,
+        areas_interes: toSave,
+      });
+    }
+  };
+
   return (
     <section className="fp-page fp-page--onboarding">
       <header className="fp-onboarding-topbar">
         <div className="fp-onboarding-topbar__inner">
           <div className="fp-brand" style={{ fontSize: "1.5rem" }}>
             <span className="fp-brand__icon fp-brand__icon--round">
-              <MaterialIcon filled>verified</MaterialIcon>
+              <MaterialIcon filled>workspace_premium</MaterialIcon>
             </span>
             <span>MyCertify</span>
           </div>
-
-          <Link className="fp-button fp-button--ghost fp-label-md" href="/frontend">
-            Volver al inicio
-          </Link>
+          <ThemeToggle />
         </div>
       </header>
 
-      <main
-        className="fp-onboarding-main"
-        style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
-      >
-        <article className="fp-card fp-onboarding-card fp-stack-xl" style={{ width: "100%", maxWidth: "60rem" }}>
-          <div className="fp-onboarding-card__glow" />
+      <main className="fp-onboarding-main fp-stack-xl">
+        <div className="fp-stack-sm" style={{ textAlign: "center" }}>
+          <h1 className="fp-headline-lg" style={{ margin: 0 }}>
+            Completar Perfil Profesional
+          </h1>
+          <p className="fp-body-md fp-muted" style={{ margin: 0 }}>
+            Configura tu perfil para destacar en la plataforma.
+          </p>
+        </div>
 
-          <OnboardingStepper
-            currentStep={3}
-            labels={["Cuenta", "Perfil", "Carrera y Áreas", "Plan"]}
-            mobileLabel="Paso 3: Carrera y Áreas"
-          />
+        <OnboardingStepper
+          currentStep={3}
+          labels={["Cuenta", "Nivel Educativo", "Carrera y Áreas", "Finalizar"]}
+          mobileLabel="Paso 3: Carrera y Áreas"
+        />
 
-          <header className="fp-stack-sm">
-            <h1 className="fp-headline-lg" style={{ margin: 0 }}>
-              Áreas de Interés
-            </h1>
-            <p className="fp-body-lg fp-muted" style={{ margin: 0, maxWidth: "42rem" }}>
-              Selecciona las áreas que definen tu perfil profesional. Puedes elegir varias
-              opciones para personalizar tus recomendaciones de cursos.
-            </p>
-          </header>
+        <article className="fp-card fp-card--panel fp-stack-lg">
+          <div className="fp-areas-header">
+            <div className="fp-stack-sm">
+              <h2 className="fp-headline-md" style={{ margin: 0 }}>
+                Áreas de Interés
+              </h2>
+              <p className="fp-body-md fp-muted" style={{ margin: 0 }}>
+                Selecciona las áreas que definen tu perfil profesional. Puedes elegir varias
+                opciones o crear las tuyas propias.
+              </p>
+            </div>
+            {/* Contador */}
+            <div className={["fp-areas-counter", selectionCount >= MIN_SELECTIONS ? "fp-areas-counter--ok" : ""].filter(Boolean).join(" ")}>
+              <span className="fp-areas-counter__num">{selectionCount}</span>
+              <span className="fp-areas-counter__label">/ {MIN_SELECTIONS} mín.</span>
+            </div>
+          </div>
 
-          <FlowForm className="fp-stack-xl" nextHref="/frontend/pagina-principal">
-            <InterestGrid interests={interests} />
+          <div className="fp-divider" />
+
+          <FlowForm
+            className="fp-stack-xl"
+            nextHref="/frontend/pagina-principal"
+            onBeforeSubmit={handleBeforeSubmit}
+          >
+            <InterestGrid
+              interests={allInterests}
+              selectedIds={selectedIds}
+              onSelectionChange={handleSelectionChange}
+              onOthersClick={() => setShowDialog(true)}
+            />
+
+            {/* Mensaje de validación */}
+            {validationError && (
+              <div className="fp-alert fp-alert--warning fp-areas-validation">
+                <MaterialIcon>warning</MaterialIcon>
+                <p className="fp-body-sm" style={{ margin: 0 }}>
+                  Debes seleccionar o crear al menos <strong>{MIN_SELECTIONS} áreas de interés</strong> para continuar.
+                </p>
+              </div>
+            )}
 
             <div className="fp-divider" />
 
             <div className="fp-row-between" style={{ flexWrap: "wrap" }}>
               <Link className="fp-button fp-button--ghost" href="/frontend/informacion-academica">
+                <MaterialIcon>arrow_back</MaterialIcon>
                 Atrás
               </Link>
-              <button className="fp-button fp-button--primary" type="submit">
-                Continuar
-              </button>
+              <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+                {!canContinue && (
+                  <span className="fp-body-sm fp-muted">
+                    Faltan {MIN_SELECTIONS - selectionCount} área{MIN_SELECTIONS - selectionCount !== 1 ? "s" : ""}
+                  </span>
+                )}
+                <button
+                  className="fp-button fp-button--primary"
+                  type="submit"
+                  disabled={!canContinue}
+                  style={{ opacity: canContinue ? 1 : 0.5 }}
+                >
+                  Continuar
+                  <MaterialIcon>arrow_forward</MaterialIcon>
+                </button>
+              </div>
             </div>
           </FlowForm>
         </article>
       </main>
 
       <FrontendFooter />
+
+      {/* Dialog de área personalizada */}
+      {showDialog && (
+        <CustomInterestDialog
+          onAdd={handleAddCustom}
+          onClose={() => setShowDialog(false)}
+        />
+      )}
     </section>
   );
 }

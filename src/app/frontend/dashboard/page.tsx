@@ -15,7 +15,7 @@ import {
 } from "chart.js";
 import { Bar, Doughnut, PolarArea } from "react-chartjs-2";
 
-import { me } from "@/lib/api/auth";
+import { me, type AuthProfile } from "@/lib/api/auth";
 import {
   listCertificates,
   type CertificateDto,
@@ -45,6 +45,7 @@ interface CertificateExtended extends CertificateDto {
 
 export default function DashboardPage() {
   const [certificates, setCertificates] = useState<CertificateExtended[]>([]);
+  const [profile, setProfile] = useState<AuthProfile | null>(null);
   const [userName, setUserName] = useState("Usuario");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
@@ -54,9 +55,10 @@ export default function DashboardPage() {
 
     async function loadData() {
       try {
-        const profile = await me();
+        const profileData = await me();
         if (!isMounted) return;
-        setUserName(profile.nombres || "Usuario");
+        setProfile(profileData);
+        setUserName(profileData.nombres || "Usuario");
 
         const data = await listCertificates();
         if (!isMounted) return;
@@ -195,9 +197,13 @@ export default function DashboardPage() {
                 </div>
                 <div className="fp-stack-xs">
                   <p className="fp-label-md" style={{ margin: 0, color: "var(--fp-on-surface)" }}>
-                    {userName}
+                    {profile?.nombre_completo ?? "Usuario"}
                   </p>
-                  <span className="fp-label-sm fp-muted">Estudiante</span>
+                  {profile?.titulo_profesional && (
+                    <p className="fp-body-sm fp-muted" style={{ margin: 0, fontSize: "0.75rem" }}>
+                      {profile.titulo_profesional}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>

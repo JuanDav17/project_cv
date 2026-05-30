@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import QRCode from "qrcode";
 
-import { getProfile } from "@/lib/api/perfil";
+import { getProfile, type ProfileDto } from "@/lib/api/perfil";
 
 import { DashboardSidebar } from "../_components/dashboard-sidebar";
 import { FrontendFooter } from "../_components/footer";
@@ -14,6 +14,7 @@ import { MobileBrandHeader } from "../_components/mobile-brand-header";
 import "./page.css";
 
 export default function CodigoQrPage() {
+  const [profile, setProfile] = useState<ProfileDto | null>(null);
   const [userName, setUserName] = useState("Usuario");
   const [publicUrl, setPublicUrl] = useState("");
   const [qrDataUrl, setQrDataUrl] = useState("");
@@ -22,10 +23,11 @@ export default function CodigoQrPage() {
     let isMounted = true;
 
     getProfile()
-      .then((profile) => {
+      .then((profileData) => {
         if (!isMounted) return;
-        const nextPublicUrl = `${window.location.origin}/u/${profile.slug_publico}`;
-        setUserName(profile.nombre_completo || "Usuario");
+        setProfile(profileData);
+        const nextPublicUrl = `${window.location.origin}/u/${profileData.slug_publico}`;
+        setUserName(profileData.nombre_completo || "Usuario");
         setPublicUrl(nextPublicUrl);
         return QRCode.toDataURL(nextPublicUrl, {
           width: 256,
@@ -79,6 +81,11 @@ export default function CodigoQrPage() {
                   <p className="fp-label-md" style={{ margin: 0, color: "var(--fp-on-surface)" }}>
                     {userName}
                   </p>
+                  {profile?.titulo_profesional && (
+                    <p className="fp-body-sm fp-muted" style={{ margin: 0, fontSize: "0.75rem" }}>
+                      {profile.titulo_profesional}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>

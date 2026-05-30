@@ -18,6 +18,7 @@ export type ProfileDto = {
   url_github: string | null;
   url_portafolio: string | null;
   avatar_url: string | null;
+  areas_interes: Array<{ id: string; label: string; icon: string; custom?: boolean }> | null;
 };
 
 type ProfileRecord = Omit<ProfileDto, "correo" | "nombre_completo">;
@@ -51,6 +52,7 @@ export async function getCurrentProfile(): Promise<ProfileDto> {
         "url_github",
         "url_portafolio",
         "avatar_url",
+        "areas_interes",
       ].join(","),
     )
     .eq("id_usuario", user.id)
@@ -100,6 +102,7 @@ export async function updateCurrentProfile(input: Record<string, unknown>) {
     url_portafolio:
       typeof input.url_portafolio === "string" ? input.url_portafolio : null,
     avatar_url: typeof input.avatar_url === "string" ? input.avatar_url : null,
+    areas_interes: Array.isArray(input.areas_interes) ? input.areas_interes : undefined,
     fecha_actualizacion: new Date().toISOString(),
   };
 

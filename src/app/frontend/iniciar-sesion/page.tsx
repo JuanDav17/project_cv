@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 
 import { login } from "@/lib/api/auth";
 import { ApiError } from "@/lib/api/http";
+import { Eye, EyeOff } from "lucide-react";
 
 import { MaterialIcon } from "../_components/material-icon";
 import { ThemeToggle } from "../_components/theme-toggle";
@@ -16,6 +17,7 @@ export default function IniciarSesionPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -130,13 +132,13 @@ export default function IniciarSesionPage() {
                     className="fp-field__label fp-label-md"
                     htmlFor="login-password"
                   >
-                    Contrasena
+                    Contraseña
                   </label>
                   <Link
                     className="fp-link fp-link--strong fp-label-md"
                     href="/frontend/recuperar-contrasena"
                   >
-                    Olvidaste tu contrasena?
+                    ¿Olvidaste tu contraseña?
                   </Link>
                 </div>
                 <div className="fp-input-wrap">
@@ -147,10 +149,30 @@ export default function IniciarSesionPage() {
                     id="login-password"
                     name="password"
                     className="fp-input"
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     placeholder="********"
                     required
+                    style={{ paddingRight: "3rem" }}
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    style={{
+                      position: "absolute",
+                      right: "1rem",
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      color: "var(--fp-muted)",
+                      display: "flex",
+                      padding: 0
+                    }}
+                    aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                  >
+                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
                 </div>
               </div>
 

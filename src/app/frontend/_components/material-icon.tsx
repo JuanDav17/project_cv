@@ -67,6 +67,9 @@ import {
   Tags,
   ScanQrCode,
   Shield,
+  Plus,
+  Edit2,
+  Compass,
 } from "lucide-react";
 
 type MaterialIconProps = {
@@ -151,6 +154,9 @@ const iconMap: Record<string, React.ElementType> = {
   warning: AlertTriangle,
   workspace_premium: Award,
   dark_mode: Moon,
+  add: Plus,
+  edit: Edit2,
+  interests: Compass,
 };
 
 export function MaterialIcon({
