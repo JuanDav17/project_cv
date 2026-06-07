@@ -1,118 +1,116 @@
-# MyCertify
+# 🎓 MyCertify (project_cv)
 
-MyCertify es una aplicacion web para registrar, organizar y compartir
-certificados profesionales. Cada usuario puede crear su perfil, subir
-certificados en PDF, generar un codigo QR publico y mostrar solo los
-certificados marcados como publicos.
+<div align="center">
+  <p><strong>Plataforma integral para registrar, organizar y compartir certificados profesionales con verificación mediante código QR.</strong></p>
+</div>
 
-El proyecto usa Next.js App Router con frontend React y backend en Route
-Handlers, Supabase para base de datos/autenticacion/storage, y Gmail/Nodemailer
-para el envio de codigos de verificacion.
+---
 
-## Stack
+## 📖 ¿Qué es MyCertify?
 
-- Next.js `16.2.6`
-- React `19.2.4`
-- TypeScript
-- Supabase Auth, PostgreSQL y Storage
-- Nodemailer para correos con Gmail
-- QR dinamico con `qrcode`
-- React Icons
-- Vercel como plataforma objetivo de despliegue
+**MyCertify** es una aplicación web moderna diseñada para centralizar y gestionar la validación de logros académicos y profesionales. Actúa como un portafolio digital seguro donde los usuarios pueden almacenar sus certificados en formato PDF y compartirlos fácilmente con reclutadores, clientes o empleadores a través de un perfil público altamente profesional.
 
-## Funcionalidades actuales
+## 🚀 ¿Qué hace?
 
-- Registro de usuario con Supabase Auth.
-- Login con correo y contrasena.
-- Segundo paso de verificacion con codigo alfanumerico o link de un solo uso.
-- Recuperacion de contrasena desde `/frontend/recuperar-contrasena`.
-- Codigos y links de verificacion de un solo uso: al consumirse se eliminan de
-  la base de datos.
-- Proteccion de rutas privadas mediante sesion de Supabase y cookie httpOnly de
-  verificacion.
-- Perfil de usuario editable.
-- Subida de certificados PDF a Supabase Storage.
-- Validacion de PDF maximo 1 MB en frontend, backend y base de datos.
-- Listado de certificados reales del usuario.
-- QR dinamico que apunta a `/u/[slug]`.
-- Perfil publico con certificados visibles.
+El sistema permite a los profesionales crear una cuenta segura, subir sus diplomas o certificados y decidir de forma granular cuáles de ellos desean hacer públicos. A partir de esta selección, la aplicación genera automáticamente un **código QR dinámico** que enlaza directamente al perfil público del usuario, permitiendo a cualquier tercero validar las credenciales escaneando el código desde un currículum impreso, una tarjeta de presentación o un perfil de LinkedIn.
 
-## Estructura principal
+## 🌟 Ventajas
 
-```txt
-app/
-  api/                          # API routes de Next.js
-  frontend/                     # Pantallas privadas/publicas de la UI
-  u/[slug]/                     # Perfil publico escaneable por QR
+- **Verificación Ágil para Reclutadores:** El código QR facilita la validación instantánea de los certificados, eliminando la necesidad de adjuntar múltiples PDFs pesados en correos electrónicos.
+- **Privacidad Granular:** El usuario tiene control total sobre qué certificados son visibles públicamente y cuáles se mantienen en su bóveda privada.
+- **Alta Seguridad:** Sistema de autenticación robusto con verificación en dos pasos (2FA) mediante códigos alfanuméricos o enlaces de un solo uso enviados por correo electrónico.
+- **Optimización de Recursos:** Validación estricta de peso y formato de archivos (solo PDFs de máx. 1 MB) tanto en el cliente como en el servidor.
+- **Experiencia de Usuario Fluida:** Carga rápida, manejo de estado eficiente y navegación sin interrupciones gracias a la arquitectura Serverless.
 
-backend/
-  auth/                         # Auth, codigos, recuperacion y cookies
-  certificates/                 # Servicios y validaciones de certificados
-  config/                       # Variables de entorno
-  email/                        # Envio de correos con Nodemailer
-  http/                         # Respuestas y errores HTTP
-  profile/                      # Perfil del usuario
-  public/                       # Consultas publicas por slug
-  supabase/                     # Clientes Supabase server/admin/proxy
-  utils/                        # Hash, tokens y slugs
+## ⚙️ Funcionalidades Principales
 
-database/
-  database.sql                  # Esquema completo
-  migrations/                   # Migraciones incrementales
+- **Sistema de Autenticación Completo:** Registro, inicio de sesión y recuperación de contraseñas.
+- **Verificación de 2 Pasos (2FA):** Integrada con Nodemailer para envíos de códigos seguros. Las rutas privadas están protegidas mediante validaciones de sesión y cookies `httpOnly`.
+- **Gestión de Perfil:** Interfaz intuitiva para la edición de los datos profesionales del usuario.
+- **Gestor de Certificados:** Subida directa de archivos a *Supabase Storage*, listado y administración de documentos académicos.
+- **Generación de Código QR:** Creación de un QR único vinculado al identificador (`slug`) del usuario en tiempo real.
+- **Perfil Público (`/u/[slug]`):** Vista de solo lectura, elegante y responsiva, diseñada para que terceros visualicen los certificados aprobados por el propietario.
 
-lib/api/                        # Cliente frontend para llamar al backend
-```
+## 🛠️ Arquitectura
 
-## Requisitos
+El proyecto está construido bajo una arquitectura *Full-Stack* orientada a Serverless con el ecosistema de Next.js:
 
-- Node.js compatible con Next.js 16.
-- npm.
-- Proyecto de Supabase.
-- Cuenta de Gmail para envio de correos.
-- Git para versionamiento.
+1. **Frontend (Cliente):** Construido con React. Se comunica con el backend mediante una capa de red abstraída (`lib/api/`) para consumir los servicios REST.
+2. **Backend (API Routes):** Funciona mediante *Route Handlers* de Next.js. Se encarga de la lógica de negocio, validaciones de seguridad y la comunicación con Supabase mediante clientes proxy/admin.
+3. **Autenticación y Sesiones:** Al iniciar sesión y pasar el 2FA, el backend verifica el token, lo destruye de la base de datos (garantizando que sea de un solo uso) y establece una cookie `httpOnly` llamada `mycertify-auth-verified` para autorizar el acceso a las rutas en `/frontend/*`.
+4. **Almacenamiento de Archivos:** Los archivos PDF se envían de forma segura al bucket privado `certificados` en Supabase Storage, mientras que la metadata (título, fecha, emisor) se guarda en PostgreSQL. Al consultar el perfil público, el backend genera URLs firmadas temporales para previsualizar los archivos sin exponer el bucket.
 
-## Instalacion
+## 💻 Tecnologías Utilizadas
+
+### Frontend
+| Tecnología | Descripción |
+|---|---|
+| [Next.js 16.2.6](https://nextjs.org/) | Framework de React con *App Router* |
+| [React 19.2.4](https://react.dev/) | Biblioteca principal para la construcción de interfaces |
+| [TypeScript](https://www.typescriptlang.org/) | Tipado estático para código robusto y escalable |
+| [qrcode](https://www.npmjs.com/package/qrcode) | Motor de generación dinámica de códigos QR |
+| [React Icons](https://react-icons.github.io/react-icons/) | Paquete de iconografía optimizada |
+
+### Backend & Base de Datos
+| Tecnología | Descripción |
+|---|---|
+| [Supabase](https://supabase.com/) | Base de datos PostgreSQL, Auth y Storage (Buckets) |
+| [Nodemailer](https://nodemailer.com/) | Envío de correos transaccionales (OTP, reset) vía SMTP |
+| [Vercel](https://vercel.com/) | Plataforma de despliegue nativa para Next.js |
+
+---
+
+## 👨‍💻 Guía de Instalación Local
+
+### 1. Requisitos Previos
+
+- **Node.js** (versión compatible con Next.js 16) y **npm**
+- **Git** instalado
+- Una cuenta en **Supabase** (para BD, Auth y Storage)
+- Una cuenta de **Gmail** con una "Contraseña de aplicación" generada para Nodemailer
+
+### 2. Clonar el Repositorio
 
 ```bash
-npm install
+git clone https://github.com/JuanDav17/project_cv.git
+cd project_cv
 ```
 
-El proyecto usa `package-lock.json`, asi que en CI/Vercel tambien puedes usar:
+### 3. Instalación de Dependencias
 
 ```bash
 npm ci
+# Si tienes problemas, puedes usar: npm install
 ```
 
-## Variables de entorno
+### 4. Configurar Variables de Entorno
 
-Copia el ejemplo:
+Copia el archivo de ejemplo para crear tu archivo de variables locales:
 
 ```bash
-copy .env.example .env.local
+cp .env.example .env.local
+# En Windows PowerShell: Copy-Item .env.example .env.local
 ```
 
-En Windows PowerShell tambien puedes usar:
-
-```powershell
-Copy-Item .env.example .env.local
-```
-
-Variables importantes:
+Edita `.env.local` con tus credenciales:
 
 ```env
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 
+# Credenciales de Supabase (Settings > API de tu proyecto)
 NEXT_PUBLIC_SUPABASE_URL=https://tu-proyecto.supabase.co
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_xxxxxxxxxxxxxxxxx
 SUPABASE_SECRET_KEY=sb_secret_xxxxxxxxxxxxxxxxx
 
 SUPABASE_CERTIFICADOS_BUCKET=certificados
 
+# Configuración de Auth & Sesión
 AUTH_CODE_TTL_MINUTES=10
 AUTH_CODE_LENGTH=7
 AUTH_DEV_FIXED_CODE=A1B2C3D
 PASSWORD_RESET_SESSION_TTL_MINUTES=10
 
+# Configuración de Gmail (Nodemailer)
 EMAIL_FROM="MyCertify <tu-correo@gmail.com>"
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=465
@@ -121,188 +119,30 @@ SMTP_USER=tu-correo@gmail.com
 SMTP_PASSWORD=xxxx xxxx xxxx xxxx
 ```
 
-Notas:
+> ⚠️ **Seguridad:** Nunca expongas `SUPABASE_SECRET_KEY` o `SUPABASE_SERVICE_ROLE_KEY` en componentes que se rendericen en el cliente.
 
-- `SUPABASE_SECRET_KEY` o `SUPABASE_SERVICE_ROLE_KEY` solo debe vivir en el
-  servidor. No la expongas en componentes cliente.
-- En desarrollo, si no configuras correo, el backend devuelve `devCode` para
-  poder probar el flujo.
-- Para Gmail, la forma simple es activar 2FA en Google y crear una contrasena de
-  aplicacion para `SMTP_PASSWORD`.
-- Tambien puedes usar OAuth2 con `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` y
-  `GOOGLE_REFRESH_TOKEN`.
+### 5. Configurar la Base de Datos (Supabase)
 
-## Base de datos
+1. Crea un nuevo proyecto en Supabase.
+2. Ve a **SQL Editor** en el panel izquierdo.
+3. Copia el contenido de `database/database.sql` y ejecútalo. Esto creará el esquema, las tablas principales y las políticas de seguridad (RLS).
+4. *(Opcional)* Si ya tenías el esquema base, ejecuta la migración incremental en `database/migrations/20260524_email_codes_password_reset.sql`.
+5. Ve a **Storage** y verifica que el bucket `certificados` exista. Si no, créalo manualmente y configúralo como **Privado**.
 
-### Opcion recomendada: Supabase
-
-1. Crea un proyecto en Supabase.
-2. Abre el SQL Editor.
-3. Ejecuta `database/database.sql`.
-4. Verifica que exista el bucket privado `certificados` en Supabase Storage.
-5. Copia las llaves del proyecto a `.env.local`.
-
-El script crea las tablas principales, indices, constraints, bucket de Storage
-y politicas RLS basicas cuando se ejecuta dentro de Supabase.
-
-### Si ya habias ejecutado el SQL anterior
-
-Ejecuta la migracion incremental:
-
-```txt
-database/migrations/20260524_email_codes_password_reset.sql
-```
-
-Esta migracion agrega:
-
-- `correo_destino` y `token_hash` en `codigos_verificacion`.
-- `sesiones_recuperacion_contrasena`.
-- Indices para tokens de verificacion y recuperacion.
-
-### PostgreSQL local
-
-Puedes ejecutar `database/database.sql` en PostgreSQL local para validar el
-modelo de datos. Sin embargo, el flujo completo de la app necesita Supabase
-Auth y Supabase Storage, por lo que para probar autenticacion, uploads y QR
-publico es mejor usar Supabase.
-
-## Ejecutar el proyecto
-
-Servidor de desarrollo:
+### 6. Ejecutar el Servidor de Desarrollo
 
 ```bash
 npm run dev
 ```
 
-Abre:
+Abre tu navegador en [http://localhost:3000/frontend](http://localhost:3000/frontend).
 
-```txt
-http://localhost:3000/frontend
-```
+> 💡 Si no configuraste el SMTP, el backend devolverá el código estático `A1B2C3D` para que puedas probar el flujo de login en desarrollo.
 
-Build de produccion:
+### 7. Comandos Adicionales
 
 ```bash
-npm run build
+npm run build   # Generar build de producción
+npm run start   # Probar el build generado localmente
+npm run lint    # Revisar linting
 ```
-
-Servidor de produccion local:
-
-```bash
-npm run start
-```
-
-Lint:
-
-```bash
-npm run lint
-```
-
-## Flujo de autenticacion
-
-1. El usuario inicia sesion en `/frontend/iniciar-sesion`.
-2. Supabase valida correo y contrasena.
-3. El backend genera codigo alfanumerico y link seguro.
-4. El codigo/link se guarda hasheado en `codigos_verificacion`.
-5. Se envia correo con Nodemailer.
-6. El usuario valida en `/frontend/codigo` o abre el link.
-7. Si la validacion es correcta, el registro se elimina de la base de datos.
-8. Se crea una cookie httpOnly `mycertify-auth-verified`.
-9. Las rutas privadas quedan disponibles.
-
-Si alguien intenta reutilizar el mismo codigo o link, el backend responde que ya
-no se puede usar.
-
-## Recuperacion de contrasena
-
-Ruta:
-
-```txt
-/frontend/recuperar-contrasena
-```
-
-Flujo:
-
-1. El usuario ingresa su correo.
-2. El backend genera codigo/link de recuperacion.
-3. El usuario valida el codigo o abre el link.
-4. El codigo/link se elimina de `codigos_verificacion`.
-5. Se crea una sesion corta en `sesiones_recuperacion_contrasena`.
-6. El usuario escribe la nueva contrasena.
-7. El backend actualiza la contrasena con Supabase Admin API.
-8. La sesion de recuperacion se elimina.
-
-## Rutas principales
-
-Frontend:
-
-- `/frontend`
-- `/frontend/registro`
-- `/frontend/iniciar-sesion`
-- `/frontend/codigo`
-- `/frontend/recuperar-contrasena`
-- `/frontend/pagina-principal`
-- `/frontend/subir-certificado`
-- `/frontend/mis-certificados`
-- `/frontend/codigo-qr`
-- `/frontend/mi-cuenta`
-- `/u/[slug]`
-
-Backend:
-
-- `POST /api/auth/register`
-- `POST /api/auth/login`
-- `POST /api/auth/verify-code`
-- `POST /api/auth/password-reset/request`
-- `POST /api/auth/password-reset/verify`
-- `POST /api/auth/password-reset/confirm`
-- `POST /api/auth/logout`
-- `GET /api/auth/me`
-- `GET /api/perfil`
-- `PUT /api/perfil`
-- `GET /api/certificados`
-- `POST /api/certificados`
-- `GET /api/certificados/:id`
-- `GET /api/public/perfiles/:slug`
-
-## Certificados y Storage
-
-Los certificados se guardan en:
-
-- `certificados`: metadatos del certificado.
-- `archivos_certificado`: referencia al PDF, hash, ruta, tamano y MIME type.
-- Supabase Storage bucket `certificados`: archivo PDF real.
-
-Reglas importantes:
-
-- Solo PDF.
-- Maximo 1 MB.
-- El bucket debe ser privado.
-- El backend genera URLs firmadas cuando necesita mostrar o descargar archivos.
-
-## Despliegue en Vercel
-
-1. Sube el repositorio a GitHub.
-2. Importa el proyecto en Vercel.
-3. Configura las mismas variables de `.env.local` en Vercel Project Settings.
-4. Asegurate de que `NEXT_PUBLIC_APP_URL` apunte al dominio real.
-5. Ejecuta el build con `npm run build`.
-
-Vercel detecta Next.js automaticamente.
-
-## Documentacion adicional
-
-La carpeta `backend/` tiene documentacion corta del backend en:
-
-```txt
-backend/README.md
-```
-
-## Notas de seguridad
-
-- No subas `.env.local` al repositorio.
-- No expongas `SUPABASE_SECRET_KEY` en el cliente.
-- Los codigos y tokens se guardan hasheados.
-- Los links/codigos de verificacion se eliminan al usarse.
-- Los PDFs se guardan en bucket privado.
-- Para produccion, usa una cuenta/correo dedicado para SMTP.
