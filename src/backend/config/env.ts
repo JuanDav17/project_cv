@@ -77,35 +77,22 @@ export function getPasswordResetSessionTtlMinutes() {
 }
 
 export function hasEmailEnv() {
-  return Boolean(
-    process.env.SMTP_USER &&
-      (process.env.SMTP_PASSWORD ||
-        (process.env.GOOGLE_CLIENT_ID &&
-          process.env.GOOGLE_CLIENT_SECRET &&
-          process.env.GOOGLE_REFRESH_TOKEN)),
-  );
+  return Boolean(process.env.RESEND_API_KEY);
 }
 
-export function getEmailEnv() {
-  const user = process.env.SMTP_USER;
+export function getResendEnv() {
+  const apiKey = process.env.RESEND_API_KEY;
 
-  if (!user) {
+  if (!apiKey) {
     throw new BackendError(
-      "Falta SMTP_USER para enviar correos.",
+      "Falta RESEND_API_KEY para enviar correos.",
       500,
       "EMAIL_ENV_MISSING",
     );
   }
 
   return {
-    from: process.env.EMAIL_FROM ?? `MyCertify <${user}>`,
-    host: process.env.SMTP_HOST ?? "smtp.gmail.com",
-    port: Number(process.env.SMTP_PORT ?? 465),
-    secure: (process.env.SMTP_SECURE ?? "true") === "true",
-    user,
-    password: process.env.SMTP_PASSWORD,
-    googleClientId: process.env.GOOGLE_CLIENT_ID,
-    googleClientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    googleRefreshToken: process.env.GOOGLE_REFRESH_TOKEN,
+    apiKey,
+    from: process.env.EMAIL_FROM ?? "MyCertify <onboarding@resend.dev>",
   };
 }

@@ -12,6 +12,7 @@ import {
 import { DashboardSidebar } from "../_components/dashboard-sidebar";
 import { MaterialIcon } from "../_components/material-icon";
 import { MobileBrandHeader } from "../_components/mobile-brand-header";
+import { FrontendFooter } from "../_components/footer";
 import "./page.css";
 
 interface CertificateExtended extends CertificateDto {
@@ -300,6 +301,8 @@ export default function MisCertificadosPage() {
             </aside>
           </div>
         </div>
+
+        <FrontendFooter />
       </main>
 
       {/* Modal Detalles del Certificado */}

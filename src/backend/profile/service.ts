@@ -2,6 +2,7 @@ import { BackendError, assertRequired } from "@/backend/http/errors";
 import { createAdminSupabaseClient } from "@/backend/supabase/admin";
 import { getAuthenticatedUser, ensureUserRecords } from "@/backend/auth/service";
 import { publicNameFromProfile, slugify } from "@/backend/utils/slug";
+import { sanitizeHtml } from "@/backend/utils/sanitize";
 
 export type ProfileDto = {
   id_usuario: string;
@@ -85,24 +86,30 @@ export async function updateCurrentProfile(input: Record<string, unknown>) {
   );
 
   const updatePayload = {
-    nombres,
-    apellidos,
+    nombres: sanitizeHtml(nombres as string),
+    apellidos: sanitizeHtml(apellidos as string),
     slug_publico:
-      typeof input.slug_publico === "string" && input.slug_publico.trim()
-        ? slugify(input.slug_publico)
+      input.slug_publico !== undefined
+        ? typeof input.slug_publico === "string" && input.slug_publico.trim()
+          ? slugify(input.slug_publico)
+          : null
         : undefined,
     descripcion_perfil:
-      typeof input.descripcion_perfil === "string" ? input.descripcion_perfil : null,
-    pais: typeof input.pais === "string" ? input.pais : null,
-    ciudad: typeof input.ciudad === "string" ? input.ciudad : null,
+      input.descripcion_perfil !== undefined
+        ? typeof input.descripcion_perfil === "string" ? sanitizeHtml(input.descripcion_perfil) : null
+        : undefined,
+    pais: input.pais !== undefined ? (typeof input.pais === "string" ? sanitizeHtml(input.pais) : null) : undefined,
+    ciudad: input.ciudad !== undefined ? (typeof input.ciudad === "string" ? sanitizeHtml(input.ciudad) : null) : undefined,
     titulo_profesional:
-      typeof input.titulo_profesional === "string" ? input.titulo_profesional : null,
-    url_linkedin: typeof input.url_linkedin === "string" ? input.url_linkedin : null,
-    url_github: typeof input.url_github === "string" ? input.url_github : null,
+      input.titulo_profesional !== undefined
+        ? typeof input.titulo_profesional === "string" ? sanitizeHtml(input.titulo_profesional) : null
+        : undefined,
+    url_linkedin: input.url_linkedin !== undefined ? (typeof input.url_linkedin === "string" ? input.url_linkedin : null) : undefined,
+    url_github: input.url_github !== undefined ? (typeof input.url_github === "string" ? input.url_github : null) : undefined,
     url_portafolio:
-      typeof input.url_portafolio === "string" ? input.url_portafolio : null,
-    avatar_url: typeof input.avatar_url === "string" ? input.avatar_url : null,
-    areas_interes: Array.isArray(input.areas_interes) ? input.areas_interes : undefined,
+      input.url_portafolio !== undefined ? (typeof input.url_portafolio === "string" ? input.url_portafolio : null) : undefined,
+    avatar_url: input.avatar_url !== undefined ? (typeof input.avatar_url === "string" ? input.avatar_url : null) : undefined,
+    areas_interes: input.areas_interes !== undefined ? (Array.isArray(input.areas_interes) ? input.areas_interes : null) : undefined,
     fecha_actualizacion: new Date().toISOString(),
   };
 

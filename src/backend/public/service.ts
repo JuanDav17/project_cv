@@ -100,6 +100,8 @@ export async function getPublicProfileBySlug(slug: string) {
         "verificado_plataforma",
         "destacado",
         "fecha_creacion",
+        "tema",
+        "tipo_certificado",
         "instituciones(nombre_institucion)",
         "archivos_certificado(id_archivo,nombre_archivo,ruta_archivo,tamano_bytes,es_actual)",
       ].join(","),
@@ -119,14 +121,16 @@ export async function getPublicProfileBySlug(slug: string) {
   }
 
   const publicCertificates = await Promise.all(
-    ((certificates ?? []) as unknown as PublicCertificateRecord[]).map(async (certificate) => {
+    ((certificates ?? []) as unknown as any[]).map(async (certificate) => {
       const currentFile =
-        certificate.archivos_certificado?.find((file) => file.es_actual) ?? null;
+        certificate.archivos_certificado?.find((file: any) => file.es_actual) ?? null;
 
       return {
         id_certificado: certificate.id_certificado,
         titulo_certificado: certificate.titulo_certificado,
         descripcion: certificate.descripcion,
+        tema: certificate.tema,
+        tipo_certificado: certificate.tipo_certificado,
         entidad:
           certificate.instituciones?.nombre_institucion ??
           "Institucion no registrada",

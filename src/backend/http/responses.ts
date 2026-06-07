@@ -13,6 +13,10 @@ export function empty(status = 204) {
 }
 
 export function fail(error: unknown) {
+  if (!isBackendError(error)) {
+    console.error("Raw unexpected error:", error);
+  }
+  
   const backendError = isBackendError(error)
     ? error
     : new BackendError("Ocurrio un error inesperado.", 500, "UNEXPECTED_ERROR");

@@ -5,7 +5,7 @@ import { checkRateLimit } from "@/backend/http/rate-limit";
 
 export async function POST(request: Request) {
   return handleRoute(async () => {
-    checkRateLimit(request);
+    checkRateLimit(request, "auth");
     const body = await request.json();
 
     return confirmPasswordReset({

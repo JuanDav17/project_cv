@@ -6,6 +6,7 @@ import Link from "next/link";
 import { getProfile, updateProfile, type ProfileDto } from "@/lib/api/perfil";
 import { type InterestArea } from "@/lib/api/areas-interes";
 import { ApiError } from "@/lib/api/http";
+import { Eye, EyeOff } from "lucide-react";
 
 import { DashboardSidebar } from "../_components/dashboard-sidebar";
 import { FrontendFooter } from "../_components/footer";
@@ -27,7 +28,7 @@ function AreaIcon({ icon }: { icon: string }) {
     "cloud_sync": "cloud", // material icon más seguro
     "checklist": "list_alt" // material icon más seguro
   };
-  
+
   const mappedIcon = iconFixMap[icon] || icon;
 
   const isLucide =
@@ -54,6 +55,15 @@ export default function MiCuentaPage() {
   const [passwordSuccess, setPasswordSuccess] = useState("");
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
+
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showRepeatPassword, setShowRepeatPassword] = useState(false);
+
+  const [showTitleModal, setShowTitleModal] = useState(false);
+  const [isUpdatingTitle, setIsUpdatingTitle] = useState(false);
+  const [titleError, setTitleError] = useState("");
+  const [titleSuccess, setTitleSuccess] = useState("");
 
   useEffect(() => {
     getProfile()
@@ -96,7 +106,7 @@ export default function MiCuentaPage() {
     event.preventDefault();
     setPasswordError("");
     setPasswordSuccess("");
-    
+
     const formData = new FormData(event.currentTarget);
     const newPassword = String(formData.get("newPassword") ?? "");
     const repeatPassword = String(formData.get("repeatPassword") ?? "");
@@ -118,12 +128,12 @@ export default function MiCuentaPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password: newPassword }),
       });
-      
+
       const data = await res.json();
       if (!res.ok) {
         throw new Error(data.message || "No se pudo actualizar la contraseña");
       }
-      
+
       setPasswordSuccess("Contraseña actualizada exitosamente.");
       setTimeout(() => setShowPasswordModal(false), 2000); // Close after 2s
       event.currentTarget.reset();
@@ -131,6 +141,41 @@ export default function MiCuentaPage() {
       setPasswordError(err.message);
     } finally {
       setIsUpdatingPassword(false);
+    }
+  };
+
+  const handleUpdateTitle = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setTitleError("");
+    setTitleSuccess("");
+    setIsUpdatingTitle(true);
+
+    const formData = new FormData(event.currentTarget);
+    const newTitle = String(formData.get("newTitle") ?? "").trim();
+
+    if (!newTitle) {
+      setTitleError("El nuevo título no puede estar vacío.");
+      setIsUpdatingTitle(false);
+      return;
+    }
+
+    try {
+      const updatedProfile = await updateProfile({
+        nombres: profile?.nombres ?? "",
+        apellidos: profile?.apellidos ?? "",
+        titulo_profesional: newTitle,
+      });
+
+      setProfile(updatedProfile);
+      setTitleSuccess("Título actualizado exitosamente.");
+      setTimeout(() => {
+        setShowTitleModal(false);
+        setTitleSuccess("");
+      }, 2000);
+    } catch (err: any) {
+      setTitleError(err.message || "No se pudo actualizar el título.");
+    } finally {
+      setIsUpdatingTitle(false);
     }
   };
 
@@ -265,15 +310,21 @@ export default function MiCuentaPage() {
                       id="title"
                       name="titulo_profesional"
                       className="fp-input"
-                      defaultValue={profile?.titulo_profesional ?? ""}
+                      value={profile?.titulo_profesional ?? ""}
                       placeholder="Ej. Ingeniero de Software"
                       type="text"
+                      readOnly
                     />
                     <p className="fp-body-sm fp-muted" style={{ margin: 0 }}>
-                      ¿Quieres actualizar tu titulo?{" "}
-                      <Link href="/frontend/informacion-academica" className="fp-link">
-                        ¡Hazlo aqui!
-                      </Link>
+                      ¿Quieres actualizar tu título?{" "}
+                      <button
+                        type="button"
+                        onClick={() => { setTitleError(""); setTitleSuccess(""); setShowTitleModal(true); }}
+                        className="fp-link"
+                        style={{ background: "none", border: "none", padding: 0, font: "inherit", cursor: "pointer" }}
+                      >
+                        ¡Hazlo aquí!
+                      </button>
                     </p>
                   </div>
 
@@ -385,42 +436,108 @@ export default function MiCuentaPage() {
                 <label className="fp-field__label fp-label-md" htmlFor="current-password">
                   Contraseña Actual
                 </label>
-                <input 
-                  id="current-password" 
-                  name="currentPassword"
-                  className="fp-input" 
-                  placeholder="••••••••" 
-                  type="password" 
-                  required
-                />
+                <div className="fp-input-wrap" style={{ position: "relative" }}>
+                  <input
+                    id="current-password"
+                    name="currentPassword"
+                    className="fp-input"
+                    placeholder="••••••••"
+                    type={showCurrentPassword ? "text" : "password"}
+                    style={{ paddingRight: "3rem" }}
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                    style={{
+                      position: "absolute",
+                      right: "1rem",
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      color: "var(--fp-muted)",
+                      display: "flex",
+                      padding: 0
+                    }}
+                    aria-label={showCurrentPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                  >
+                    {showCurrentPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
+                </div>
               </div>
 
               <div className="fp-field">
                 <label className="fp-field__label fp-label-md" htmlFor="new-password">
                   Nueva Contraseña
                 </label>
-                <input
-                  id="new-password"
-                  name="newPassword"
-                  className="fp-input"
-                  placeholder="Nueva contraseña segura"
-                  type="password"
-                  required
-                />
+                <div className="fp-input-wrap" style={{ position: "relative" }}>
+                  <input
+                    id="new-password"
+                    name="newPassword"
+                    className="fp-input"
+                    placeholder="Nueva contraseña segura"
+                    type={showNewPassword ? "text" : "password"}
+                    style={{ paddingRight: "3rem" }}
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    style={{
+                      position: "absolute",
+                      right: "1rem",
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      color: "var(--fp-muted)",
+                      display: "flex",
+                      padding: 0
+                    }}
+                    aria-label={showNewPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                  >
+                    {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
+                </div>
               </div>
 
               <div className="fp-field">
                 <label className="fp-field__label fp-label-md" htmlFor="repeat-new-password">
                   Repetir Nueva Contraseña
                 </label>
-                <input
-                  id="repeat-new-password"
-                  name="repeatPassword"
-                  className="fp-input"
-                  placeholder="Repetir nueva contraseña"
-                  type="password"
-                  required
-                />
+                <div className="fp-input-wrap" style={{ position: "relative" }}>
+                  <input
+                    id="repeat-new-password"
+                    name="repeatPassword"
+                    className="fp-input"
+                    placeholder="Repetir nueva contraseña"
+                    type={showRepeatPassword ? "text" : "password"}
+                    style={{ paddingRight: "3rem" }}
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowRepeatPassword(!showRepeatPassword)}
+                    style={{
+                      position: "absolute",
+                      right: "1rem",
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      color: "var(--fp-muted)",
+                      display: "flex",
+                      padding: 0
+                    }}
+                    aria-label={showRepeatPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                  >
+                    {showRepeatPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
+                </div>
               </div>
 
               {passwordError && (
@@ -438,19 +555,103 @@ export default function MiCuentaPage() {
               )}
 
               <div style={{ display: "flex", justifyContent: "flex-end", gap: "1rem", marginTop: "1rem" }}>
-                <button 
-                  type="button" 
-                  className="fp-button fp-button--ghost" 
+                <button
+                  type="button"
+                  className="fp-button fp-button--ghost"
                   onClick={() => setShowPasswordModal(false)}
                 >
                   Cancelar
                 </button>
-                <button 
-                  className="fp-button fp-button--primary" 
-                  type="submit" 
+                <button
+                  className="fp-button fp-button--primary"
+                  type="submit"
                   disabled={isUpdatingPassword}
                 >
                   {isUpdatingPassword ? "Actualizando..." : "Actualizar contraseña"}
+                </button>
+              </div>
+            </form>
+          </article>
+        </div>
+      )}
+      {/* Modal de Actualizar Título */}
+      {showTitleModal && (
+        <div style={{
+          position: "fixed",
+          top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: "rgba(0, 0, 0, 0.5)",
+          zIndex: 9999,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "1rem",
+          backdropFilter: "blur(4px)"
+        }}>
+          <article className="fp-card fp-card--panel fp-stack-md" style={{ width: "100%", maxWidth: "440px" }}>
+            <h2 className="fp-headline-md" style={{ margin: 0, display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              <MaterialIcon style={{ color: "var(--fp-primary)" }}>badge</MaterialIcon>
+              Actualizar título
+            </h2>
+
+            <div className="fp-divider" />
+
+            <form className="fp-stack-md" onSubmit={handleUpdateTitle}>
+              <div className="fp-field">
+                <label className="fp-field__label fp-label-md" htmlFor="current-title">
+                  Título actual
+                </label>
+                <input
+                  id="current-title"
+                  className="fp-input"
+                  value={profile?.titulo_profesional ?? "Sin título"}
+                  type="text"
+                  readOnly
+                  style={{ backgroundColor: "var(--fp-surface-variant)" }}
+                />
+              </div>
+
+              <div className="fp-field">
+                <label className="fp-field__label fp-label-md" htmlFor="new-title">
+                  Título nuevo
+                </label>
+                <input
+                  id="new-title"
+                  name="newTitle"
+                  className="fp-input"
+                  placeholder="Ej. Ingeniero DevOps"
+                  type="text"
+                  required
+                />
+              </div>
+
+              {titleError && (
+                <div className="fp-alert fp-alert--error">
+                  <MaterialIcon>error_outline</MaterialIcon>
+                  <p className="fp-body-sm" style={{ margin: 0 }}>{titleError}</p>
+                </div>
+              )}
+
+              {titleSuccess && (
+                <div className="fp-alert fp-alert--success">
+                  <MaterialIcon>check_circle_outline</MaterialIcon>
+                  <p className="fp-body-sm" style={{ margin: 0 }}>{titleSuccess}</p>
+                </div>
+              )}
+
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: "1rem", marginTop: "1rem" }}>
+                <button
+                  type="button"
+                  className="fp-button fp-button--ghost"
+                  onClick={() => setShowTitleModal(false)}
+                >
+                  Cancelar
+                </button>
+                <button
+                  className="fp-button fp-button--primary"
+                  type="submit"
+                  disabled={isUpdatingTitle}
+                >
+                  {isUpdatingTitle ? "Actualizando..." : "Actualizar título"}
                 </button>
               </div>
             </form>

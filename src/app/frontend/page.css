@@ -617,3 +617,18 @@
     gap: 0.5rem;
   }
 }
+
+/* GitHub Footer Link Styling */
+.fp-github-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, color 0.2s ease;
+  color: var(--fp-on-surface-variant);
+}
+
+.fp-github-link:hover {
+  transform: scale(1.15);
+  color: var(--fp-primary) !important;
+}
+

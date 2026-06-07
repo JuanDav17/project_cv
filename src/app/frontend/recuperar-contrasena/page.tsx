@@ -10,6 +10,7 @@ import {
   verifyPasswordReset,
 } from "@/lib/api/auth";
 import { ApiError } from "@/lib/api/http";
+import { Eye, EyeOff } from "lucide-react";
 
 import { MaterialIcon } from "../_components/material-icon";
 import { ThemeToggle } from "../_components/theme-toggle";
@@ -29,6 +30,8 @@ export default function RecuperarContrasenaPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [tokenFromUrl] = useState(() =>
     typeof window === "undefined"
       ? ""
@@ -273,18 +276,6 @@ export default function RecuperarContrasenaPage() {
                   </div>
                 </div>
 
-                {devCode && (
-                  <p className="fp-body-sm fp-muted" style={{ margin: 0 }}>
-                    En desarrollo usa: {devCode}
-                  </p>
-                )}
-
-                {devLink && (
-                  <Link className="fp-link fp-link--strong fp-label-md" href={devLink}>
-                    Abrir enlace de desarrollo
-                  </Link>
-                )}
-
                 <button
                   className="fp-button fp-button--primary fp-button--full"
                   type="submit"
@@ -310,10 +301,30 @@ export default function RecuperarContrasenaPage() {
                       name="password"
                       className="fp-input"
                       placeholder="********"
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       minLength={8}
+                      style={{ paddingRight: "3rem" }}
                       required
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      style={{
+                        position: "absolute",
+                        right: "1rem",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                        color: "var(--fp-muted)",
+                        display: "flex",
+                        padding: 0
+                      }}
+                      aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                    >
+                      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    </button>
                   </div>
                 </div>
 
@@ -330,10 +341,30 @@ export default function RecuperarContrasenaPage() {
                       name="passwordConfirm"
                       className="fp-input"
                       placeholder="********"
-                      type="password"
+                      type={showConfirmPassword ? "text" : "password"}
                       minLength={8}
+                      style={{ paddingRight: "3rem" }}
                       required
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      style={{
+                        position: "absolute",
+                        right: "1rem",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                        color: "var(--fp-muted)",
+                        display: "flex",
+                        padding: 0
+                      }}
+                      aria-label={showConfirmPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                    >
+                      {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    </button>
                   </div>
                 </div>
 

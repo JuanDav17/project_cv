@@ -24,6 +24,7 @@ import {
 import { DashboardSidebar } from "../_components/dashboard-sidebar";
 import { MaterialIcon } from "../_components/material-icon";
 import { MobileBrandHeader } from "../_components/mobile-brand-header";
+import { FrontendFooter } from "../_components/footer";
 import "./page.css";
 
 ChartJS.register(
@@ -295,6 +296,8 @@ export default function DashboardPage() {
             </div>
           )}
         </div>
+
+        <FrontendFooter />
       </main>
     </section>
   );

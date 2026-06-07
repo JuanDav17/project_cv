@@ -119,10 +119,6 @@ export default function CodigoPage() {
           <div className="fp-login-split__form-container">
             <header className="fp-login-split__form-header">
               <h1 className="fp-login-split__form-title">Ingresar Codigo</h1>
-              <p className="fp-login-split__form-desc">
-                Revisa tu correo y escribe el codigo alfanumerico.
-                {devCode ? ` En desarrollo usa: ${devCode}` : ""}
-              </p>
             </header>
 
             <form className="fp-login-split__form fp-stack-md" onSubmit={handleSubmit}>
@@ -139,9 +135,8 @@ export default function CodigoPage() {
                   </span>
                   <input
                     id="verification-code"
-                    className={`fp-input ${error ? "fp-input--error" : ""} ${
-                      success ? "fp-input--success" : ""
-                    }`}
+                    className={`fp-input ${error ? "fp-input--error" : ""} ${success ? "fp-input--success" : ""
+                      }`}
                     placeholder="A1B2C3D"
                     type="text"
                     value={code}

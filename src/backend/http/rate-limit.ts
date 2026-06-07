@@ -5,6 +5,8 @@ import { BackendError } from "./errors";
 // In a serverless environment (like Vercel), this memory resets on cold starts.
 // For production with heavy traffic, a Redis-based limiter is recommended.
 
+type RateLimitCategory = "auth" | "api";
+
 type RateLimitEntry = {
   count: number;
   resetAt: number;
@@ -13,9 +15,13 @@ type RateLimitEntry = {
 const store = new Map<string, RateLimitEntry>();
 
 const WINDOW_MS = 15 * 60 * 1000; // 15 minutes
-const MAX_REQUESTS = 10; // Max 10 requests per window per IP
 
-export function checkRateLimit(request: Request) {
+const CATEGORY_LIMITS: Record<RateLimitCategory, number> = {
+  auth: 5,   // Strict limit for login/register to prevent brute force
+  api: 100,  // Loose limit for standard API calls to prevent DoS
+};
+
+export function checkRateLimit(request: Request, category: RateLimitCategory = "api") {
   // Extraemos la IP previniendo spoofing de cabeceras X-Forwarded-For
   let ip = request.headers.get("x-real-ip");
   const forwardedFor = request.headers.get("x-forwarded-for");
@@ -28,14 +34,17 @@ export function checkRateLimit(request: Request) {
   
   ip = ip ?? "127.0.0.1";
   const now = Date.now();
-  const entry = store.get(ip);
+  const key = `${category}:${ip}`;
+  const entry = store.get(key);
 
   if (!entry || entry.resetAt < now) {
-    store.set(ip, { count: 1, resetAt: now + WINDOW_MS });
+    store.set(key, { count: 1, resetAt: now + WINDOW_MS });
     return;
   }
 
-  if (entry.count >= MAX_REQUESTS) {
+  const limit = CATEGORY_LIMITS[category];
+
+  if (entry.count >= limit) {
     throw new BackendError(
       "Demasiadas peticiones. Intenta de nuevo mas tarde.",
       429,
@@ -47,10 +56,13 @@ export function checkRateLimit(request: Request) {
 }
 
 // Helper to wrap route handlers
-export function withRateLimit(handler: (req: NextRequest, ...args: unknown[]) => Promise<NextResponse>) {
+export function withRateLimit(
+  handler: (req: NextRequest, ...args: unknown[]) => Promise<NextResponse>,
+  category: RateLimitCategory = "api"
+) {
   return async (req: NextRequest, ...args: unknown[]) => {
     try {
-      checkRateLimit(req);
+      checkRateLimit(req, category);
     } catch (error) {
       if (error instanceof BackendError && error.statusCode === 429) {
         return NextResponse.json(

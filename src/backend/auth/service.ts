@@ -1,5 +1,7 @@
 import type { User } from "@supabase/supabase-js";
+import { cookies } from "next/headers";
 
+import { AUTH_VERIFIED_COOKIE } from "@/backend/auth/cookies";
 import {
   getAppUrl,
   getPasswordResetSessionTtlMinutes,
@@ -53,6 +55,10 @@ function normalizeEmail(value: unknown) {
     .toLowerCase()
     .trim();
 
+  if (email.length > 150) {
+    throw new BackendError("El correo es demasiado largo.", 400, "EMAIL_TOO_LONG");
+  }
+
   if (!email.includes("@")) {
     throw new BackendError("El correo no tiene un formato valido.", 400, "EMAIL_INVALID");
   }
@@ -72,6 +78,27 @@ function validatePassword(value: unknown) {
       "La contrasena debe tener al menos 8 caracteres.",
       400,
       "PASSWORD_TOO_SHORT",
+    );
+  }
+
+  if (password.length > 100) {
+    throw new BackendError(
+      "La contrasena es demasiado larga.",
+      400,
+      "PASSWORD_TOO_LONG",
+    );
+  }
+
+  const hasUpperCase = /[A-Z]/.test(password);
+  const hasLowerCase = /[a-z]/.test(password);
+  const hasNumbers = /\d/.test(password);
+  const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+  if (!hasUpperCase || !hasLowerCase || !hasNumbers || !hasSpecialChar) {
+    throw new BackendError(
+      "La contrasena debe incluir mayúsculas, minúsculas, números y caracteres especiales.",
+      400,
+      "PASSWORD_WEAK",
     );
   }
 
@@ -206,7 +233,7 @@ export async function ensureUserRecords(
   };
 }
 
-export async function getAuthenticatedUser() {
+export async function getAuthenticatedUser(options: { require2FA?: boolean } = { require2FA: true }) {
   const supabase = await createServerSupabaseClient();
   const {
     data: { user },
@@ -215,6 +242,13 @@ export async function getAuthenticatedUser() {
 
   if (error || !user) {
     throw new BackendError("Debes iniciar sesion.", 401, "UNAUTHENTICATED");
+  }
+
+  if (options.require2FA) {
+    const cookieStore = await cookies();
+    if (cookieStore.get(AUTH_VERIFIED_COOKIE)?.value !== "true") {
+      throw new BackendError("Requiere verificacion de segundo factor.", 403, "2FA_REQUIRED");
+    }
   }
 
   return { supabase, user };
@@ -320,6 +354,7 @@ async function consumeVerificationChallenge(input: {
     .from("codigos_verificacion")
     .select("id_codigo,id_usuario,expira_en")
     .eq("proposito", input.purpose)
+    .eq("usado", false)
     .gte("expira_en", new Date().toISOString())
     .limit(1);
 
@@ -358,17 +393,17 @@ async function consumeVerificationChallenge(input: {
     );
   }
 
-  const { error: deleteError } = await admin
+  const { error: updateError } = await admin
     .from("codigos_verificacion")
-    .delete()
+    .update({ usado: true, fecha_uso: new Date().toISOString() })
     .eq("id_codigo", data.id_codigo);
 
-  if (deleteError) {
+  if (updateError) {
     throw new BackendError(
       "No se pudo cerrar el codigo de verificacion.",
       500,
       "VERIFICATION_CODE_DELETE_FAILED",
-      deleteError.message,
+      updateError.message,
     );
   }
 
@@ -409,7 +444,15 @@ export async function registerWithPassword(input: RegisterInput) {
     input.fullName,
     "El nombre completo es obligatorio.",
     "FULL_NAME_REQUIRED",
-  );
+  ).trim();
+
+  if (fullName.length > 100) {
+    throw new BackendError(
+      "El nombre completo es demasiado largo.",
+      400,
+      "FULL_NAME_TOO_LONG"
+    );
+  }
   const email = normalizeEmail(input.email);
   const password = validatePassword(input.password);
   const supabase = await createServerSupabaseClient();
@@ -475,7 +518,7 @@ export async function loginWithPassword(input: LoginInput) {
 }
 
 export async function verifyLoginCode(input: VerificationInput) {
-  const { user } = await getAuthenticatedUser();
+  const { user } = await getAuthenticatedUser({ require2FA: false });
   await consumeVerificationChallenge({
     purpose: "login",
     userId: user.id,

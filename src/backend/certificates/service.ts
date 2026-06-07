@@ -3,6 +3,7 @@ import { getAuthenticatedUser } from "@/backend/auth/service";
 import { BackendError, assertRequired } from "@/backend/http/errors";
 import { createAdminSupabaseClient } from "@/backend/supabase/admin";
 import { sha256Hex } from "@/backend/utils/hash";
+import { sanitizeHtml } from "@/backend/utils/sanitize";
 
 import {
   getHoursRange,
@@ -270,18 +271,19 @@ export async function createCurrentUserCertificate(formData: FormData) {
     formData.get("horas") ?? formData.get("duracion_horas"),
     "La cantidad de horas",
   );
-  const title =
+  const title = sanitizeHtml(
     typeof formData.get("titulo_certificado") === "string" &&
     String(formData.get("titulo_certificado")).trim()
       ? String(formData.get("titulo_certificado")).trim()
-      : institutionName;
-  const description =
+      : institutionName
+  );
+  const description = sanitizeHtml(
     typeof formData.get("descripcion") === "string"
       ? String(formData.get("descripcion")).trim()
-      : null;
+      : null
+  );
   const fileEntry = formData.get("archivo");
-  const file = validatePdfFile(fileEntry instanceof File ? fileEntry : null);
-  const fileBuffer = await file.arrayBuffer();
+  const { file, buffer: fileBuffer } = await validatePdfFile(fileEntry instanceof File ? fileEntry : null);
   const institutionId = await getOrCreateInstitutionId(institutionName);
 
   const { data: certificate, error: certificateError } = await admin
@@ -367,6 +369,9 @@ export async function createCurrentUserCertificate(formData: FormData) {
   });
 
   if (fileError) {
+    await admin.storage.from(CERTIFICADOS_BUCKET).remove([storagePath]);
+    await admin.from("certificados").delete().eq("id_certificado", certificate.id_certificado);
+
     throw new BackendError(
       "No se pudo guardar la referencia del PDF.",
       500,

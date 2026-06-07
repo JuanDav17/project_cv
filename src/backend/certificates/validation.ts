@@ -44,7 +44,7 @@ export function parseModality(value: FormDataEntryValue | null): CertificateModa
     : "online";
 }
 
-export function validatePdfFile(file: File | null) {
+export async function validatePdfFile(file: File | null) {
   if (!file) {
     throw new BackendError("Debes adjuntar el PDF del certificado.", 400, "FILE_REQUIRED");
   }
@@ -61,7 +61,14 @@ export function validatePdfFile(file: File | null) {
     );
   }
 
-  return file;
+  const buffer = await file.arrayBuffer();
+  const bytes = new Uint8Array(buffer.slice(0, 4));
+  
+  if (bytes.length < 4 || bytes[0] !== 0x25 || bytes[1] !== 0x50 || bytes[2] !== 0x44 || bytes[3] !== 0x46) {
+    throw new BackendError("El archivo no es un PDF valido.", 400, "INVALID_FILE_CONTENT");
+  }
+
+  return { file, buffer };
 }
 
 export function sanitizeFileName(fileName: string) {
