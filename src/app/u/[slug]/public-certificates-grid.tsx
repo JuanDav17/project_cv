@@ -13,7 +13,7 @@ type CertificateProp = {
   entidad: string;
   duracion_horas: number;
   fecha_display: string;
-  archivo?: { url_firmada: string } | null;
+  archivo?: { url_firmada?: string } | null;
 };
 
 export function PublicCertificatesGrid({ certificados }: { certificados: CertificateProp[] }) {

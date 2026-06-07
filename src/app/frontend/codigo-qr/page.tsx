@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import QRCode from "qrcode";
 
@@ -119,9 +120,10 @@ export default function CodigoQrPage() {
             <article className="fp-card fp-qr-preview fp-stack-md">
               <div className="fp-qr-image-frame fp-stack-sm theme-primary">
                 {qrDataUrl ? (
-                  <img
+                  <Image
                     alt="QR Code Preview"
                     height={256}
+                    unoptimized
                     src={qrDataUrl}
                     width={256}
                   />

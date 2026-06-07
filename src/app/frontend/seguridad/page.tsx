@@ -48,7 +48,7 @@ export default function SeguridadPage() {
 
             <h2><MaterialIcon>cloud_done</MaterialIcon> Protección de Archivos (Storage)</h2>
             <p>
-              Los documentos y comprobantes físicos o digitales que subes a la plataforma se almacenan en buckets de almacenamiento en la nube protegidos y configurados con estrictas políticas de acceso. Los archivos marcados como "privados" requieren autenticación con tu cuenta para ser visualizados o descargados, garantizando que nadie sin autorización pueda acceder a ellos.
+              Los documentos y comprobantes físicos o digitales que subes a la plataforma se almacenan en buckets de almacenamiento en la nube protegidos y configurados con estrictas políticas de acceso. Los archivos marcados como &quot;privados&quot; requieren autenticación con tu cuenta para ser visualizados o descargados, garantizando que nadie sin autorización pueda acceder a ellos.
             </p>
 
             <h2><MaterialIcon>qr_code_scanner</MaterialIcon> Verificación Pública Segura</h2>

@@ -44,6 +44,63 @@ export function parseModality(value: FormDataEntryValue | null): CertificateModa
     : "online";
 }
 
+export function parseOptionalIssueDate(value: FormDataEntryValue | null) {
+  if (typeof value !== "string" || !value.trim()) {
+    return null;
+  }
+
+  const normalized = value.trim();
+
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(normalized)) {
+    throw new BackendError(
+      "La fecha de emision debe tener formato YYYY-MM-DD.",
+      400,
+      "INVALID_ISSUE_DATE",
+    );
+  }
+
+  const issueDate = new Date(`${normalized}T00:00:00.000Z`);
+
+  if (Number.isNaN(issueDate.getTime())) {
+    throw new BackendError(
+      "La fecha de emision no es valida.",
+      400,
+      "INVALID_ISSUE_DATE",
+    );
+  }
+
+  const today = new Date();
+  today.setUTCHours(23, 59, 59, 999);
+
+  if (issueDate > today) {
+    throw new BackendError(
+      "La fecha de emision no puede estar en el futuro.",
+      400,
+      "ISSUE_DATE_IN_FUTURE",
+    );
+  }
+
+  return normalized;
+}
+
+export function parseOptionalHexColor(value: FormDataEntryValue | null) {
+  if (typeof value !== "string" || !value.trim()) {
+    return null;
+  }
+
+  const color = value.trim();
+
+  if (!/^#[0-9A-Fa-f]{6}$/.test(color)) {
+    throw new BackendError(
+      "El color debe ser un hexadecimal valido.",
+      400,
+      "INVALID_COLOR",
+    );
+  }
+
+  return color;
+}
+
 export async function validatePdfFile(file: File | null) {
   if (!file) {
     throw new BackendError("Debes adjuntar el PDF del certificado.", 400, "FILE_REQUIRED");

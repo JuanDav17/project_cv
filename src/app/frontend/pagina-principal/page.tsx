@@ -169,10 +169,10 @@ export default function PaginaPrincipalPage() {
               </div>
             ) : (
               <div className="fp-certificates-grid" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))" }}>
-                {certificates.slice(0, 3).map((cert: any) => (
-                  <article key={cert.id_certificado} className="fp-cert-card" style={{ borderColor: cert.color }}>
+                {certificates.slice(0, 3).map((cert) => (
+                  <article key={cert.id_certificado} className="fp-cert-card" style={{ borderColor: cert.color ?? undefined }}>
                     <div className="fp-cert-card__image" style={{ backgroundColor: cert.color ? `${cert.color}22` : undefined }}>
-                      <MaterialIcon className="fp-cert-card__image-icon" style={{ color: cert.color }}>workspace_premium</MaterialIcon>
+                      <MaterialIcon className="fp-cert-card__image-icon" style={{ color: cert.color ?? undefined }}>workspace_premium</MaterialIcon>
                     </div>
                     <div className="fp-cert-card__content">
                       <h3 className="fp-headline-md" style={{ margin: 0, color: "var(--fp-on-surface)" }}>

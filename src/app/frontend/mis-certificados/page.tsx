@@ -6,6 +6,7 @@ import { me, type AuthProfile } from "@/lib/api/auth";
 import {
   listCertificates,
   deleteCertificate,
+  getCertificate,
   type CertificateDto,
 } from "@/lib/api/certificados";
 
@@ -24,7 +25,6 @@ interface CertificateExtended extends CertificateDto {
 export default function MisCertificadosPage() {
   const [certificates, setCertificates] = useState<CertificateExtended[]>([]);
   const [profile, setProfile] = useState<AuthProfile | null>(null);
-  const [userName, setUserName] = useState("Usuario");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -38,6 +38,7 @@ export default function MisCertificadosPage() {
   const [selectedCert, setSelectedCert] = useState<CertificateExtended | null>(null);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [detailsError, setDetailsError] = useState("");
 
   useEffect(() => {
     let isMounted = true;
@@ -47,7 +48,6 @@ export default function MisCertificadosPage() {
         if (!isMounted) return;
         setCertificates(certificateData as CertificateExtended[]);
         setProfile(profileData);
-        setUserName(profileData.nombre_completo || "Usuario");
       })
       .catch(() => {
         if (isMounted) {
@@ -75,6 +75,19 @@ export default function MisCertificadosPage() {
     const matchHoras = filters.horas ? cert.duracion_horas.toString() === filters.horas : true;
     return matchEntidad && matchTema && matchTipo && matchHoras;
   });
+
+  const handleSelectCertificate = async (cert: CertificateExtended) => {
+    setSelectedCert(cert);
+    setShowDeleteConfirm(false);
+    setDetailsError("");
+
+    try {
+      const fullCertificate = await getCertificate(cert.id_certificado);
+      setSelectedCert(fullCertificate as CertificateExtended);
+    } catch {
+      setDetailsError("No se pudo cargar el PDF firmado del certificado.");
+    }
+  };
 
   return (
     <section className="fp-page fp-page--shell">
@@ -158,9 +171,9 @@ export default function MisCertificadosPage() {
             <div className="fp-certificates-grid-container">
               <div className="fp-certificates-grid">
                 {filteredCertificates.map((cert) => (
-                  <article key={cert.id_certificado} className="fp-cert-card" style={{ borderColor: cert.color }}>
+                  <article key={cert.id_certificado} className="fp-cert-card" style={{ borderColor: cert.color ?? undefined }}>
                     <div className="fp-cert-card__image" style={{ backgroundColor: cert.color ? `${cert.color}22` : undefined }}>
-                      <MaterialIcon className="fp-cert-card__image-icon" style={{ color: cert.color }}>workspace_premium</MaterialIcon>
+                      <MaterialIcon className="fp-cert-card__image-icon" style={{ color: cert.color ?? undefined }}>workspace_premium</MaterialIcon>
                     </div>
                     <div className="fp-cert-card__content">
                       <h3 className="fp-headline-md" style={{ margin: 0, color: "var(--fp-on-surface)" }}>
@@ -183,7 +196,7 @@ export default function MisCertificadosPage() {
                         <button 
                           className="fp-button fp-button--secondary fp-button--full" 
                           type="button"
-                          onClick={() => setSelectedCert(cert)}
+                          onClick={() => handleSelectCertificate(cert)}
                         >
                           Ver Detalles
                         </button>
@@ -358,7 +371,7 @@ export default function MisCertificadosPage() {
                         setShowDeleteConfirm(false);
                       } catch (err) {
                         console.error("Error deleting certificate", err);
-                        alert("No se pudo eliminar el certificado.");
+                        setDetailsError("No se pudo eliminar el certificado.");
                       }
                     }}
                   >
@@ -390,6 +403,16 @@ export default function MisCertificadosPage() {
                     <p className="fp-body-md" style={{ margin: 0 }}>{selectedCert.duracion_horas} Horas</p>
                   </div>
                   <div>
+                    <span className="fp-label-sm fp-muted">Fecha de emision</span>
+                    <p className="fp-body-md" style={{ margin: 0 }}>{selectedCert.fecha_display}</p>
+                  </div>
+                  <div>
+                    <span className="fp-label-sm fp-muted">Visibilidad</span>
+                    <p className="fp-body-md" style={{ margin: 0 }}>
+                      {selectedCert.visibilidad === "publico" ? "Publico" : "Privado"}
+                    </p>
+                  </div>
+                  <div>
                     <span className="fp-label-sm fp-muted">Color Seleccionado</span>
                     <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "0.25rem" }}>
                       <div style={{ 
@@ -403,6 +426,13 @@ export default function MisCertificadosPage() {
                     </div>
                   </div>
                 </div>
+
+                {detailsError && (
+                  <div className="fp-alert fp-alert--warning" style={{ marginTop: "1rem" }}>
+                    <MaterialIcon>warning</MaterialIcon>
+                    <p className="fp-body-sm" style={{ margin: 0 }}>{detailsError}</p>
+                  </div>
+                )}
                 
                 <div style={{ marginTop: "1.5rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <button 
@@ -413,12 +443,25 @@ export default function MisCertificadosPage() {
                     <MaterialIcon>delete</MaterialIcon>
                     Borrar Certificado
                   </button>
-                  <button 
-                    className="fp-button fp-button--primary" 
-                    onClick={() => setSelectedCert(null)}
-                  >
-                    Cerrar
-                  </button>
+                  <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", justifyContent: "flex-end" }}>
+                    {selectedCert.archivo?.url_firmada && (
+                      <a
+                        className="fp-button fp-button--secondary"
+                        href={selectedCert.archivo.url_firmada}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        <MaterialIcon>picture_as_pdf</MaterialIcon>
+                        Ver PDF
+                      </a>
+                    )}
+                    <button 
+                      className="fp-button fp-button--primary" 
+                      onClick={() => setSelectedCert(null)}
+                    >
+                      Cerrar
+                    </button>
+                  </div>
                 </div>
               </>
             )}

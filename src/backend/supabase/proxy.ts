@@ -8,8 +8,11 @@ const PRIVATE_FRONTEND_PATHS = [
   "/frontend/pagina-principal",
   "/frontend/subir-certificado",
   "/frontend/mis-certificados",
+  "/frontend/dashboard",
   "/frontend/codigo-qr",
   "/frontend/mi-cuenta",
+  "/frontend/informacion-academica",
+  "/frontend/areas-interes",
 ];
 
 function isPrivateFrontendPath(pathname: string) {

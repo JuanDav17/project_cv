@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 
 import { getPublicProfileBySlug } from "@/backend/public/service";
@@ -90,9 +91,12 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
           <header className="fp-stack-sm">
             <div style={{ display: "flex", alignItems: "center", gap: "1rem", flexWrap: "wrap" }}>
               {perfil.avatar_url ? (
-                <img 
-                  src={perfil.avatar_url} 
-                  alt={perfil.nombre_completo} 
+                <Image
+                  src={perfil.avatar_url}
+                  alt={perfil.nombre_completo}
+                  width={64}
+                  height={64}
+                  unoptimized
                   style={{ width: "4rem", height: "4rem", borderRadius: "50%", objectFit: "cover" }} 
                 />
               ) : (
@@ -162,7 +166,7 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
               </div>
             )}
 
-            <PublicCertificatesGrid certificados={certificados as any} />
+            <PublicCertificatesGrid certificados={certificados} />
           </section>
         </section>
       </main>

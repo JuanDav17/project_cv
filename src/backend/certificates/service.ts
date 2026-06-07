@@ -8,6 +8,8 @@ import { sanitizeHtml } from "@/backend/utils/sanitize";
 import {
   getHoursRange,
   parseModality,
+  parseOptionalHexColor,
+  parseOptionalIssueDate,
   parsePositiveInteger,
   parseVisibility,
   sanitizeFileName,
@@ -271,12 +273,21 @@ export async function createCurrentUserCertificate(formData: FormData) {
     formData.get("horas") ?? formData.get("duracion_horas"),
     "La cantidad de horas",
   );
-  const title = sanitizeHtml(
-    typeof formData.get("titulo_certificado") === "string" &&
-    String(formData.get("titulo_certificado")).trim()
-      ? String(formData.get("titulo_certificado")).trim()
-      : institutionName
+  const titleInput = assertRequired(
+    formData.get("titulo_certificado") ?? formData.get("titulo"),
+    "El titulo del certificado es obligatorio.",
+    "CERTIFICATE_TITLE_REQUIRED",
   );
+
+  if (titleInput.length > 300) {
+    throw new BackendError(
+      "El titulo del certificado es demasiado largo.",
+      400,
+      "CERTIFICATE_TITLE_TOO_LONG",
+    );
+  }
+
+  const title = sanitizeHtml(titleInput) ?? titleInput;
   const description = sanitizeHtml(
     typeof formData.get("descripcion") === "string"
       ? String(formData.get("descripcion")).trim()
@@ -304,11 +315,7 @@ export async function createCurrentUserCertificate(formData: FormData) {
       duracion_horas: hours,
       rango_horas: getHoursRange(hours),
       modalidad: parseModality(formData.get("modalidad")),
-      fecha_emision:
-        typeof formData.get("fecha_emision") === "string" &&
-        String(formData.get("fecha_emision")).trim()
-          ? String(formData.get("fecha_emision")).trim()
-          : null,
+      fecha_emision: parseOptionalIssueDate(formData.get("fecha_emision")),
       visibilidad: parseVisibility(formData.get("visibilidad")),
       tema:
         typeof formData.get("tema") === "string"
@@ -318,10 +325,7 @@ export async function createCurrentUserCertificate(formData: FormData) {
         typeof formData.get("tipo_certificado") === "string"
           ? String(formData.get("tipo_certificado")).trim() || null
           : null,
-      color:
-        typeof formData.get("color") === "string"
-          ? String(formData.get("color")).trim() || null
-          : null,
+      color: parseOptionalHexColor(formData.get("color")),
     })
     .select("id_certificado")
     .single();
@@ -411,7 +415,9 @@ export async function deleteCurrentUserCertificate(id: string) {
     .eq("id_certificado", id);
 
   if (fileRecords && fileRecords.length > 0) {
-    const paths = fileRecords.map((f: any) => f.ruta_archivo);
+    const paths = (fileRecords as Array<{ ruta_archivo: string }>).map(
+      (file) => file.ruta_archivo,
+    );
     // Borrar del storage
     await admin.storage.from(CERTIFICADOS_BUCKET).remove(paths);
   }

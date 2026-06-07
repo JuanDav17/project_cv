@@ -25,7 +25,7 @@ El sistema permite a los profesionales crear una cuenta segura, subir sus diplom
 ## ⚙️ Funcionalidades Principales
 
 - **Sistema de Autenticación Completo:** Registro, inicio de sesión y recuperación de contraseñas.
-- **Verificación de 2 Pasos (2FA):** Integrada con Nodemailer para envíos de códigos seguros. Las rutas privadas están protegidas mediante validaciones de sesión y cookies `httpOnly`.
+- **Verificación de 2 Pasos (2FA):** Integrada con Resend para envíos de códigos seguros. Las rutas privadas están protegidas mediante validaciones de sesión y cookies `httpOnly`.
 - **Gestión de Perfil:** Interfaz intuitiva para la edición de los datos profesionales del usuario.
 - **Gestor de Certificados:** Subida directa de archivos a *Supabase Storage*, listado y administración de documentos académicos.
 - **Generación de Código QR:** Creación de un QR único vinculado al identificador (`slug`) del usuario en tiempo real.
@@ -49,13 +49,13 @@ El proyecto está construido bajo una arquitectura *Full-Stack* orientada a Serv
 | [React 19.2.4](https://react.dev/) | Biblioteca principal para la construcción de interfaces |
 | [TypeScript](https://www.typescriptlang.org/) | Tipado estático para código robusto y escalable |
 | [qrcode](https://www.npmjs.com/package/qrcode) | Motor de generación dinámica de códigos QR |
-| [React Icons](https://react-icons.github.io/react-icons/) | Paquete de iconografía optimizada |
+| [Lucide React](https://lucide.dev/) | Paquete de iconografía optimizada |
 
 ### Backend & Base de Datos
 | Tecnología | Descripción |
 |---|---|
 | [Supabase](https://supabase.com/) | Base de datos PostgreSQL, Auth y Storage (Buckets) |
-| [Nodemailer](https://nodemailer.com/) | Envío de correos transaccionales (OTP, reset) vía SMTP |
+| [Resend](https://resend.com/) | Envío de correos transaccionales (OTP, reset) |
 | [Vercel](https://vercel.com/) | Plataforma de despliegue nativa para Next.js |
 
 ---
@@ -67,7 +67,7 @@ El proyecto está construido bajo una arquitectura *Full-Stack* orientada a Serv
 - **Node.js** (versión compatible con Next.js 16) y **npm**
 - **Git** instalado
 - Una cuenta en **Supabase** (para BD, Auth y Storage)
-- Una cuenta de **Gmail** con una "Contraseña de aplicación" generada para Nodemailer
+- Una cuenta de **Resend** con una API key para correos transaccionales
 
 ### 2. Clonar el Repositorio
 
@@ -110,13 +110,9 @@ AUTH_CODE_LENGTH=7
 AUTH_DEV_FIXED_CODE=A1B2C3D
 PASSWORD_RESET_SESSION_TTL_MINUTES=10
 
-# Configuración de Gmail (Nodemailer)
-EMAIL_FROM="MyCertify <tu-correo@gmail.com>"
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=465
-SMTP_SECURE=true
-SMTP_USER=tu-correo@gmail.com
-SMTP_PASSWORD=xxxx xxxx xxxx xxxx
+# Configuración de Resend
+RESEND_API_KEY=re_xxxxxxxxxxxxxxxxx
+EMAIL_FROM="MyCertify <onboarding@resend.dev>"
 ```
 
 > ⚠️ **Seguridad:** Nunca expongas `SUPABASE_SECRET_KEY` o `SUPABASE_SERVICE_ROLE_KEY` en componentes que se rendericen en el cliente.
@@ -137,7 +133,7 @@ npm run dev
 
 Abre tu navegador en [http://localhost:3000/frontend](http://localhost:3000/frontend).
 
-> 💡 Si no configuraste el SMTP, el backend devolverá el código estático `A1B2C3D` para que puedas probar el flujo de login en desarrollo.
+> 💡 Si no configuraste Resend en desarrollo, el backend puede devolver y mostrar el código de prueba configurado en `AUTH_DEV_FIXED_CODE`.
 
 ### 7. Comandos Adicionales
 

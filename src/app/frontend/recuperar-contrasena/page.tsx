@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useCallback, useEffect, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -154,10 +155,13 @@ export default function RecuperarContrasenaPage() {
   return (
     <section className="fp-login-split">
       <aside className="fp-login-split__hero" aria-hidden="true">
-        <img
+        <Image
           className="fp-login-split__hero-img"
           src="/login-hero.png"
           alt=""
+          fill
+          sizes="(max-width: 768px) 100vw, 50vw"
+          priority
           draggable={false}
         />
         <div className="fp-login-split__hero-overlay" />
@@ -284,6 +288,27 @@ export default function RecuperarContrasenaPage() {
                   {loading ? "Validando..." : "Validar codigo"}
                 </button>
               </form>
+            )}
+
+            {step === "verify" && (devCode || devLink) && (
+              <div className="fp-alert" style={{ marginTop: "1rem" }}>
+                <MaterialIcon>info</MaterialIcon>
+                <p className="fp-body-sm" style={{ margin: 0 }}>
+                  Modo desarrollo: codigo <strong>{devCode}</strong>
+                  {devLink ? (
+                    <>
+                      {" "}
+                      o{" "}
+                      <Link className="fp-link fp-link--strong" href={devLink}>
+                        abrir enlace seguro
+                      </Link>
+                      .
+                    </>
+                  ) : (
+                    "."
+                  )}
+                </p>
+              </div>
             )}
 
             {step === "reset" && (

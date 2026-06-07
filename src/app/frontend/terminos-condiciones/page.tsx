@@ -37,7 +37,7 @@ export default function TerminosYCondicionesPage() {
           <article className="fp-legal-content">
             <h2>1. Aceptación de los Términos</h2>
             <p>
-              Al acceder y utilizar MyCertify ("la Plataforma"), usted acepta estar sujeto a estos Términos y Condiciones. Si no está de acuerdo con alguna parte de los términos, no podrá acceder a la Plataforma. Estos términos se aplican a todos los visitantes, usuarios y otras personas que accedan o utilicen el servicio.
+              Al acceder y utilizar MyCertify (&quot;la Plataforma&quot;), usted acepta estar sujeto a estos Términos y Condiciones. Si no está de acuerdo con alguna parte de los términos, no podrá acceder a la Plataforma. Estos términos se aplican a todos los visitantes, usuarios y otras personas que accedan o utilicen el servicio.
             </p>
 
             <h2>2. Descripción del Servicio</h2>
@@ -52,7 +52,7 @@ export default function TerminosYCondicionesPage() {
 
             <h2>4. Propiedad Intelectual y Contenido del Usuario</h2>
             <p>
-              Los certificados, archivos e información que usted sube ("Contenido del Usuario") siguen siendo de su propiedad. Al subir contenido, usted nos otorga una licencia limitada para almacenar, procesar y mostrar dicho contenido exclusivamente para la prestación del servicio. Usted garantiza que posee los derechos necesarios sobre los certificados que sube y que estos no infringen derechos de terceros ni constituyen documentos fraudulentos.
+              Los certificados, archivos e información que usted sube (&quot;Contenido del Usuario&quot;) siguen siendo de su propiedad. Al subir contenido, usted nos otorga una licencia limitada para almacenar, procesar y mostrar dicho contenido exclusivamente para la prestación del servicio. Usted garantiza que posee los derechos necesarios sobre los certificados que sube y que estos no infringen derechos de terceros ni constituyen documentos fraudulentos.
             </p>
 
             <h2>5. Privacidad y Protección de Datos</h2>
@@ -62,7 +62,7 @@ export default function TerminosYCondicionesPage() {
 
             <h2>6. Limitación de Responsabilidad</h2>
             <p>
-              MyCertify proporciona la plataforma "tal cual". No garantizamos que el servicio sea ininterrumpido, seguro o libre de errores. En ningún caso la Plataforma, sus directores, empleados o afiliados serán responsables de daños indirectos, incidentales, especiales o consecuentes que resulten del uso o la imposibilidad de usar el servicio.
+              MyCertify proporciona la plataforma &quot;tal cual&quot;. No garantizamos que el servicio sea ininterrumpido, seguro o libre de errores. En ningún caso la Plataforma, sus directores, empleados o afiliados serán responsables de daños indirectos, incidentales, especiales o consecuentes que resulten del uso o la imposibilidad de usar el servicio.
             </p>
           </article>
         </div>

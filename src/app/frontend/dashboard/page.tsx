@@ -35,6 +35,7 @@ ChartJS.register(
   Tooltip,
   Legend,
   ArcElement,
+  PolarAreaController,
   RadialLinearScale
 );
 
@@ -64,7 +65,7 @@ export default function DashboardPage() {
         const data = await listCertificates();
         if (!isMounted) return;
         setCertificates(data as CertificateExtended[]);
-      } catch (err: any) {
+      } catch (err: unknown) {
         if (!isMounted) return;
         console.error("Dashboard data load error:", err);
         setError("No se pudo cargar la información del panel.");

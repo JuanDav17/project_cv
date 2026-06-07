@@ -105,7 +105,7 @@ CREATE INDEX idx_carreras_nivel ON public.carreras(id_nivel);
 -- Tabla certificados
 CREATE TABLE certificados (
     id_certificado UUID PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-    id_usuario UUID NOT NULL REFERENCES public.usuarios(id_usuario),
+    id_usuario UUID NOT NULL REFERENCES public.usuarios(id_usuario) ON DELETE CASCADE,
     id_institucion UUID REFERENCES public.instituciones(id_institucion),
     titulo_certificado VARCHAR(300) NOT NULL,
     descripcion TEXT,
@@ -166,7 +166,7 @@ CREATE UNIQUE INDEX idx_perfiles_slug ON public.perfiles_usuario(slug_publico);
 -- Tabla archivos_certificado
 CREATE TABLE archivos_certificado (
     id_archivo UUID PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-    id_certificado UUID NOT NULL REFERENCES public.certificados(id_certificado),
+    id_certificado UUID NOT NULL REFERENCES public.certificados(id_certificado) ON DELETE CASCADE,
     nombre_archivo VARCHAR(255) NOT NULL,
     ruta_archivo VARCHAR(500) NOT NULL,
     tipo_mime VARCHAR(80) NOT NULL DEFAULT 'application/pdf',
@@ -181,22 +181,22 @@ CREATE INDEX idx_archivos_certificado ON public.archivos_certificado(id_certific
 
 -- Tabla certificado_etiquetas
 CREATE TABLE certificado_etiquetas (
-    id_certificado UUID NOT NULL REFERENCES public.certificados(id_certificado),
-    id_etiqueta UUID NOT NULL REFERENCES public.etiquetas(id_etiqueta),
+    id_certificado UUID NOT NULL REFERENCES public.certificados(id_certificado) ON DELETE CASCADE,
+    id_etiqueta UUID NOT NULL REFERENCES public.etiquetas(id_etiqueta) ON DELETE CASCADE,
     PRIMARY KEY (id_certificado, id_etiqueta)
 );
 
 -- Tabla certificado_carreras
 CREATE TABLE certificado_carreras (
-    id_certificado UUID NOT NULL REFERENCES public.certificados(id_certificado),
-    id_carrera UUID NOT NULL REFERENCES public.carreras(id_carrera),
+    id_certificado UUID NOT NULL REFERENCES public.certificados(id_certificado) ON DELETE CASCADE,
+    id_carrera UUID NOT NULL REFERENCES public.carreras(id_carrera) ON DELETE CASCADE,
     PRIMARY KEY (id_certificado, id_carrera)
 );
 
 -- Tabla certificado_areas
 CREATE TABLE certificado_areas (
-    id_certificado UUID NOT NULL REFERENCES public.certificados(id_certificado),
-    id_area UUID NOT NULL REFERENCES public.areas_conocimiento(id_area),
+    id_certificado UUID NOT NULL REFERENCES public.certificados(id_certificado) ON DELETE CASCADE,
+    id_area UUID NOT NULL REFERENCES public.areas_conocimiento(id_area) ON DELETE CASCADE,
     PRIMARY KEY (id_certificado, id_area)
 );
 

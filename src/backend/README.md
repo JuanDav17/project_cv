@@ -43,15 +43,13 @@ La recuperacion de contrasena usa el mismo mecanismo, pero al validar el codigo
 crea una sesion corta en `sesiones_recuperacion_contrasena`. Esa sesion se borra
 cuando la contrasena se actualiza.
 
-## Correos con Google
+## Correos con Resend
 
-Configura `.env.local` con las variables SMTP de Gmail. Para desarrollo la ruta
-mas simple es usar una contrasena de aplicacion de Google:
+Configura `.env.local` con las variables de Resend:
 
-- `SMTP_USER`: tu correo Gmail.
-- `SMTP_PASSWORD`: contrasena de aplicacion.
-- `EMAIL_FROM`: remitente visible.
+- `RESEND_API_KEY`: API key del proyecto en Resend.
+- `EMAIL_FROM`: remitente visible, por ejemplo `MyCertify <onboarding@resend.dev>`.
 
-Tambien puedes usar OAuth2 con `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` y
-`GOOGLE_REFRESH_TOKEN`; si existe `GOOGLE_REFRESH_TOKEN`, Nodemailer usara esa
-configuracion.
+En desarrollo, si no existe `RESEND_API_KEY`, el servicio no envia correo y la
+respuesta de la API puede incluir `devCode` y `devLink` para probar login y
+recuperacion de contrasena sin depender de entregabilidad real.

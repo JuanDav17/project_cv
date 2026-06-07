@@ -476,10 +476,28 @@ export async function registerWithPassword(input: RegisterInput) {
 
   const profile = await ensureUserRecords(data.user, { fullName });
 
+  if (data.session) {
+    const verification = await createVerificationChallenge({
+      userId: data.user.id,
+      email,
+      purpose: "login",
+      redirectPath: "/frontend/codigo",
+    });
+
+    return {
+      profile,
+      sessionReady: true,
+      emailConfirmationRequired: false,
+      requiresVerification: true,
+      ...verification,
+    };
+  }
+
   return {
     profile,
-    sessionReady: Boolean(data.session),
-    emailConfirmationRequired: !data.session,
+    sessionReady: false,
+    emailConfirmationRequired: true,
+    requiresVerification: false,
   };
 }
 
@@ -659,9 +677,43 @@ export async function getCurrentSessionProfile() {
   return ensureUserRecords(user);
 }
 
-export async function updateCurrentPassword(passwordInput: string) {
-  const password = validatePassword(passwordInput);
-  const { user } = await getAuthenticatedUser();
+export async function updateCurrentPassword(input: {
+  currentPassword?: unknown;
+  newPassword?: unknown;
+}) {
+  const currentPassword = assertRequired(
+    input.currentPassword,
+    "La contrasena actual es obligatoria.",
+    "CURRENT_PASSWORD_REQUIRED",
+  );
+  const password = validatePassword(input.newPassword);
+  const { supabase, user } = await getAuthenticatedUser();
+
+  if (!user.email) {
+    throw new BackendError(
+      "No se pudo validar el correo de la sesion.",
+      400,
+      "SESSION_EMAIL_MISSING",
+    );
+  }
+
+  const {
+    data: verificationData,
+    error: verificationError,
+  } = await supabase.auth.signInWithPassword({
+    email: user.email,
+    password: currentPassword,
+  });
+
+  if (verificationError || verificationData.user?.id !== user.id) {
+    throw new BackendError(
+      "La contrasena actual no es correcta.",
+      401,
+      "CURRENT_PASSWORD_INVALID",
+      verificationError?.message,
+    );
+  }
+
   const admin = createAdminSupabaseClient();
   
   const { error: updateError } = await admin.auth.admin.updateUserById(

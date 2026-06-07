@@ -108,8 +108,14 @@ export default function MiCuentaPage() {
     setPasswordSuccess("");
 
     const formData = new FormData(event.currentTarget);
+    const currentPassword = String(formData.get("currentPassword") ?? "");
     const newPassword = String(formData.get("newPassword") ?? "");
     const repeatPassword = String(formData.get("repeatPassword") ?? "");
+
+    if (!currentPassword) {
+      setPasswordError("Debes ingresar tu contrasena actual.");
+      return;
+    }
 
     if (newPassword !== repeatPassword) {
       setPasswordError("Las contraseñas nuevas no coinciden.");
@@ -126,19 +132,27 @@ export default function MiCuentaPage() {
       const res = await fetch("/api/auth/password", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password: newPassword }),
+        body: JSON.stringify({ currentPassword, newPassword }),
       });
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.message || "No se pudo actualizar la contraseña");
+        throw new Error(
+          data.error?.message ||
+            data.message ||
+            "No se pudo actualizar la contrasena",
+        );
       }
 
       setPasswordSuccess("Contraseña actualizada exitosamente.");
       setTimeout(() => setShowPasswordModal(false), 2000); // Close after 2s
       event.currentTarget.reset();
-    } catch (err: any) {
-      setPasswordError(err.message);
+    } catch (err: unknown) {
+      setPasswordError(
+        err instanceof Error
+          ? err.message
+          : "No se pudo actualizar la contrasena.",
+      );
     } finally {
       setIsUpdatingPassword(false);
     }
@@ -172,8 +186,10 @@ export default function MiCuentaPage() {
         setShowTitleModal(false);
         setTitleSuccess("");
       }, 2000);
-    } catch (err: any) {
-      setTitleError(err.message || "No se pudo actualizar el título.");
+    } catch (err: unknown) {
+      setTitleError(
+        err instanceof Error ? err.message : "No se pudo actualizar el titulo.",
+      );
     } finally {
       setIsUpdatingTitle(false);
     }

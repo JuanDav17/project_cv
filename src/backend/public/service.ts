@@ -3,6 +3,13 @@ import { BackendError } from "@/backend/http/errors";
 import { createAdminSupabaseClient } from "@/backend/supabase/admin";
 import { publicNameFromProfile } from "@/backend/utils/slug";
 
+export type PublicInterestArea = {
+  id: string;
+  label: string;
+  icon: string;
+  custom?: boolean;
+};
+
 type PublicProfileRecord = {
   id_usuario: string;
   nombres: string;
@@ -13,7 +20,11 @@ type PublicProfileRecord = {
   ciudad: string | null;
   pais: string | null;
   avatar_url: string | null;
-  areas_interes: Array<{ id: string; label: string; icon: string; custom?: boolean }> | null;
+  areas_interes: PublicInterestArea[] | null;
+};
+
+type InstitutionRelation = {
+  nombre_institucion: string | null;
 };
 
 type PublicCertificateRecord = {
@@ -25,7 +36,9 @@ type PublicCertificateRecord = {
   verificado_plataforma: boolean;
   destacado: boolean;
   fecha_creacion: string;
-  instituciones: { nombre_institucion: string | null } | null;
+  tema?: string | null;
+  tipo_certificado?: string | null;
+  instituciones: InstitutionRelation | InstitutionRelation[] | null;
   archivos_certificado?: Array<{
     id_archivo: string;
     nombre_archivo: string;
@@ -33,6 +46,33 @@ type PublicCertificateRecord = {
     tamano_bytes: number;
     es_actual: boolean;
   }> | null;
+};
+
+export type PublicCertificateDto = {
+  id_certificado: string;
+  titulo_certificado: string;
+  descripcion: string | null;
+  tema?: string | null;
+  tipo_certificado?: string | null;
+  entidad: string;
+  duracion_horas: number;
+  fecha_display: string;
+  verificado_plataforma: boolean;
+  destacado: boolean;
+  archivo: {
+    nombre_archivo: string;
+    tamano_bytes: number;
+    url_firmada?: string;
+  } | null;
+};
+
+export type PublicProfileDto = PublicProfileRecord & {
+  nombre_completo: string;
+};
+
+export type PublicProfilePayload = {
+  perfil: PublicProfileDto;
+  certificados: PublicCertificateDto[];
 };
 
 async function signedUrl(path: string) {
@@ -57,7 +97,19 @@ function displayDate(value: string | null, fallback: string) {
   }).format(date);
 }
 
-export async function getPublicProfileBySlug(slug: string) {
+function institutionName(
+  institutions: PublicCertificateRecord["instituciones"],
+) {
+  const institution = Array.isArray(institutions)
+    ? institutions[0]
+    : institutions;
+
+  return institution?.nombre_institucion ?? "Institucion no registrada";
+}
+
+export async function getPublicProfileBySlug(
+  slug: string,
+): Promise<PublicProfilePayload> {
   const admin = createAdminSupabaseClient();
   const { data: profile, error: profileError } = await admin
     .from("perfiles_usuario")
@@ -121,35 +173,36 @@ export async function getPublicProfileBySlug(slug: string) {
   }
 
   const publicCertificates = await Promise.all(
-    ((certificates ?? []) as unknown as any[]).map(async (certificate) => {
-      const currentFile =
-        certificate.archivos_certificado?.find((file: any) => file.es_actual) ?? null;
+    ((certificates ?? []) as unknown as PublicCertificateRecord[]).map(
+      async (certificate): Promise<PublicCertificateDto> => {
+        const currentFile =
+          certificate.archivos_certificado?.find((file) => file.es_actual) ??
+          null;
 
-      return {
-        id_certificado: certificate.id_certificado,
-        titulo_certificado: certificate.titulo_certificado,
-        descripcion: certificate.descripcion,
-        tema: certificate.tema,
-        tipo_certificado: certificate.tipo_certificado,
-        entidad:
-          certificate.instituciones?.nombre_institucion ??
-          "Institucion no registrada",
-        duracion_horas: certificate.duracion_horas,
-        fecha_display: displayDate(
-          certificate.fecha_emision,
-          certificate.fecha_creacion,
-        ),
-        verificado_plataforma: certificate.verificado_plataforma,
-        destacado: certificate.destacado,
-        archivo: currentFile
-          ? {
-              nombre_archivo: currentFile.nombre_archivo,
-              tamano_bytes: currentFile.tamano_bytes,
-              url_firmada: await signedUrl(currentFile.ruta_archivo),
-            }
-          : null,
-      };
-    }),
+        return {
+          id_certificado: certificate.id_certificado,
+          titulo_certificado: certificate.titulo_certificado,
+          descripcion: certificate.descripcion,
+          tema: certificate.tema,
+          tipo_certificado: certificate.tipo_certificado,
+          entidad: institutionName(certificate.instituciones),
+          duracion_horas: certificate.duracion_horas,
+          fecha_display: displayDate(
+            certificate.fecha_emision,
+            certificate.fecha_creacion,
+          ),
+          verificado_plataforma: certificate.verificado_plataforma,
+          destacado: certificate.destacado,
+          archivo: currentFile
+            ? {
+                nombre_archivo: currentFile.nombre_archivo,
+                tamano_bytes: currentFile.tamano_bytes,
+                url_firmada: await signedUrl(currentFile.ruta_archivo),
+              }
+            : null,
+        };
+      },
+    ),
   );
 
   return {

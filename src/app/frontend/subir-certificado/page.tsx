@@ -18,11 +18,14 @@ import "./page.css";
 export default function SubirCertificadoPage() {
   const [profile, setProfile] = useState<AuthProfile | null>(null);
   const [formData, setFormData] = useState({
+    titulo_certificado: "",
     entidad: "",
     tema: "",
     descripcion: "",
     tipo_certificado: "",
     horas: "",
+    fecha_emision: "",
+    visibilidad: "publico",
     color: "#4f46e5", // Default color
   });
   const [file, setFile] = useState<File | null>(null);
@@ -37,7 +40,9 @@ export default function SubirCertificadoPage() {
   }, []);
 
   // Manejador para los campos de texto obligatorios
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
@@ -74,7 +79,7 @@ export default function SubirCertificadoPage() {
     setSuccess(false);
 
     // 3. Verificación manual estricta de todos los campos obligatorios
-    if (!formData.entidad || !formData.horas || !file) {
+    if (!formData.titulo_certificado || !formData.entidad || !formData.horas || !file) {
       setError("Todos los campos marcados con asterisco (*) son completamente obligatorios.");
       return;
     }
@@ -83,20 +88,32 @@ export default function SubirCertificadoPage() {
 
     try {
       const payload = new FormData();
+      payload.append("titulo_certificado", formData.titulo_certificado);
       payload.append("entidad", formData.entidad);
       payload.append("tema", formData.tema);
       payload.append("descripcion", formData.descripcion);
       payload.append("tipo_certificado", formData.tipo_certificado);
       payload.append("horas", formData.horas);
+      payload.append("fecha_emision", formData.fecha_emision);
       payload.append("color", formData.color);
       payload.append("archivo", file);
-      payload.append("visibilidad", "publico");
+      payload.append("visibilidad", formData.visibilidad);
 
       await createCertificate(payload);
 
       setSuccess(true);
       // Limpieza del formulario tras éxito
-      setFormData({ entidad: "", tema: "", descripcion: "", tipo_certificado: "", horas: "", color: "#4f46e5" });
+      setFormData({
+        titulo_certificado: "",
+        entidad: "",
+        tema: "",
+        descripcion: "",
+        tipo_certificado: "",
+        horas: "",
+        fecha_emision: "",
+        visibilidad: "publico",
+        color: "#4f46e5",
+      });
       setFile(null);
     } catch (requestError) {
       setError(
@@ -170,6 +187,26 @@ export default function SubirCertificadoPage() {
               <h2 className="fp-headline-md" style={{ margin: 0 }}>Datos de la Certificación</h2>
 
               <div className="fp-field">
+                <label className="fp-field__label fp-label-md" htmlFor="titulo_certificado">
+                  Titulo del Certificado *
+                </label>
+                <div className="fp-input-wrap">
+                  <span className="fp-input-icon"><MaterialIcon>workspace_premium</MaterialIcon></span>
+                  <input
+                    type="text"
+                    id="titulo_certificado"
+                    name="titulo_certificado"
+                    value={formData.titulo_certificado}
+                    onChange={handleInputChange}
+                    placeholder="Ej. React Avanzado, Scrum Master, Cloud Foundations"
+                    className="fp-input"
+                    maxLength={120}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="fp-field">
                 <label className="fp-field__label fp-label-md" htmlFor="entidad">
                   Entidad / Plataforma de Expedición *
                 </label>
@@ -217,7 +254,7 @@ export default function SubirCertificadoPage() {
                     id="descripcion"
                     name="descripcion"
                     value={formData.descripcion}
-                    onChange={(e: any) => handleInputChange(e)}
+                    onChange={handleInputChange}
                     placeholder="Breve descripción del curso..."
                     className="fp-input"
                     style={{ minHeight: "80px", resize: "vertical" }}
@@ -236,7 +273,7 @@ export default function SubirCertificadoPage() {
                     id="tipo_certificado"
                     name="tipo_certificado"
                     value={formData.tipo_certificado}
-                    onChange={(e: any) => handleInputChange(e)}
+                    onChange={handleInputChange}
                     className="fp-input"
                   >
                     <option value="" disabled>Selecciona un tipo</option>
@@ -266,6 +303,42 @@ export default function SubirCertificadoPage() {
                     required
                     min="1"
                   />
+                </div>
+              </div>
+
+              <div className="fp-field">
+                <label className="fp-field__label fp-label-md" htmlFor="fecha_emision">
+                  Fecha de Emision
+                </label>
+                <div className="fp-input-wrap">
+                  <span className="fp-input-icon"><MaterialIcon>event</MaterialIcon></span>
+                  <input
+                    type="date"
+                    id="fecha_emision"
+                    name="fecha_emision"
+                    value={formData.fecha_emision}
+                    onChange={handleInputChange}
+                    className="fp-input"
+                  />
+                </div>
+              </div>
+
+              <div className="fp-field">
+                <label className="fp-field__label fp-label-md" htmlFor="visibilidad">
+                  Visibilidad
+                </label>
+                <div className="fp-input-wrap">
+                  <span className="fp-input-icon"><MaterialIcon>visibility</MaterialIcon></span>
+                  <select
+                    id="visibilidad"
+                    name="visibilidad"
+                    value={formData.visibilidad}
+                    onChange={handleInputChange}
+                    className="fp-input"
+                  >
+                    <option value="publico">Publico en mi perfil QR</option>
+                    <option value="privado">Privado en mi cuenta</option>
+                  </select>
                 </div>
               </div>
 

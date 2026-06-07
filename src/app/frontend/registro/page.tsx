@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -42,8 +43,14 @@ export default function RegistroPage() {
         password: String(formData.get("password") ?? ""),
       });
 
-      if (response.sessionReady) {
-        router.push("/frontend/informacion-academica");
+      if (response.sessionReady && response.requiresVerification) {
+        if (response.devCode) {
+          sessionStorage.setItem("mycertify-dev-code", response.devCode);
+        } else {
+          sessionStorage.removeItem("mycertify-dev-code");
+        }
+
+        router.push("/frontend/codigo");
         return;
       }
 
@@ -64,10 +71,13 @@ export default function RegistroPage() {
   return (
     <section className="fp-register-split">
       <aside className="fp-register-split__hero" aria-hidden="true">
-        <img
+        <Image
           className="fp-register-split__hero-img"
           src="/register-hero.png"
           alt=""
+          fill
+          sizes="(max-width: 768px) 100vw, 50vw"
+          priority
           draggable={false}
         />
         <div className="fp-register-split__hero-overlay" />

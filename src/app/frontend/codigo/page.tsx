@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useCallback, useEffect, useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
@@ -75,10 +76,13 @@ export default function CodigoPage() {
   return (
     <section className="fp-login-split">
       <aside className="fp-login-split__hero" aria-hidden="true">
-        <img
+        <Image
           className="fp-login-split__hero-img"
           src="/login-hero.png"
           alt=""
+          fill
+          sizes="(max-width: 768px) 100vw, 50vw"
+          priority
           draggable={false}
         />
         <div className="fp-login-split__hero-overlay" />
@@ -170,6 +174,15 @@ export default function CodigoPage() {
                   </p>
                 )}
               </div>
+
+              {devCode && (
+                <div className="fp-alert">
+                  <MaterialIcon>info</MaterialIcon>
+                  <p className="fp-body-sm" style={{ margin: 0 }}>
+                    Modo desarrollo: usa el codigo <strong>{devCode}</strong>.
+                  </p>
+                </div>
+              )}
 
               <button
                 className="fp-button fp-button--primary fp-button--full"

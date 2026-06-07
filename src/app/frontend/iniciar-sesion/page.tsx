@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -53,10 +54,13 @@ export default function IniciarSesionPage() {
   return (
     <section className="fp-login-split">
       <aside className="fp-login-split__hero" aria-hidden="true">
-        <img
+        <Image
           className="fp-login-split__hero-img"
           src="/login-hero.png"
           alt=""
+          fill
+          sizes="(max-width: 768px) 100vw, 50vw"
+          priority
           draggable={false}
         />
         <div className="fp-login-split__hero-overlay" />

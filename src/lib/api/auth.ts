@@ -8,6 +8,11 @@ export type RegisterResponse = {
   profile: AuthProfile;
   sessionReady: boolean;
   emailConfirmationRequired: boolean;
+  requiresVerification: boolean;
+  expiresAt?: string;
+  emailSent?: boolean;
+  devCode?: string;
+  devLink?: string;
 };
 
 export type LoginResponse = {

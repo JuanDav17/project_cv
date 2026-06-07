@@ -158,7 +158,7 @@ export default function InformacionAcademicaPage() {
                 />
               </div>
               <p className="fp-body-sm fp-muted" style={{ margin: 0 }}>
-                Este título aparecerá en tu perfil público como "Título Profesional".
+                Este título aparecerá en tu perfil público como &quot;Título Profesional&quot;.
               </p>
             </div>
 
