@@ -11,6 +11,11 @@ import {
 } from "@/backend/config/env";
 import { sendVerificationEmail } from "@/backend/email/service";
 import { BackendError, assertRequired } from "@/backend/http/errors";
+import {
+  assertLoginNotLocked,
+  clearLoginFailures,
+  recordFailedLogin,
+} from "@/backend/http/rate-limit";
 import { createAdminSupabaseClient } from "@/backend/supabase/admin";
 import { createServerSupabaseClient } from "@/backend/supabase/server";
 import {
@@ -503,7 +508,13 @@ export async function registerWithPassword(input: RegisterInput) {
 
 export async function loginWithPassword(input: LoginInput) {
   const email = normalizeEmail(input.email);
-  const password = validatePassword(input.password);
+  const password = assertRequired(
+    input.password,
+    "La contrasena es obligatoria.",
+    "PASSWORD_REQUIRED",
+  );
+  await assertLoginNotLocked(email);
+
   const supabase = await createServerSupabaseClient();
 
   const { data, error } = await supabase.auth.signInWithPassword({
@@ -512,13 +523,17 @@ export async function loginWithPassword(input: LoginInput) {
   });
 
   if (error || !data.user) {
+    const failure = await recordFailedLogin(email);
+
     throw new BackendError(
-      "Correo o contrasena incorrectos.",
+      `Correo o contrasena incorrectos. Te quedan ${failure.remainingAttempts} intento(s).`,
       401,
       "LOGIN_FAILED",
       error?.message,
     );
   }
+
+  await clearLoginFailures(email);
 
   const profile = await ensureUserRecords(data.user);
   const verification = await createVerificationChallenge({

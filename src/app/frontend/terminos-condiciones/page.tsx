@@ -1,10 +1,18 @@
 import Link from "next/link";
 import { FrontendFooter } from "../_components/footer";
+import {
+  resolveLegalReturnHref,
+  type LegalPageProps,
+} from "../_components/legal-return";
 import { MaterialIcon } from "../_components/material-icon";
 import { ThemeToggle } from "../_components/theme-toggle";
 import "./page.css";
 
-export default function TerminosYCondicionesPage() {
+export default async function TerminosYCondicionesPage({
+  searchParams,
+}: LegalPageProps) {
+  const backHref = await resolveLegalReturnHref(searchParams);
+
   return (
     <section className="fp-page" style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
       {/* Navbar Pública */}
@@ -17,7 +25,7 @@ export default function TerminosYCondicionesPage() {
         </Link>
         <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
           <ThemeToggle />
-          <Link href="/frontend" className="fp-button fp-button--secondary fp-button--sm">
+          <Link href={backHref} className="fp-button fp-button--secondary fp-button--sm">
             <MaterialIcon>arrow_back</MaterialIcon> Volver
           </Link>
         </div>

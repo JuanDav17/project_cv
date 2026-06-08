@@ -168,7 +168,7 @@ export default function FrontendIndexPage() {
         </section>
 
         {/* ─── Footer ─── */}
-        <footer className="fp-landing__footer">
+        <footer className="fp-landing__footer" id="contacto">
           <div className="fp-landing__footer-inner">
             <div className="fp-landing__footer-left">
               <div className="fp-brand fp-brand--footer">
@@ -182,10 +182,10 @@ export default function FrontendIndexPage() {
               </span>
             </div>
             <div className="fp-landing__footer-links fp-body-sm">
-              <Link href="/frontend/terminos-condiciones">Términos y Condiciones</Link>
-              <Link href="/frontend/terminos-servicio">Términos de Servicio</Link>
-              <Link href="/frontend/seguridad">Seguridad</Link>
-              <Link href="/frontend">Contacto</Link>
+              <Link href="/frontend/terminos-condiciones?from=%2Ffrontend">Términos y Condiciones</Link>
+              <Link href="/frontend/terminos-servicio?from=%2Ffrontend">Términos de Servicio</Link>
+              <Link href="/frontend/seguridad?from=%2Ffrontend">Seguridad</Link>
+              <Link href="/frontend#contacto">Contacto</Link>
               <a
                 href="https://github.com/JuanDav17/project_cv.git"
                 target="_blank"

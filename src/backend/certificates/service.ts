@@ -68,6 +68,71 @@ type CertificateRecord = {
   archivos_certificado?: FileRecord[] | null;
 };
 
+type CertificateUpdateInput = {
+  titulo_certificado?: unknown;
+  titulo?: unknown;
+  entidad?: unknown;
+  institucion?: unknown;
+  descripcion?: unknown;
+  tema?: unknown;
+  tipo_certificado?: unknown;
+  duracion_horas?: unknown;
+  horas?: unknown;
+  fecha_emision?: unknown;
+  visibilidad?: unknown;
+  color?: unknown;
+  modalidad?: unknown;
+};
+
+type CertificateUpdatePayload = {
+  id_institucion: string;
+  titulo_certificado: string;
+  descripcion: string | null;
+  duracion_horas: number;
+  rango_horas: string;
+  fecha_emision: string | null;
+  visibilidad: "publico" | "privado";
+  tema: string | null;
+  tipo_certificado: string | null;
+  color: string | null;
+  fecha_actualizacion: string;
+  modalidad?: string;
+};
+
+function toFormValue(value: unknown): FormDataEntryValue | null {
+  if (typeof value === "string") {
+    return value;
+  }
+
+  if (typeof value === "number") {
+    return String(value);
+  }
+
+  return null;
+}
+
+function optionalText(value: unknown, maxLength: number, field: string) {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const text = value.trim();
+
+  if (!text) {
+    return null;
+  }
+
+  if (text.length > maxLength) {
+    throw new BackendError(
+      `${field} es demasiado largo.`,
+      400,
+      "CERTIFICATE_FIELD_TOO_LONG",
+    );
+  }
+
+  return sanitizeHtml(text);
+}
+
 function getInstitutionName(record: CertificateRecord) {
   const institution = Array.isArray(record.instituciones)
     ? record.instituciones[0]
@@ -385,6 +450,100 @@ export async function createCurrentUserCertificate(formData: FormData) {
   }
 
   return getCurrentUserCertificate(certificate.id_certificado as string);
+}
+
+export async function updateCurrentUserCertificate(
+  id: string,
+  input: CertificateUpdateInput,
+) {
+  const { user } = await getAuthenticatedUser();
+  const admin = createAdminSupabaseClient();
+  const titleInput = assertRequired(
+    input.titulo_certificado ?? input.titulo,
+    "El titulo del certificado es obligatorio.",
+    "CERTIFICATE_TITLE_REQUIRED",
+  );
+  const institutionName = assertRequired(
+    input.entidad ?? input.institucion,
+    "La institucion es obligatoria.",
+    "INSTITUTION_REQUIRED",
+  );
+  const hours = parsePositiveInteger(
+    toFormValue(input.duracion_horas ?? input.horas),
+    "La cantidad de horas",
+  );
+
+  if (titleInput.length > 300) {
+    throw new BackendError(
+      "El titulo del certificado es demasiado largo.",
+      400,
+      "CERTIFICATE_TITLE_TOO_LONG",
+    );
+  }
+
+  if (institutionName.length > 200) {
+    throw new BackendError(
+      "La institucion es demasiado larga.",
+      400,
+      "INSTITUTION_TOO_LONG",
+    );
+  }
+
+  const { data: existing, error: lookupError } = await admin
+    .from("certificados")
+    .select("id_certificado")
+    .eq("id_certificado", id)
+    .eq("id_usuario", user.id)
+    .maybeSingle();
+
+  if (lookupError || !existing) {
+    throw new BackendError(
+      "Certificado no encontrado o no pertenece al usuario.",
+      404,
+      "CERTIFICATE_NOT_FOUND",
+      lookupError?.message,
+    );
+  }
+
+  const institutionId = await getOrCreateInstitutionId(institutionName);
+  const updatePayload: CertificateUpdatePayload = {
+    id_institucion: institutionId,
+    titulo_certificado: sanitizeHtml(titleInput) ?? titleInput,
+    descripcion: optionalText(input.descripcion, 5000, "La descripcion"),
+    duracion_horas: hours,
+    rango_horas: getHoursRange(hours),
+    fecha_emision: parseOptionalIssueDate(toFormValue(input.fecha_emision)),
+    visibilidad: parseVisibility(toFormValue(input.visibilidad)),
+    tema: optionalText(input.tema, 100, "El tema"),
+    tipo_certificado: optionalText(
+      input.tipo_certificado,
+      100,
+      "El tipo de certificado",
+    ),
+    color: parseOptionalHexColor(toFormValue(input.color)),
+    fecha_actualizacion: new Date().toISOString(),
+  };
+
+  if (input.modalidad != null) {
+    updatePayload.modalidad = parseModality(toFormValue(input.modalidad));
+  }
+
+  const { error } = await admin
+    .from("certificados")
+    .update(updatePayload)
+    .eq("id_certificado", id)
+    .eq("id_usuario", user.id);
+
+  if (error) {
+    throw new BackendError(
+      "No se pudo actualizar el certificado.",
+      500,
+      "CERTIFICATE_UPDATE_FAILED",
+      error.message,
+    );
+  }
+
+  return getCurrentUserCertificate(id);
 }
 
 export async function deleteCurrentUserCertificate(id: string) {

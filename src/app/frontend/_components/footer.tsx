@@ -1,15 +1,35 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+
+function legalHref(path: string, from: string) {
+  return `${path}?from=${encodeURIComponent(from)}`;
+}
 
 export function FrontendFooter() {
+  const pathname = usePathname();
+  const from =
+    pathname?.startsWith("/frontend") || pathname?.startsWith("/u/")
+      ? pathname
+      : "/frontend";
+
   return (
-    <footer className="fp-footer">
+    <footer className="fp-footer" id="contacto">
       <div className="fp-footer__inner">
         <div className="fp-footer__brand fp-label-md">MyCertify</div>
-        <div className="fp-body-sm">© 2024 MyCertify Precision Systems. All rights reserved.</div>
+        <div className="fp-body-sm">
+          © 2024 MyCertify Precision Systems. All rights reserved.
+        </div>
         <div className="fp-footer__links fp-body-sm">
-          <Link href="/frontend/terminos-condiciones">Términos y Condiciones</Link>
-          <Link href="/frontend/terminos-servicio">Términos de Servicio</Link>
-          <Link href="/frontend/seguridad">Seguridad</Link>
+          <Link href={legalHref("/frontend/terminos-condiciones", from)}>
+            Terminos y Condiciones
+          </Link>
+          <Link href={legalHref("/frontend/terminos-servicio", from)}>
+            Terminos de Servicio
+          </Link>
+          <Link href={legalHref("/frontend/seguridad", from)}>Seguridad</Link>
+          <Link href={`${from}#contacto`}>Contacto</Link>
           <a
             href="https://github.com/JuanDav17/project_cv.git"
             target="_blank"

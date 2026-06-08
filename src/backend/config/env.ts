@@ -76,6 +76,17 @@ export function getPasswordResetSessionTtlMinutes() {
   return Number.isFinite(value) && value > 0 ? value : 10;
 }
 
+export function getUpstashRedisEnv() {
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+
+  if (!url || !token || url.startsWith("<") || token.startsWith("<")) {
+    return null;
+  }
+
+  return { url, token };
+}
+
 export function hasEmailEnv() {
   return Boolean(process.env.RESEND_API_KEY);
 }

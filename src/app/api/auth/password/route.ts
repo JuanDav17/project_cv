@@ -4,7 +4,7 @@ import { checkRateLimit } from "@/backend/http/rate-limit";
 
 export async function PUT(request: Request) {
   return handleRoute(async () => {
-    checkRateLimit(request, "auth");
+    await checkRateLimit(request, "auth");
     const body = await request.json();
     return updateCurrentPassword({
       currentPassword: body.currentPassword,

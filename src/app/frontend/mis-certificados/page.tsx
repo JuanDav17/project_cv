@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState, ChangeEvent } from "react";
+import { useEffect, useState, ChangeEvent, FormEvent } from "react";
 
 import { me, type AuthProfile } from "@/lib/api/auth";
 import {
   listCertificates,
   deleteCertificate,
   getCertificate,
+  updateCertificate,
   type CertificateDto,
 } from "@/lib/api/certificados";
 
@@ -39,6 +40,8 @@ export default function MisCertificadosPage() {
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [detailsError, setDetailsError] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -80,12 +83,61 @@ export default function MisCertificadosPage() {
     setSelectedCert(cert);
     setShowDeleteConfirm(false);
     setDetailsError("");
+    setIsEditing(false);
 
     try {
       const fullCertificate = await getCertificate(cert.id_certificado);
       setSelectedCert(fullCertificate as CertificateExtended);
     } catch {
       setDetailsError("No se pudo cargar el PDF firmado del certificado.");
+    }
+  };
+
+  const closeDetailsModal = () => {
+    setSelectedCert(null);
+    setShowDeleteConfirm(false);
+    setDetailsError("");
+    setIsEditing(false);
+  };
+
+  const handleEditSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (!selectedCert) {
+      return;
+    }
+
+    const formData = new FormData(event.currentTarget);
+    setIsSavingEdit(true);
+    setDetailsError("");
+
+    try {
+      const updatedCertificate = await updateCertificate(selectedCert.id_certificado, {
+        titulo_certificado: String(formData.get("titulo_certificado") ?? ""),
+        entidad: String(formData.get("entidad") ?? ""),
+        descripcion: String(formData.get("descripcion") ?? ""),
+        tema: String(formData.get("tema") ?? ""),
+        tipo_certificado: String(formData.get("tipo_certificado") ?? ""),
+        duracion_horas: Number(formData.get("duracion_horas") ?? selectedCert.duracion_horas),
+        fecha_emision: String(formData.get("fecha_emision") ?? ""),
+        visibilidad:
+          formData.get("visibilidad") === "privado" ? "privado" : "publico",
+        color: String(formData.get("color") ?? ""),
+      });
+
+      setCertificates((prev) =>
+        prev.map((cert) =>
+          cert.id_certificado === updatedCertificate.id_certificado
+            ? (updatedCertificate as CertificateExtended)
+            : cert,
+        ),
+      );
+      setSelectedCert(updatedCertificate as CertificateExtended);
+      setIsEditing(false);
+    } catch {
+      setDetailsError("No se pudo actualizar el certificado.");
+    } finally {
+      setIsSavingEdit(false);
     }
   };
 
@@ -320,10 +372,7 @@ export default function MisCertificadosPage() {
 
       {/* Modal Detalles del Certificado */}
       {selectedCert && (
-        <div className="fp-modal-overlay" onClick={() => {
-          setSelectedCert(null);
-          setShowDeleteConfirm(false);
-        }}>
+        <div className="fp-modal-overlay" onClick={closeDetailsModal}>
           <div 
             className="fp-modal-content fp-stack-md" 
             onClick={(e) => e.stopPropagation()}
@@ -331,14 +380,15 @@ export default function MisCertificadosPage() {
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
               <h2 className="fp-headline-md" style={{ margin: 0 }}>
-                {showDeleteConfirm ? "Eliminar Certificado" : "Detalles del Certificado"}
+                {showDeleteConfirm
+                  ? "Eliminar Certificado"
+                  : isEditing
+                    ? "Editar Certificado"
+                    : "Detalles del Certificado"}
               </h2>
               <button 
                 className="fp-modal-close" 
-                onClick={() => {
-                  setSelectedCert(null);
-                  setShowDeleteConfirm(false);
-                }}
+                onClick={closeDetailsModal}
                 style={{ background: "transparent", border: "none", cursor: "pointer", color: "var(--fp-on-surface-variant)" }}
               >
                 <MaterialIcon>close</MaterialIcon>
@@ -353,6 +403,12 @@ export default function MisCertificadosPage() {
                     ¿Desea eliminar este certificado? Al hacerlo tendra que volver a subirlo si lo desea ver en este panel
                   </p>
                 </div>
+                {detailsError && (
+                  <div className="fp-alert fp-alert--warning">
+                    <MaterialIcon>warning</MaterialIcon>
+                    <p className="fp-body-sm" style={{ margin: 0 }}>{detailsError}</p>
+                  </div>
+                )}
                 <div style={{ display: "flex", gap: "1rem", marginTop: "1rem", justifyContent: "flex-end" }}>
                   <button 
                     className="fp-button fp-button--secondary" 
@@ -369,6 +425,7 @@ export default function MisCertificadosPage() {
                         setCertificates(prev => prev.filter(c => c.id_certificado !== selectedCert.id_certificado));
                         setSelectedCert(null);
                         setShowDeleteConfirm(false);
+                        setIsEditing(false);
                       } catch (err) {
                         console.error("Error deleting certificate", err);
                         setDetailsError("No se pudo eliminar el certificado.");
@@ -379,6 +436,182 @@ export default function MisCertificadosPage() {
                   </button>
                 </div>
               </div>
+            ) : isEditing ? (
+              <form className="fp-stack-md" onSubmit={handleEditSubmit} style={{ marginTop: "1rem" }}>
+                <div className="fp-edit-form__grid">
+                  <div className="fp-field fp-edit-form__full">
+                    <label className="fp-field__label fp-label-sm" htmlFor="edit-titulo">
+                      Titulo del certificado
+                    </label>
+                    <div className="fp-input-wrap">
+                      <input
+                        id="edit-titulo"
+                        name="titulo_certificado"
+                        className="fp-input"
+                        defaultValue={selectedCert.titulo_certificado}
+                        maxLength={300}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="fp-field fp-edit-form__full">
+                    <label className="fp-field__label fp-label-sm" htmlFor="edit-entidad">
+                      Entidad / Plataforma
+                    </label>
+                    <div className="fp-input-wrap">
+                      <input
+                        id="edit-entidad"
+                        name="entidad"
+                        className="fp-input"
+                        defaultValue={selectedCert.entidad}
+                        maxLength={200}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="fp-field">
+                    <label className="fp-field__label fp-label-sm" htmlFor="edit-tema">
+                      Tema
+                    </label>
+                    <div className="fp-input-wrap">
+                      <input
+                        id="edit-tema"
+                        name="tema"
+                        className="fp-input"
+                        defaultValue={selectedCert.tema ?? ""}
+                        maxLength={100}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="fp-field">
+                    <label className="fp-field__label fp-label-sm" htmlFor="edit-tipo">
+                      Tipo de certificado
+                    </label>
+                    <div className="fp-input-wrap">
+                      <select
+                        id="edit-tipo"
+                        name="tipo_certificado"
+                        className="fp-input"
+                        defaultValue={selectedCert.tipo_certificado ?? ""}
+                      >
+                        <option value="">Sin especificar</option>
+                        <option value="Masterclass">Masterclass</option>
+                        <option value="Jornadas">Jornadas</option>
+                        <option value="Curso introductorio">Curso introductorio</option>
+                        <option value="Curso especializado">Curso especializado</option>
+                        <option value="Diplomado">Diplomado</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="fp-field">
+                    <label className="fp-field__label fp-label-sm" htmlFor="edit-horas">
+                      Cantidad de horas
+                    </label>
+                    <div className="fp-input-wrap">
+                      <input
+                        id="edit-horas"
+                        name="duracion_horas"
+                        type="number"
+                        className="fp-input"
+                        defaultValue={selectedCert.duracion_horas}
+                        min={1}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="fp-field">
+                    <label className="fp-field__label fp-label-sm" htmlFor="edit-fecha">
+                      Fecha de emision
+                    </label>
+                    <div className="fp-input-wrap">
+                      <input
+                        id="edit-fecha"
+                        name="fecha_emision"
+                        type="date"
+                        className="fp-input"
+                        defaultValue={selectedCert.fecha_emision ?? ""}
+                        max={new Date().toISOString().slice(0, 10)}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="fp-field">
+                    <label className="fp-field__label fp-label-sm" htmlFor="edit-visibilidad">
+                      Visibilidad
+                    </label>
+                    <div className="fp-input-wrap">
+                      <select
+                        id="edit-visibilidad"
+                        name="visibilidad"
+                        className="fp-input"
+                        defaultValue={selectedCert.visibilidad}
+                      >
+                        <option value="publico">Publico</option>
+                        <option value="privado">Privado</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="fp-field">
+                    <label className="fp-field__label fp-label-sm" htmlFor="edit-color">
+                      Color
+                    </label>
+                    <div className="fp-input-wrap fp-color-input-wrap">
+                      <input
+                        id="edit-color"
+                        name="color"
+                        type="color"
+                        className="fp-input fp-color-input"
+                        defaultValue={selectedCert.color ?? "#6366F1"}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="fp-field fp-edit-form__full">
+                    <label className="fp-field__label fp-label-sm" htmlFor="edit-descripcion">
+                      Descripcion
+                    </label>
+                    <div className="fp-input-wrap">
+                      <textarea
+                        id="edit-descripcion"
+                        name="descripcion"
+                        className="fp-input"
+                        defaultValue={selectedCert.descripcion ?? ""}
+                        rows={4}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {detailsError && (
+                  <div className="fp-alert fp-alert--warning">
+                    <MaterialIcon>warning</MaterialIcon>
+                    <p className="fp-body-sm" style={{ margin: 0 }}>{detailsError}</p>
+                  </div>
+                )}
+
+                <div className="fp-modal-actions">
+                  <button
+                    className="fp-button fp-button--secondary"
+                    type="button"
+                    disabled={isSavingEdit}
+                    onClick={() => {
+                      setIsEditing(false);
+                      setDetailsError("");
+                    }}
+                  >
+                    Cancelar
+                  </button>
+                  <button className="fp-button fp-button--primary" type="submit" disabled={isSavingEdit}>
+                    {isSavingEdit ? "Guardando..." : "Guardar"}
+                  </button>
+                </div>
+              </form>
             ) : (
               <>
                 <div className="fp-stack-sm" style={{ marginTop: "1rem" }}>
@@ -434,34 +667,38 @@ export default function MisCertificadosPage() {
                   </div>
                 )}
                 
-                <div style={{ marginTop: "1.5rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <button 
-                    className="fp-button fp-button--ghost" 
+                <div className="fp-modal-actions">
+                  {selectedCert.archivo?.url_firmada && (
+                    <a
+                      className="fp-button fp-button--secondary"
+                      href={selectedCert.archivo.url_firmada}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <MaterialIcon>picture_as_pdf</MaterialIcon>
+                      Ver PDF
+                    </a>
+                  )}
+                  <button
+                    className="fp-button fp-button--secondary"
+                    type="button"
+                    onClick={() => {
+                      setIsEditing(true);
+                      setDetailsError("");
+                    }}
+                  >
+                    <MaterialIcon>edit</MaterialIcon>
+                    Editar
+                  </button>
+                  <button
+                    className="fp-button fp-button--ghost"
+                    type="button"
                     onClick={() => setShowDeleteConfirm(true)}
                     style={{ color: "var(--fp-error)" }}
                   >
                     <MaterialIcon>delete</MaterialIcon>
-                    Borrar Certificado
+                    Borrar
                   </button>
-                  <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", justifyContent: "flex-end" }}>
-                    {selectedCert.archivo?.url_firmada && (
-                      <a
-                        className="fp-button fp-button--secondary"
-                        href={selectedCert.archivo.url_firmada}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        <MaterialIcon>picture_as_pdf</MaterialIcon>
-                        Ver PDF
-                      </a>
-                    )}
-                    <button 
-                      className="fp-button fp-button--primary" 
-                      onClick={() => setSelectedCert(null)}
-                    >
-                      Cerrar
-                    </button>
-                  </div>
                 </div>
               </>
             )}

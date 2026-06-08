@@ -55,6 +55,8 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
 
   const { perfil, certificados } = data;
   const areas = perfil.areas_interes || [];
+  const profileReturnPath = `/u/${slug}`;
+  const encodedProfileReturnPath = encodeURIComponent(profileReturnPath);
 
   return (
     <section className="fp-page fp-landing">
@@ -172,7 +174,7 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
       </main>
 
       {/* ─── Footer ─── */}
-      <footer className="fp-landing__footer">
+      <footer className="fp-landing__footer" id="contacto">
         <div className="fp-landing__footer-inner">
           <div className="fp-landing__footer-left">
             <div className="fp-brand fp-brand--footer">
@@ -186,10 +188,10 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
             </span>
           </div>
           <div className="fp-landing__footer-links fp-body-sm">
-            <Link href="/frontend/terminos-condiciones">Términos y Condiciones</Link>
-            <Link href="/frontend/terminos-servicio">Términos de Servicio</Link>
-            <Link href="/frontend/seguridad">Seguridad</Link>
-            <Link href="/frontend">Contacto</Link>
+            <Link href={`/frontend/terminos-condiciones?from=${encodedProfileReturnPath}`}>Términos y Condiciones</Link>
+            <Link href={`/frontend/terminos-servicio?from=${encodedProfileReturnPath}`}>Términos de Servicio</Link>
+            <Link href={`/frontend/seguridad?from=${encodedProfileReturnPath}`}>Seguridad</Link>
+            <Link href={`${profileReturnPath}#contacto`}>Contacto</Link>
             <a
               href="https://github.com/JuanDav17/project_cv.git"
               target="_blank"

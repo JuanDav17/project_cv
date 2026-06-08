@@ -1,4 +1,8 @@
-import { getCurrentUserCertificate, deleteCurrentUserCertificate } from "@/backend/certificates/service";
+import {
+  deleteCurrentUserCertificate,
+  getCurrentUserCertificate,
+  updateCurrentUserCertificate,
+} from "@/backend/certificates/service";
 import { handleRoute } from "@/backend/http/responses";
 
 type RouteContext = {
@@ -20,3 +24,10 @@ export async function DELETE(_request: Request, context: RouteContext) {
   });
 }
 
+export async function PUT(request: Request, context: RouteContext) {
+  return handleRoute(async () => {
+    const { id } = await context.params;
+    const body = await request.json();
+    return updateCurrentUserCertificate(id, body);
+  });
+}

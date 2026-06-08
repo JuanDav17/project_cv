@@ -12,6 +12,36 @@ type VerificationEmailInput = {
   purpose: "login" | "password_reset";
 };
 
+function getResendErrorMessage(error: unknown) {
+  if (error && typeof error === "object" && "message" in error) {
+    const message = (error as { message?: unknown }).message;
+
+    if (typeof message === "string") {
+      return message;
+    }
+  }
+
+  return "Resend no pudo enviar el correo.";
+}
+
+function isResendTestingRecipientError(error: unknown) {
+  if (!error || typeof error !== "object") {
+    return false;
+  }
+
+  const resendError = error as { statusCode?: unknown; message?: unknown };
+  const statusCode = Number(resendError.statusCode);
+  const message =
+    typeof resendError.message === "string"
+      ? resendError.message.toLowerCase()
+      : "";
+
+  return (
+    statusCode === 403 &&
+    (message.includes("testing emails") || message.includes("verify a domain"))
+  );
+}
+
 export async function sendVerificationEmail(input: VerificationEmailInput) {
   if (!hasEmailEnv()) {
     if (process.env.NODE_ENV !== "production") {
@@ -55,12 +85,29 @@ export async function sendVerificationEmail(input: VerificationEmailInput) {
   });
 
   if (error) {
+    if (isResendTestingRecipientError(error)) {
+      const message =
+        "Resend esta en modo de prueba. Verifica un dominio en Resend y usa EMAIL_FROM con ese dominio para enviar codigos a otros destinatarios.";
+
+      if (process.env.NODE_ENV !== "production") {
+        console.warn(`${message} Correo omitido para ${input.to}.`);
+        return { skipped: true, reason: "resend_testing_recipient" };
+      }
+
+      throw new BackendError(
+        message,
+        500,
+        "RESEND_DOMAIN_NOT_VERIFIED",
+        getResendErrorMessage(error),
+      );
+    }
+
     console.error("Resend Error:", error);
     throw new BackendError(
       "Fallo el envio del correo mediante Resend.",
       500,
       "EMAIL_SEND_FAILED",
-      error.message
+      getResendErrorMessage(error)
     );
   }
 

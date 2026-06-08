@@ -1,9 +1,8 @@
-import { NextResponse, type NextRequest } from "next/server";
-import { BackendError } from "./errors";
+import { createHash } from "node:crypto";
 
-// Simple in-memory rate limiter for mitigating basic brute force attacks
-// In a serverless environment (like Vercel), this memory resets on cold starts.
-// For production with heavy traffic, a Redis-based limiter is recommended.
+import { getUpstashRedisEnv } from "@/backend/config/env";
+
+import { BackendError } from "./errors";
 
 type RateLimitCategory = "auth" | "api";
 
@@ -12,66 +11,231 @@ type RateLimitEntry = {
   resetAt: number;
 };
 
-const store = new Map<string, RateLimitEntry>();
-
-const WINDOW_MS = 15 * 60 * 1000; // 15 minutes
-
-const CATEGORY_LIMITS: Record<RateLimitCategory, number> = {
-  auth: 5,   // Strict limit for login/register to prevent brute force
-  api: 100,  // Loose limit for standard API calls to prevent DoS
+type LoginFailureEntry = {
+  count: number;
+  resetAt: number;
+  lockedUntil?: number;
 };
 
-export function checkRateLimit(request: Request, category: RateLimitCategory = "api") {
-  // Extraemos la IP previniendo spoofing de cabeceras X-Forwarded-For
-  let ip = request.headers.get("x-real-ip");
+const rateStore = new Map<string, RateLimitEntry>();
+const loginFailureStore = new Map<string, LoginFailureEntry>();
+
+const RATE_WINDOW_SECONDS = 15 * 60;
+const RATE_WINDOW_MS = RATE_WINDOW_SECONDS * 1000;
+const LOGIN_LOCK_SECONDS = 30 * 60;
+const LOGIN_LOCK_MS = LOGIN_LOCK_SECONDS * 1000;
+const MAX_LOGIN_ATTEMPTS = 4;
+
+const CATEGORY_LIMITS: Record<RateLimitCategory, number> = {
+  auth: 40,
+  api: 300,
+};
+
+function sha256(value: string) {
+  return createHash("sha256").update(value).digest("hex");
+}
+
+function identityKey(value: string) {
+  return sha256(value.trim().toLowerCase());
+}
+
+function getClientIp(request: Request) {
   const forwardedFor = request.headers.get("x-forwarded-for");
-  
-  if (!ip && forwardedFor) {
-    // Proxies seguros suelen sobreescribir o añadir la IP real al final o principio.
-    // Tomamos la primera IP de la cadena de forma limpia.
-    ip = forwardedFor.split(",")[0].trim();
+  const realIp = request.headers.get("x-real-ip");
+
+  return realIp ?? forwardedFor?.split(",")[0].trim() ?? "127.0.0.1";
+}
+
+async function redisCommand<T>(command: unknown[]): Promise<T | null> {
+  const env = getUpstashRedisEnv();
+
+  if (!env) {
+    return null;
   }
-  
-  ip = ip ?? "127.0.0.1";
+
+  const response = await fetch(env.url, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${env.token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(command),
+    cache: "no-store",
+  });
+
+  const payload = (await response.json()) as {
+    result?: T;
+    error?: string;
+  };
+
+  if (!response.ok || payload.error) {
+    throw new Error(payload.error ?? "Upstash Redis request failed.");
+  }
+
+  return payload.result ?? null;
+}
+
+async function redisAvailable() {
+  return Boolean(getUpstashRedisEnv());
+}
+
+export async function checkRateLimit(
+  request: Request,
+  category: RateLimitCategory = "api",
+  identifier?: string,
+) {
+  const ip = getClientIp(request);
+  const limit = CATEGORY_LIMITS[category];
+  const keyIdentity = identifier ? `${ip}:${identityKey(identifier)}` : ip;
+  const key = `mycertify:rate:${category}:${identityKey(keyIdentity)}`;
+
+  if (await redisAvailable()) {
+    try {
+      const count = Number(await redisCommand<number>(["INCR", key]));
+
+      if (count === 1) {
+        await redisCommand(["EXPIRE", key, RATE_WINDOW_SECONDS]);
+      }
+
+      if (count > limit) {
+        throw new BackendError(
+          "Demasiadas peticiones. Intenta de nuevo mas tarde.",
+          429,
+          "TOO_MANY_REQUESTS",
+        );
+      }
+
+      return;
+    } catch (error) {
+      if (error instanceof BackendError) {
+        throw error;
+      }
+    }
+  }
+
   const now = Date.now();
-  const key = `${category}:${ip}`;
-  const entry = store.get(key);
+  const entry = rateStore.get(key);
 
   if (!entry || entry.resetAt < now) {
-    store.set(key, { count: 1, resetAt: now + WINDOW_MS });
+    rateStore.set(key, { count: 1, resetAt: now + RATE_WINDOW_MS });
     return;
   }
-
-  const limit = CATEGORY_LIMITS[category];
 
   if (entry.count >= limit) {
     throw new BackendError(
       "Demasiadas peticiones. Intenta de nuevo mas tarde.",
       429,
-      "TOO_MANY_REQUESTS"
+      "TOO_MANY_REQUESTS",
     );
   }
 
   entry.count += 1;
 }
 
-// Helper to wrap route handlers
-export function withRateLimit(
-  handler: (req: NextRequest, ...args: unknown[]) => Promise<NextResponse>,
-  category: RateLimitCategory = "api"
-) {
-  return async (req: NextRequest, ...args: unknown[]) => {
+function loginKey(email: string) {
+  return `mycertify:login:${identityKey(email)}`;
+}
+
+function loginBlockedError(lockedUntil: number) {
+  throw new BackendError(
+    "Por medio de seguridad hemos bloqueado tu cuenta por 30 minutos.",
+    429,
+    "ACCOUNT_TEMPORARILY_LOCKED",
+    {
+      lockedUntil: new Date(lockedUntil).toISOString(),
+    },
+  );
+}
+
+export async function assertLoginNotLocked(email: string) {
+  const lockKey = `${loginKey(email)}:locked`;
+
+  if (await redisAvailable()) {
     try {
-      checkRateLimit(req, category);
-    } catch (error) {
-      if (error instanceof BackendError && error.statusCode === 429) {
-        return NextResponse.json(
-          { error: error.message, code: error.code },
-          { status: error.statusCode }
-        );
+      const lockedUntil = Number(await redisCommand<string | number>(["GET", lockKey]));
+
+      if (lockedUntil && lockedUntil > Date.now()) {
+        loginBlockedError(lockedUntil);
       }
-      throw error;
+
+      return;
+    } catch (error) {
+      if (error instanceof BackendError) {
+        throw error;
+      }
     }
-    return handler(req, ...args);
+  }
+
+  const entry = loginFailureStore.get(loginKey(email));
+
+  if (entry?.lockedUntil && entry.lockedUntil > Date.now()) {
+    loginBlockedError(entry.lockedUntil);
+  }
+}
+
+export async function recordFailedLogin(email: string) {
+  const baseKey = loginKey(email);
+  const attemptsKey = `${baseKey}:attempts`;
+  const lockKey = `${baseKey}:locked`;
+
+  if (await redisAvailable()) {
+    try {
+      const count = Number(await redisCommand<number>(["INCR", attemptsKey]));
+
+      if (count === 1) {
+        await redisCommand(["EXPIRE", attemptsKey, LOGIN_LOCK_SECONDS]);
+      }
+
+      if (count >= MAX_LOGIN_ATTEMPTS) {
+        const lockedUntil = Date.now() + LOGIN_LOCK_MS;
+        await redisCommand(["SET", lockKey, String(lockedUntil), "EX", LOGIN_LOCK_SECONDS]);
+        await redisCommand(["DEL", attemptsKey]);
+        loginBlockedError(lockedUntil);
+      }
+
+      return {
+        remainingAttempts: Math.max(0, MAX_LOGIN_ATTEMPTS - count),
+      };
+    } catch (error) {
+      if (error instanceof BackendError) {
+        throw error;
+      }
+    }
+  }
+
+  const now = Date.now();
+  const current = loginFailureStore.get(baseKey);
+  const entry =
+    !current || current.resetAt < now
+      ? { count: 0, resetAt: now + LOGIN_LOCK_MS }
+      : current;
+
+  entry.count += 1;
+
+  if (entry.count >= MAX_LOGIN_ATTEMPTS) {
+    entry.lockedUntil = now + LOGIN_LOCK_MS;
+    loginFailureStore.set(baseKey, entry);
+    loginBlockedError(entry.lockedUntil);
+  }
+
+  loginFailureStore.set(baseKey, entry);
+
+  return {
+    remainingAttempts: Math.max(0, MAX_LOGIN_ATTEMPTS - entry.count),
   };
+}
+
+export async function clearLoginFailures(email: string) {
+  const baseKey = loginKey(email);
+
+  if (await redisAvailable()) {
+    try {
+      await redisCommand(["DEL", `${baseKey}:attempts`, `${baseKey}:locked`]);
+      return;
+    } catch {
+      // Local fallback below still clears this instance.
+    }
+  }
+
+  loginFailureStore.delete(baseKey);
 }
