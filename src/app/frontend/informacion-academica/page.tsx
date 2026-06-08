@@ -4,6 +4,7 @@ import { useRef, useState, useEffect } from "react";
 import Link from "next/link";
 
 import { getProfile, updateProfile, type ProfileDto } from "@/lib/api/perfil";
+import { showErrorToast, showSuccessToast } from "@/lib/ui/toast";
 import { FlowForm } from "../_components/flow-form";
 import { FrontendFooter } from "../_components/footer";
 import { MaterialIcon } from "../_components/material-icon";
@@ -17,7 +18,6 @@ export default function InformacionAcademicaPage() {
   const educationRef = useRef<HTMLSelectElement>(null);
   const programRef = useRef<HTMLSelectElement>(null);
 
-  const [error, setError] = useState("");
   const [defaultCareer, setDefaultCareer] = useState("");
   const [currentProfile, setCurrentProfile] = useState<ProfileDto | null>(null);
 
@@ -39,7 +39,6 @@ export default function InformacionAcademicaPage() {
     const titulo = careerInputRef.current?.value?.trim() ?? "";
     if (!titulo) return; // Si no llenó, no guardamos (el campo no es obligatorio aquí)
 
-    setError("");
     try {
       if (currentProfile) {
         await updateProfile({
@@ -47,9 +46,11 @@ export default function InformacionAcademicaPage() {
           apellidos: currentProfile.apellidos,
           titulo_profesional: titulo,
         });
+        showSuccessToast("Titulo profesional actualizado.");
       }
     } catch {
-      setError("No se pudo guardar el título profesional. Intenta de nuevo.");
+      const message = "No se pudo guardar el titulo profesional.";
+      showErrorToast(message);
       throw new Error("save failed");
     }
   };
@@ -161,15 +162,6 @@ export default function InformacionAcademicaPage() {
                 Este título aparecerá en tu perfil público como &quot;Título Profesional&quot;.
               </p>
             </div>
-
-            {error && (
-              <div className="fp-alert fp-alert--error">
-                <MaterialIcon>error_outline</MaterialIcon>
-                <p className="fp-body-sm" style={{ margin: 0 }}>
-                  {error}
-                </p>
-              </div>
-            )}
 
             <div className="fp-divider" />
 

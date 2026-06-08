@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createPortal } from "react-dom";
 
 import { logout as logoutRequest } from "@/lib/api/auth";
+import { showErrorToast, showSuccessToast } from "@/lib/ui/toast";
 
 import { MaterialIcon } from "./material-icon";
 
@@ -18,6 +19,9 @@ export function LogoutButton() {
 
     try {
       await logoutRequest();
+      showSuccessToast("Sesion cerrada correctamente.");
+    } catch {
+      showErrorToast("No se pudo cerrar la sesion por completo.");
     } finally {
       router.push("/frontend/iniciar-sesion");
       router.refresh();

@@ -6,6 +6,11 @@ import Link from "next/link";
 import { me, type AuthProfile } from "@/lib/api/auth";
 import { createCertificate } from "@/lib/api/certificados";
 import { ApiError } from "@/lib/api/http";
+import {
+  showErrorToast,
+  showSuccessToast,
+  showWarningToast,
+} from "@/lib/ui/toast";
 
 import { DashboardSidebar } from "../_components/dashboard-sidebar";
 import { FrontendFooter } from "../_components/footer";
@@ -29,9 +34,7 @@ export default function SubirCertificadoPage() {
     color: "#4f46e5", // Default color
   });
   const [file, setFile] = useState<File | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
-  const [success, setSuccess] = useState(false);
 
   useEffect(() => {
     me()
@@ -49,15 +52,13 @@ export default function SubirCertificadoPage() {
 
   // Manejador y validador del archivo adjunto (Reglas de Negocio)
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setError(null);
-    setSuccess(false);
     const selectedFile = e.target.files?.[0];
 
     if (!selectedFile) return;
 
     // 1. Validar que sea un formato PDF obligatoriamente
     if (selectedFile.type !== "application/pdf") {
-      setError("El archivo seleccionado debe ser un documento en formato PDF.");
+      showWarningToast("El archivo seleccionado debe ser un PDF.");
       setFile(null);
       return;
     }
@@ -65,7 +66,7 @@ export default function SubirCertificadoPage() {
     // 2. Validar tamaño máximo (<= 1 MB)
     const MAX_SIZE_BYTES = 1 * 1024 * 1024; // 1,048,576 bytes
     if (selectedFile.size > MAX_SIZE_BYTES) {
-      setError("El archivo supera el límite permitido de 1 MB. Por favor, optimízalo.");
+      showWarningToast("El archivo supera el limite permitido de 1 MB.");
       setFile(null);
       return;
     }
@@ -75,12 +76,10 @@ export default function SubirCertificadoPage() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setError(null);
-    setSuccess(false);
 
     // 3. Verificación manual estricta de todos los campos obligatorios
     if (!formData.titulo_certificado || !formData.entidad || !formData.horas || !file) {
-      setError("Todos los campos marcados con asterisco (*) son completamente obligatorios.");
+      showWarningToast("Completa los campos obligatorios y adjunta el PDF.");
       return;
     }
 
@@ -101,7 +100,7 @@ export default function SubirCertificadoPage() {
 
       await createCertificate(payload);
 
-      setSuccess(true);
+      showSuccessToast("Certificado registrado exitosamente.");
       // Limpieza del formulario tras éxito
       setFormData({
         titulo_certificado: "",
@@ -116,7 +115,7 @@ export default function SubirCertificadoPage() {
       });
       setFile(null);
     } catch (requestError) {
-      setError(
+      showErrorToast(
         requestError instanceof ApiError
           ? requestError.message
           : "Ocurrió un error inesperado al procesar el certificado. Inténtalo de nuevo.",
@@ -386,22 +385,6 @@ export default function SubirCertificadoPage() {
                     </span>
                   </div>
                 </div>
-
-                {error && (
-                  <div className="fp-alert fp-alert--error">
-                    <MaterialIcon>error_outline</MaterialIcon>
-                    <p className="fp-body-sm" style={{ margin: 0 }}>{error}</p>
-                  </div>
-                )}
-
-                {success && (
-                  <div className="fp-alert fp-alert--success">
-                    <MaterialIcon>check_circle_outline</MaterialIcon>
-                    <p className="fp-body-sm" style={{ margin: 0 }}>
-                      ¡Certificado registrado exitosamente en la plataforma!
-                    </p>
-                  </div>
-                )}
 
                 <button
                   type="submit"

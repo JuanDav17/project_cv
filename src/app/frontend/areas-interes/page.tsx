@@ -5,6 +5,11 @@ import Link from "next/link";
 
 import { getProfile, updateProfile, type ProfileDto } from "@/lib/api/perfil";
 import { type InterestArea } from "@/lib/api/areas-interes";
+import {
+  showErrorToast,
+  showSuccessToast,
+  showWarningToast,
+} from "@/lib/ui/toast";
 
 import { CustomInterestDialog } from "../_components/custom-interest-dialog";
 import { FrontendFooter } from "../_components/footer";
@@ -119,6 +124,7 @@ export default function AreasInteresPage() {
   const handleBeforeSubmit = async () => {
     if (!canContinue) {
       setValidationError(true);
+      showWarningToast("Selecciona al menos 3 areas de interes.");
       throw new Error("not enough selections");
     }
 
@@ -131,11 +137,17 @@ export default function AreasInteresPage() {
     }));
     
     if (currentProfile) {
-      await updateProfile({
-        nombres: currentProfile.nombres,
-        apellidos: currentProfile.apellidos,
-        areas_interes: toSave,
-      });
+      try {
+        await updateProfile({
+          nombres: currentProfile.nombres,
+          apellidos: currentProfile.apellidos,
+          areas_interes: toSave,
+        });
+        showSuccessToast("Areas de interes actualizadas.");
+      } catch {
+        showErrorToast("No se pudieron guardar tus areas de interes.");
+        throw new Error("save failed");
+      }
     }
   };
 

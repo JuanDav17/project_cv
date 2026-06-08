@@ -7,6 +7,11 @@ import Link from "next/link";
 
 import { verifyCode } from "@/lib/api/auth";
 import { ApiError } from "@/lib/api/http";
+import {
+  showErrorToast,
+  showSuccessToast,
+  showWarningToast,
+} from "@/lib/ui/toast";
 
 import { MaterialIcon } from "../_components/material-icon";
 import { ThemeToggle } from "../_components/theme-toggle";
@@ -39,14 +44,16 @@ export default function CodigoPage() {
       await verifyCode(payload);
       sessionStorage.removeItem("mycertify-dev-code");
       setSuccess(true);
+      showSuccessToast("Codigo verificado. Redirigiendo...");
       router.push("/frontend/pagina-principal");
       router.refresh();
     } catch (requestError) {
-      setError(
+      const message =
         requestError instanceof ApiError
           ? requestError.message
-          : "Codigo invalido. Intentalo nuevamente.",
-      );
+          : "Codigo invalido. Intentalo nuevamente.";
+      setError(message);
+      showErrorToast(message);
     } finally {
       setLoading(false);
     }
@@ -66,7 +73,9 @@ export default function CodigoPage() {
     event.preventDefault();
 
     if (!code.trim()) {
-      setError("Por favor ingresa un codigo.");
+      const message = "Por favor ingresa un codigo.";
+      setError(message);
+      showWarningToast(message);
       return;
     }
 
@@ -157,22 +166,6 @@ export default function CodigoPage() {
                     autoCapitalize="characters"
                   />
                 </div>
-                {error && (
-                  <p
-                    className="fp-body-sm fp-error-message"
-                    style={{ color: "var(--fp-error)", marginTop: "0.5rem" }}
-                  >
-                    {error}
-                  </p>
-                )}
-                {success && (
-                  <p
-                    className="fp-body-sm fp-success-message"
-                    style={{ color: "var(--fp-primary)", marginTop: "0.5rem" }}
-                  >
-                    Codigo verificado. Redirigiendo...
-                  </p>
-                )}
               </div>
 
               {devCode && (

@@ -11,6 +11,11 @@ import {
   verifyPasswordReset,
 } from "@/lib/api/auth";
 import { ApiError } from "@/lib/api/http";
+import {
+  showErrorToast,
+  showSuccessToast,
+  showWarningToast,
+} from "@/lib/ui/toast";
 import { Eye, EyeOff } from "lucide-react";
 
 import { MaterialIcon } from "../_components/material-icon";
@@ -30,7 +35,6 @@ export default function RecuperarContrasenaPage() {
   const [devLink, setDevLink] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [tokenFromUrl] = useState(() =>
@@ -42,19 +46,19 @@ export default function RecuperarContrasenaPage() {
   const verifyToken = useCallback(async (token: string) => {
     setLoading(true);
     setError("");
-    setSuccess("");
 
     try {
       const response = await verifyPasswordReset({ token });
       setResetToken(response.resetToken);
       setStep("reset");
-      setSuccess("Codigo verificado. Ahora puedes crear una nueva contrasena.");
+      showSuccessToast("Codigo verificado. Crea una nueva contrasena.");
     } catch (requestError) {
-      setError(
+      const message =
         requestError instanceof ApiError
           ? requestError.message
-          : "Este enlace ya no se puede usar.",
-      );
+          : "Este enlace ya no se puede usar.";
+      setError(message);
+      showErrorToast(message);
     } finally {
       setLoading(false);
     }
@@ -74,7 +78,6 @@ export default function RecuperarContrasenaPage() {
     event.preventDefault();
     setLoading(true);
     setError("");
-    setSuccess("");
 
     const formData = new FormData(event.currentTarget);
     const nextEmail = String(formData.get("email") ?? "").trim();
@@ -85,15 +88,14 @@ export default function RecuperarContrasenaPage() {
       setDevCode(response.devCode ?? "");
       setDevLink(response.devLink ?? "");
       setStep("verify");
-      setSuccess(
-        "Si el correo existe en MyCertify, te enviamos un codigo de recuperacion.",
-      );
+      showSuccessToast("Si el correo existe, te enviamos un codigo.");
     } catch (requestError) {
-      setError(
+      const message =
         requestError instanceof ApiError
           ? requestError.message
-          : "No se pudo enviar el codigo.",
-      );
+          : "No se pudo enviar el codigo.";
+      setError(message);
+      showErrorToast(message);
     } finally {
       setLoading(false);
     }
@@ -103,19 +105,19 @@ export default function RecuperarContrasenaPage() {
     event.preventDefault();
     setLoading(true);
     setError("");
-    setSuccess("");
 
     try {
       const response = await verifyPasswordReset({ email, code });
       setResetToken(response.resetToken);
       setStep("reset");
-      setSuccess("Codigo verificado. Ahora puedes crear una nueva contrasena.");
+      showSuccessToast("Codigo verificado. Crea una nueva contrasena.");
     } catch (requestError) {
-      setError(
+      const message =
         requestError instanceof ApiError
           ? requestError.message
-          : "Este codigo ya no se puede usar.",
-      );
+          : "Este codigo ya no se puede usar.";
+      setError(message);
+      showErrorToast(message);
     } finally {
       setLoading(false);
     }
@@ -125,7 +127,6 @@ export default function RecuperarContrasenaPage() {
     event.preventDefault();
     setLoading(true);
     setError("");
-    setSuccess("");
 
     const formData = new FormData(event.currentTarget);
     const password = String(formData.get("password") ?? "");
@@ -133,20 +134,23 @@ export default function RecuperarContrasenaPage() {
 
     if (password !== passwordConfirm) {
       setLoading(false);
-      setError("Las contrasenas no coinciden.");
+      const message = "Las contrasenas no coinciden.";
+      setError(message);
+      showWarningToast(message);
       return;
     }
 
     try {
       await confirmPasswordReset({ resetToken, password });
       setStep("done");
-      setSuccess("Contrasena actualizada. Ya puedes iniciar sesion.");
+      showSuccessToast("Contrasena actualizada. Ya puedes iniciar sesion.");
     } catch (requestError) {
-      setError(
+      const message =
         requestError instanceof ApiError
           ? requestError.message
-          : "No se pudo actualizar la contraseña.",
-      );
+          : "No se pudo actualizar la contrasena.";
+      setError(message);
+      showErrorToast(message);
     } finally {
       setLoading(false);
     }
@@ -413,23 +417,6 @@ export default function RecuperarContrasenaPage() {
               </button>
             )}
 
-            {error && (
-              <div className="fp-alert fp-alert--error" style={{ marginTop: "1rem" }}>
-                <MaterialIcon>error_outline</MaterialIcon>
-                <p className="fp-body-sm" style={{ margin: 0 }}>
-                  {error}
-                </p>
-              </div>
-            )}
-
-            {success && (
-              <div className="fp-alert fp-alert--success" style={{ marginTop: "1rem" }}>
-                <MaterialIcon>check_circle_outline</MaterialIcon>
-                <p className="fp-body-sm" style={{ margin: 0 }}>
-                  {success}
-                </p>
-              </div>
-            )}
           </div>
         </div>
       </main>

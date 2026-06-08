@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 
 import { login } from "@/lib/api/auth";
 import { ApiError } from "@/lib/api/http";
+import { showErrorToast, showSuccessToast } from "@/lib/ui/toast";
 import { Eye, EyeOff } from "lucide-react";
 
 import { MaterialIcon } from "../_components/material-icon";
@@ -17,12 +18,10 @@ import "./page.css";
 export default function IniciarSesionPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setError("");
     setIsSubmitting(true);
 
     const formData = new FormData(event.currentTarget);
@@ -39,9 +38,10 @@ export default function IniciarSesionPage() {
         sessionStorage.removeItem("mycertify-dev-code");
       }
 
+      showSuccessToast("Sesion iniciada. Verifica tu codigo.");
       router.push("/frontend/codigo");
     } catch (requestError) {
-      setError(
+      showErrorToast(
         requestError instanceof ApiError
           ? requestError.message
           : "No se pudo iniciar sesion.",
@@ -179,15 +179,6 @@ export default function IniciarSesionPage() {
                   </button>
                 </div>
               </div>
-
-              {error && (
-                <div className="fp-alert fp-alert--error">
-                  <MaterialIcon>error_outline</MaterialIcon>
-                  <p className="fp-body-sm" style={{ margin: 0 }}>
-                    {error}
-                  </p>
-                </div>
-              )}
 
               <button
                 className="fp-button fp-button--primary fp-button--full"

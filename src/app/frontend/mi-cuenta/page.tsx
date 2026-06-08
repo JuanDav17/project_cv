@@ -6,6 +6,11 @@ import Link from "next/link";
 import { getProfile, updateProfile, type ProfileDto } from "@/lib/api/perfil";
 import { type InterestArea } from "@/lib/api/areas-interes";
 import { ApiError } from "@/lib/api/http";
+import {
+  showErrorToast,
+  showSuccessToast,
+  showWarningToast,
+} from "@/lib/ui/toast";
 import { Eye, EyeOff } from "lucide-react";
 
 import { DashboardSidebar } from "../_components/dashboard-sidebar";
@@ -48,11 +53,8 @@ export default function MiCuentaPage() {
   const [profile, setProfile] = useState<ProfileDto | null>(null);
   const [interests, setInterests] = useState<InterestArea[]>([]);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
-  const [passwordError, setPasswordError] = useState("");
-  const [passwordSuccess, setPasswordSuccess] = useState("");
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
 
@@ -62,8 +64,6 @@ export default function MiCuentaPage() {
 
   const [showTitleModal, setShowTitleModal] = useState(false);
   const [isUpdatingTitle, setIsUpdatingTitle] = useState(false);
-  const [titleError, setTitleError] = useState("");
-  const [titleSuccess, setTitleSuccess] = useState("");
 
   useEffect(() => {
     getProfile()
@@ -77,7 +77,6 @@ export default function MiCuentaPage() {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError("");
-    setSuccess("");
     setIsSaving(true);
 
     const formData = new FormData(event.currentTarget);
@@ -90,9 +89,9 @@ export default function MiCuentaPage() {
       });
 
       setProfile(updatedProfile);
-      setSuccess("Perfil actualizado correctamente.");
+      showSuccessToast("Perfil actualizado correctamente.");
     } catch (requestError) {
-      setError(
+      showErrorToast(
         requestError instanceof ApiError
           ? requestError.message
           : "No se pudo actualizar el perfil.",
@@ -104,8 +103,6 @@ export default function MiCuentaPage() {
 
   const handleUpdatePassword = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setPasswordError("");
-    setPasswordSuccess("");
 
     const formData = new FormData(event.currentTarget);
     const currentPassword = String(formData.get("currentPassword") ?? "");
@@ -113,17 +110,17 @@ export default function MiCuentaPage() {
     const repeatPassword = String(formData.get("repeatPassword") ?? "");
 
     if (!currentPassword) {
-      setPasswordError("Debes ingresar tu contrasena actual.");
+      showWarningToast("Debes ingresar tu contrasena actual.");
       return;
     }
 
     if (newPassword !== repeatPassword) {
-      setPasswordError("Las contraseñas nuevas no coinciden.");
+      showWarningToast("Las contrasenas nuevas no coinciden.");
       return;
     }
 
     if (newPassword.length < 8) {
-      setPasswordError("La contraseña debe tener al menos 8 caracteres.");
+      showWarningToast("La contrasena debe tener al menos 8 caracteres.");
       return;
     }
 
@@ -144,11 +141,11 @@ export default function MiCuentaPage() {
         );
       }
 
-      setPasswordSuccess("Contraseña actualizada exitosamente.");
-      setTimeout(() => setShowPasswordModal(false), 2000); // Close after 2s
+      showSuccessToast("Contrasena actualizada exitosamente.");
+      setShowPasswordModal(false);
       event.currentTarget.reset();
     } catch (err: unknown) {
-      setPasswordError(
+      showErrorToast(
         err instanceof Error
           ? err.message
           : "No se pudo actualizar la contrasena.",
@@ -160,15 +157,13 @@ export default function MiCuentaPage() {
 
   const handleUpdateTitle = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setTitleError("");
-    setTitleSuccess("");
     setIsUpdatingTitle(true);
 
     const formData = new FormData(event.currentTarget);
     const newTitle = String(formData.get("newTitle") ?? "").trim();
 
     if (!newTitle) {
-      setTitleError("El nuevo título no puede estar vacío.");
+      showWarningToast("El nuevo titulo no puede estar vacio.");
       setIsUpdatingTitle(false);
       return;
     }
@@ -181,13 +176,10 @@ export default function MiCuentaPage() {
       });
 
       setProfile(updatedProfile);
-      setTitleSuccess("Título actualizado exitosamente.");
-      setTimeout(() => {
-        setShowTitleModal(false);
-        setTitleSuccess("");
-      }, 2000);
+      showSuccessToast("Titulo actualizado exitosamente.");
+      setShowTitleModal(false);
     } catch (err: unknown) {
-      setTitleError(
+      showErrorToast(
         err instanceof Error ? err.message : "No se pudo actualizar el titulo.",
       );
     } finally {
@@ -335,7 +327,7 @@ export default function MiCuentaPage() {
                       ¿Quieres actualizar tu título?{" "}
                       <button
                         type="button"
-                        onClick={() => { setTitleError(""); setTitleSuccess(""); setShowTitleModal(true); }}
+                        onClick={() => setShowTitleModal(true)}
                         className="fp-link"
                         style={{ background: "none", border: "none", padding: 0, font: "inherit", cursor: "pointer" }}
                       >
@@ -351,17 +343,10 @@ export default function MiCuentaPage() {
                     </div>
                   )}
 
-                  {success && (
-                    <div className="fp-alert fp-alert--success">
-                      <MaterialIcon>check_circle_outline</MaterialIcon>
-                      <p className="fp-body-sm" style={{ margin: 0 }}>{success}</p>
-                    </div>
-                  )}
-
                   <div className="fp-divider" />
 
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1rem" }}>
-                    <button type="button" className="fp-button fp-button--ghost" onClick={() => { setPasswordError(""); setPasswordSuccess(""); setShowPasswordModal(true); }}>
+                    <button type="button" className="fp-button fp-button--ghost" onClick={() => setShowPasswordModal(true)}>
                       <MaterialIcon>lock</MaterialIcon>
                       Actualizar contraseña
                     </button>
@@ -556,20 +541,6 @@ export default function MiCuentaPage() {
                 </div>
               </div>
 
-              {passwordError && (
-                <div className="fp-alert fp-alert--error">
-                  <MaterialIcon>error_outline</MaterialIcon>
-                  <p className="fp-body-sm" style={{ margin: 0 }}>{passwordError}</p>
-                </div>
-              )}
-
-              {passwordSuccess && (
-                <div className="fp-alert fp-alert--success">
-                  <MaterialIcon>check_circle_outline</MaterialIcon>
-                  <p className="fp-body-sm" style={{ margin: 0 }}>{passwordSuccess}</p>
-                </div>
-              )}
-
               <div style={{ display: "flex", justifyContent: "flex-end", gap: "1rem", marginTop: "1rem" }}>
                 <button
                   type="button"
@@ -639,20 +610,6 @@ export default function MiCuentaPage() {
                   required
                 />
               </div>
-
-              {titleError && (
-                <div className="fp-alert fp-alert--error">
-                  <MaterialIcon>error_outline</MaterialIcon>
-                  <p className="fp-body-sm" style={{ margin: 0 }}>{titleError}</p>
-                </div>
-              )}
-
-              {titleSuccess && (
-                <div className="fp-alert fp-alert--success">
-                  <MaterialIcon>check_circle_outline</MaterialIcon>
-                  <p className="fp-body-sm" style={{ margin: 0 }}>{titleSuccess}</p>
-                </div>
-              )}
 
               <div style={{ display: "flex", justifyContent: "flex-end", gap: "1rem", marginTop: "1rem" }}>
                 <button

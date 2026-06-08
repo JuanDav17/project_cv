@@ -7,6 +7,11 @@ import { useRouter } from "next/navigation";
 
 import { register } from "@/lib/api/auth";
 import { ApiError } from "@/lib/api/http";
+import {
+  showErrorToast,
+  showSuccessToast,
+  showWarningToast,
+} from "@/lib/ui/toast";
 import { Eye, EyeOff } from "lucide-react";
 
 import { MaterialIcon } from "../_components/material-icon";
@@ -17,20 +22,16 @@ import "./page.css";
 export default function RegistroPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setError("");
-    setSuccess("");
 
     const formData = new FormData(event.currentTarget);
     const acceptedTerms = formData.get("terms") === "on";
 
     if (!acceptedTerms) {
-      setError("Debes aceptar los terminos para crear la cuenta.");
+      showWarningToast("Debes aceptar los terminos para crear la cuenta.");
       return;
     }
 
@@ -50,15 +51,14 @@ export default function RegistroPage() {
           sessionStorage.removeItem("mycertify-dev-code");
         }
 
+        showSuccessToast("Cuenta creada. Verifica tu codigo.");
         router.push("/frontend/codigo");
         return;
       }
 
-      setSuccess(
-        "Cuenta creada. Confirma tu correo en Supabase y luego inicia sesion.",
-      );
+      showSuccessToast("Cuenta creada. Confirma tu correo para iniciar sesion.");
     } catch (requestError) {
-      setError(
+      showErrorToast(
         requestError instanceof ApiError
           ? requestError.message
           : "No se pudo crear la cuenta.",
@@ -223,24 +223,6 @@ export default function RegistroPage() {
                   </Link>
                 </span>
               </label>
-
-              {error && (
-                <div className="fp-alert fp-alert--error">
-                  <MaterialIcon>error_outline</MaterialIcon>
-                  <p className="fp-body-sm" style={{ margin: 0 }}>
-                    {error}
-                  </p>
-                </div>
-              )}
-
-              {success && (
-                <div className="fp-alert fp-alert--success">
-                  <MaterialIcon>check_circle_outline</MaterialIcon>
-                  <p className="fp-body-sm" style={{ margin: 0 }}>
-                    {success}
-                  </p>
-                </div>
-              )}
 
               <button
                 className="fp-button fp-button--primary fp-button--full"

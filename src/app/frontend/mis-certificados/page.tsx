@@ -10,6 +10,7 @@ import {
   updateCertificate,
   type CertificateDto,
 } from "@/lib/api/certificados";
+import { showErrorToast, showSuccessToast } from "@/lib/ui/toast";
 
 import { DashboardSidebar } from "../_components/dashboard-sidebar";
 import { MaterialIcon } from "../_components/material-icon";
@@ -134,8 +135,9 @@ export default function MisCertificadosPage() {
       );
       setSelectedCert(updatedCertificate as CertificateExtended);
       setIsEditing(false);
+      showSuccessToast("Certificado actualizado correctamente.");
     } catch {
-      setDetailsError("No se pudo actualizar el certificado.");
+      showErrorToast("No se pudo actualizar el certificado.");
     } finally {
       setIsSavingEdit(false);
     }
@@ -426,9 +428,10 @@ export default function MisCertificadosPage() {
                         setSelectedCert(null);
                         setShowDeleteConfirm(false);
                         setIsEditing(false);
+                        showSuccessToast("Certificado eliminado correctamente.");
                       } catch (err) {
                         console.error("Error deleting certificate", err);
-                        setDetailsError("No se pudo eliminar el certificado.");
+                        showErrorToast("No se pudo eliminar el certificado.");
                       }
                     }}
                   >
