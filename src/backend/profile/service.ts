@@ -85,6 +85,14 @@ export async function updateCurrentProfile(input: Record<string, unknown>) {
     "LAST_NAME_REQUIRED",
   );
 
+  if ((nombres as string).length > 100) {
+    throw new BackendError("Los nombres son demasiado largos.", 400, "FIRST_NAME_TOO_LONG");
+  }
+
+  if ((apellidos as string).length > 100) {
+    throw new BackendError("Los apellidos son demasiado largos.", 400, "LAST_NAME_TOO_LONG");
+  }
+
   const updatePayload = {
     nombres: sanitizeHtml(nombres as string),
     apellidos: sanitizeHtml(apellidos as string),

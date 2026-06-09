@@ -40,10 +40,16 @@ function identityKey(value: string) {
 }
 
 function getClientIp(request: Request) {
-  const forwardedFor = request.headers.get("x-forwarded-for");
   const realIp = request.headers.get("x-real-ip");
+  if (realIp) return realIp.trim();
 
-  return realIp ?? forwardedFor?.split(",")[0].trim() ?? "127.0.0.1";
+  const forwardedFor = request.headers.get("x-forwarded-for");
+  if (forwardedFor) {
+    const ips = forwardedFor.split(",").map((i) => i.trim());
+    return ips[ips.length - 1] || "127.0.0.1";
+  }
+
+  return "127.0.0.1";
 }
 
 async function redisCommand<T>(command: unknown[]): Promise<T | null> {
