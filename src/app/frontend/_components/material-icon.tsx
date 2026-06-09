@@ -97,6 +97,7 @@ const iconMap: Record<string, React.ElementType> = {
   checklist: ListChecks,
   chevron_right: ChevronRight,
   close: X,
+  contact_support: HelpCircle,
   cloud_done: CloudUpload,
   cloud_sync: Cloud,
   code: Code,
@@ -115,6 +116,7 @@ const iconMap: Record<string, React.ElementType> = {
   filter_list: Filter,
   groups: Users,
   help: HelpCircle,
+  help_center: HelpCircle,
   history: History,
   hourglass_empty: Hourglass,
   info: Info,
@@ -156,6 +158,7 @@ const iconMap: Record<string, React.ElementType> = {
   dark_mode: Moon,
   add: Plus,
   edit: Edit2,
+  email: Mail,
   interests: Compass,
 };
 

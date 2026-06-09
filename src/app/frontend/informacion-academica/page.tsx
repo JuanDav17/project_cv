@@ -23,6 +23,29 @@ export default function InformacionAcademicaPage() {
 
   // Pre-popular el título con el valor guardado en el perfil
   useEffect(() => {
+    const isRegistrationFlow = sessionStorage.getItem("register_data") !== null;
+
+    if (isRegistrationFlow) {
+      const savedData = sessionStorage.getItem("register_academic_data");
+      if (savedData) {
+        try {
+          const parsed = JSON.parse(savedData);
+          if (parsed.titulo_profesional) {
+            setDefaultCareer(parsed.titulo_profesional);
+          }
+          if (parsed.education && educationRef.current) {
+            educationRef.current.value = parsed.education;
+          }
+          if (parsed.program && programRef.current) {
+            programRef.current.value = parsed.program;
+          }
+        } catch {
+          // ignore parsing errors
+        }
+      }
+      return;
+    }
+
     getProfile()
       .then((profile) => {
         setCurrentProfile(profile);
@@ -31,12 +54,32 @@ export default function InformacionAcademicaPage() {
         }
       })
       .catch(() => {
-        // Sin sesión o error: no pre-populamos, silencioso
+        // Sin sesión o error, redirigir a inicio de sesión
+        window.location.href = "/frontend/iniciar-sesion?next=/frontend/informacion-academica";
       });
   }, []);
 
   const handleBeforeSubmit = async () => {
     const titulo = careerInputRef.current?.value?.trim() ?? "";
+    const isRegistrationFlow = sessionStorage.getItem("register_data") !== null;
+
+    if (isRegistrationFlow) {
+      const education = educationRef.current?.value;
+      const program = programRef.current?.value;
+      
+      if (!titulo || !education || !program) {
+        showErrorToast("Por favor completa toda la información solicitada.");
+        throw new Error("missing info");
+      }
+      
+      sessionStorage.setItem("register_academic_data", JSON.stringify({ 
+        titulo_profesional: titulo,
+        education,
+        program
+      }));
+      return;
+    }
+
     if (!titulo) return; // Si no llenó, no guardamos (el campo no es obligatorio aquí)
 
     try {

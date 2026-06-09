@@ -5,8 +5,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import { register } from "@/lib/api/auth";
-import { ApiError } from "@/lib/api/http";
 import {
   showErrorToast,
   showSuccessToast,
@@ -35,34 +33,23 @@ export default function RegistroPage() {
       return;
     }
 
+    const fullName = String(formData.get("fullName") ?? "").trim();
+    const email = String(formData.get("email") ?? "").trim();
+    const password = String(formData.get("password") ?? "");
+
+    if (!fullName || !email || !password) {
+      showWarningToast("Por favor completa toda la informacion.");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      const response = await register({
-        fullName: String(formData.get("fullName") ?? ""),
-        email: String(formData.get("email") ?? ""),
-        password: String(formData.get("password") ?? ""),
-      });
+      const registerData = { fullName, email, password };
+      sessionStorage.setItem("register_data", JSON.stringify(registerData));
+      sessionStorage.removeItem("register_academic_data");
 
-      if (response.sessionReady && response.requiresVerification) {
-        if (response.devCode) {
-          sessionStorage.setItem("mycertify-dev-code", response.devCode);
-        } else {
-          sessionStorage.removeItem("mycertify-dev-code");
-        }
-
-        showSuccessToast("Cuenta creada. Verifica tu codigo.");
-        router.push("/frontend/codigo");
-        return;
-      }
-
-      showSuccessToast("Cuenta creada. Confirma tu correo para iniciar sesion.");
-    } catch (requestError) {
-      showErrorToast(
-        requestError instanceof ApiError
-          ? requestError.message
-          : "No se pudo crear la cuenta.",
-      );
+      router.push("/frontend/informacion-academica");
     } finally {
       setIsSubmitting(false);
     }

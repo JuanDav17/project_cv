@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, ChangeEvent, FormEvent } from "react";
+import Link from "next/link";
 
 import { me, type AuthProfile } from "@/lib/api/auth";
 import {
@@ -173,6 +174,14 @@ export default function MisCertificadosPage() {
               </div>
             </div>
           </>
+        }
+        footer={
+          <div className="fp-stack-md">
+            <Link className="fp-sidebar__link fp-label-md" href="/frontend/ayuda">
+              <MaterialIcon>help</MaterialIcon>
+              <span>Centro de Ayuda</span>
+            </Link>
+          </div>
         }
       />
 

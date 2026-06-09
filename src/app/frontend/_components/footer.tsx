@@ -19,7 +19,7 @@ export function FrontendFooter() {
       <div className="fp-footer__inner">
         <div className="fp-footer__brand fp-label-md">MyCertify</div>
         <div className="fp-body-sm">
-          © 2024 MyCertify Precision Systems. All rights reserved.
+          © 2026 MyCertify
         </div>
         <div className="fp-footer__links fp-body-sm">
           <Link href={legalHref("/frontend/terminos-condiciones", from)}>
@@ -29,7 +29,7 @@ export function FrontendFooter() {
             Terminos de Servicio
           </Link>
           <Link href={legalHref("/frontend/seguridad", from)}>Seguridad</Link>
-          <Link href={`${from}#contacto`}>Contacto</Link>
+          <Link href={legalHref("/frontend/contacto", from)}>Contacto</Link>
           <a
             href="https://github.com/JuanDav17/project_cv.git"
             target="_blank"

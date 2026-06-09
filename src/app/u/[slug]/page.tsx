@@ -184,14 +184,14 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
               <span>MyCertify</span>
             </div>
             <span className="fp-footer__copyright">
-              © 2024 MyCertify Inc. Todos los derechos reservados.
+              © 2026 MyCertify
             </span>
           </div>
           <div className="fp-landing__footer-links fp-body-sm">
             <Link href={`/frontend/terminos-condiciones?from=${encodedProfileReturnPath}`}>Términos y Condiciones</Link>
             <Link href={`/frontend/terminos-servicio?from=${encodedProfileReturnPath}`}>Términos de Servicio</Link>
             <Link href={`/frontend/seguridad?from=${encodedProfileReturnPath}`}>Seguridad</Link>
-            <Link href={`${profileReturnPath}#contacto`}>Contacto</Link>
+            <Link href={`/frontend/contacto?from=${encodedProfileReturnPath}`}>Contacto</Link>
             <a
               href="https://github.com/JuanDav17/project_cv.git"
               target="_blank"

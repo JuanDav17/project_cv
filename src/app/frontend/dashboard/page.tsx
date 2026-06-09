@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -210,6 +211,14 @@ export default function DashboardPage() {
               </div>
             </div>
           </>
+        }
+        footer={
+          <div className="fp-stack-md">
+            <Link className="fp-sidebar__link fp-label-md" href="/frontend/ayuda">
+              <MaterialIcon>help</MaterialIcon>
+              <span>Centro de Ayuda</span>
+            </Link>
+          </div>
         }
       />
 

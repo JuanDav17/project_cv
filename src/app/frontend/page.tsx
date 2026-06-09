@@ -178,14 +178,14 @@ export default function FrontendIndexPage() {
                 <span>MyCertify</span>
               </div>
               <span className="fp-footer__copyright">
-                © 2026 MyCertify Inc.
+                © 2026 MyCertify
               </span>
             </div>
             <div className="fp-landing__footer-links fp-body-sm">
               <Link href="/frontend/terminos-condiciones?from=%2Ffrontend">Términos y Condiciones</Link>
               <Link href="/frontend/terminos-servicio?from=%2Ffrontend">Términos de Servicio</Link>
               <Link href="/frontend/seguridad?from=%2Ffrontend">Seguridad</Link>
-              <Link href="/frontend#contacto">Contacto</Link>
+              <Link href="/frontend/contacto?from=%2Ffrontend">Contacto</Link>
               <a
                 href="https://github.com/JuanDav17/project_cv.git"
                 target="_blank"

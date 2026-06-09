@@ -93,7 +93,7 @@ export default function CodigoQrPage() {
           </>
         }
         footer={
-          <Link className="fp-sidebar__link fp-label-md" href="/frontend">
+          <Link className="fp-sidebar__link fp-label-md" href="/frontend/ayuda">
             <MaterialIcon>help</MaterialIcon>
             <span>Centro de Ayuda</span>
           </Link>

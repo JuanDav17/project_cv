@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 
 import { getProfile, updateProfile, type ProfileDto } from "@/lib/api/perfil";
+import { register } from "@/lib/api/auth";
 import { type InterestArea } from "@/lib/api/areas-interes";
 import {
   showErrorToast,
@@ -51,9 +52,17 @@ export default function AreasInteresPage() {
   const [validationError, setValidationError] = useState(false);
 
   const [currentProfile, setCurrentProfile] = useState<ProfileDto | null>(null);
+  const [isRegistrationFlow, setIsRegistrationFlow] = useState(false);
 
   // Cargar selecciones previas desde el perfil del usuario (DB)
   useEffect(() => {
+    const isReg = sessionStorage.getItem("register_data") !== null;
+    setIsRegistrationFlow(isReg);
+
+    if (isReg) {
+      return;
+    }
+
     getProfile()
       .then((profile) => {
         setCurrentProfile(profile);
@@ -83,7 +92,8 @@ export default function AreasInteresPage() {
     setSelectedItems(restored);
       })
       .catch(() => {
-        // Ignorar si falla la carga del perfil
+        // Sin sesión o error, redirigir a inicio de sesión
+        window.location.href = "/frontend/iniciar-sesion?next=/frontend/areas-interes";
       });
   }, []);
 
@@ -136,6 +146,46 @@ export default function AreasInteresPage() {
       custom: item.custom,
     }));
     
+    if (isRegistrationFlow) {
+      const regDataStr = sessionStorage.getItem("register_data");
+      const acadDataStr = sessionStorage.getItem("register_academic_data");
+      
+      if (!regDataStr || !acadDataStr) {
+        showErrorToast("Falta informacion del registro. Por favor vuelve a empezar.");
+        throw new Error("missing registration data");
+      }
+      
+      const regData = JSON.parse(regDataStr);
+      const acadData = JSON.parse(acadDataStr);
+      
+      try {
+        const response = await register(regData);
+        
+        await updateProfile({
+          nombres: response.profile.nombres,
+          apellidos: response.profile.apellidos,
+          titulo_profesional: acadData.titulo_profesional,
+          areas_interes: toSave,
+        });
+        
+        sessionStorage.removeItem("register_data");
+        sessionStorage.removeItem("register_academic_data");
+        
+        if (response.sessionReady && response.requiresVerification) {
+          if (response.devCode) {
+            sessionStorage.setItem("mycertify-dev-code", response.devCode);
+          } else {
+            sessionStorage.removeItem("mycertify-dev-code");
+          }
+        }
+        showSuccessToast("Cuenta creada. Verifica tu codigo.");
+      } catch (err: any) {
+        showErrorToast(err.message || "No se pudo crear la cuenta.");
+        throw new Error("registration failed");
+      }
+      return;
+    }
+
     if (currentProfile) {
       try {
         await updateProfile({
@@ -203,7 +253,7 @@ export default function AreasInteresPage() {
 
           <FlowForm
             className="fp-stack-xl"
-            nextHref="/frontend/pagina-principal"
+            nextHref={isRegistrationFlow ? "/frontend/codigo" : "/frontend/pagina-principal"}
             onBeforeSubmit={handleBeforeSubmit}
           >
             <InterestGrid
