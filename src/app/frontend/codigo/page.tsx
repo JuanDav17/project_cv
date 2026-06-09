@@ -168,15 +168,6 @@ export default function CodigoPage() {
                 </div>
               </div>
 
-              {devCode && (
-                <div className="fp-alert">
-                  <MaterialIcon>info</MaterialIcon>
-                  <p className="fp-body-sm" style={{ margin: 0 }}>
-                    Modo desarrollo: usa el codigo <strong>{devCode}</strong>.
-                  </p>
-                </div>
-              )}
-
               <button
                 className="fp-button fp-button--primary fp-button--full"
                 type="submit"
