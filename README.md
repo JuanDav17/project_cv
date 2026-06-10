@@ -113,6 +113,10 @@ PASSWORD_RESET_SESSION_TTL_MINUTES=10
 # Configuración de Resend
 RESEND_API_KEY=re_xxxxxxxxxxxxxxxxx
 EMAIL_FROM="MyCertify <onboarding@resend.dev>"
+
+#Configuracion Uptash Redis
+UPSTASH_REDIS_REST_URL=<TU_UPSTASH_REDIS_REST_URL>
+UPSTASH_REDIS_REST_TOKEN=<TU_UPSTASH_REDIS_REST_TOKEN>
 ```
 
 > ⚠️ **Seguridad:** Nunca expongas `SUPABASE_SECRET_KEY` o `SUPABASE_SERVICE_ROLE_KEY` en componentes que se rendericen en el cliente.
