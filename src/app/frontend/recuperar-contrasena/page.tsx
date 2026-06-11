@@ -294,27 +294,6 @@ export default function RecuperarContrasenaPage() {
               </form>
             )}
 
-            {step === "verify" && (devCode || devLink) && (
-              <div className="fp-alert" style={{ marginTop: "1rem" }}>
-                <MaterialIcon>info</MaterialIcon>
-                <p className="fp-body-sm" style={{ margin: 0 }}>
-                  Modo desarrollo: codigo <strong>{devCode}</strong>
-                  {devLink ? (
-                    <>
-                      {" "}
-                      o{" "}
-                      <Link className="fp-link fp-link--strong" href={devLink}>
-                        abrir enlace seguro
-                      </Link>
-                      .
-                    </>
-                  ) : (
-                    "."
-                  )}
-                </p>
-              </div>
-            )}
-
             {step === "reset" && (
               <form className="fp-login-split__form" onSubmit={handleConfirm}>
                 <div className="fp-field">
