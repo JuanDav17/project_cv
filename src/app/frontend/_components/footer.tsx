@@ -1,17 +1,74 @@
 "use client";
 
+import { useSyncExternalStore } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+
+const FOOTER_INFO_PATHS = new Set([
+  "/frontend/terminos-condiciones",
+  "/frontend/terminos-servicio",
+  "/frontend/seguridad",
+  "/frontend/contacto",
+]);
 
 function legalHref(path: string, from: string) {
   return `${path}?from=${encodeURIComponent(from)}`;
 }
 
+function subscribeToLocationChanges(onStoreChange: () => void) {
+  window.addEventListener("popstate", onStoreChange);
+
+  return () => window.removeEventListener("popstate", onStoreChange);
+}
+
+function getBrowserSearch() {
+  return typeof window === "undefined" ? "" : window.location.search;
+}
+
+function getServerSearch() {
+  return "";
+}
+
+function safeFooterReturnHref(value: string | null) {
+  if (!value) {
+    return null;
+  }
+
+  let decoded = value.trim();
+
+  try {
+    decoded = decodeURIComponent(decoded);
+  } catch {
+    return null;
+  }
+
+  if (decoded.startsWith("//") || !decoded.startsWith("/")) {
+    return null;
+  }
+
+  if (decoded.startsWith("/frontend") || decoded.startsWith("/u/")) {
+    return decoded;
+  }
+
+  return null;
+}
+
 export function FrontendFooter() {
   const pathname = usePathname();
+  const currentPathname = pathname ?? "/frontend";
+  const search = useSyncExternalStore(
+    subscribeToLocationChanges,
+    getBrowserSearch,
+    getServerSearch,
+  );
+  const preservedFrom = safeFooterReturnHref(
+    new URLSearchParams(search).get("from"),
+  );
   const from =
-    pathname?.startsWith("/frontend") || pathname?.startsWith("/u/")
-      ? pathname
+    FOOTER_INFO_PATHS.has(currentPathname) && preservedFrom
+      ? preservedFrom
+      : currentPathname.startsWith("/frontend") || currentPathname.startsWith("/u/")
+      ? currentPathname
       : "/frontend";
 
   return (
