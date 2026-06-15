@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { MaterialIcon } from "@/app/frontend/_components/material-icon";
+import { MaterialIcon } from "@/app/(frontend)/_components/material-icon";
 
 type CertificateProp = {
   id_certificado: string;

@@ -3,14 +3,14 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 
 import { getPublicProfileBySlug } from "@/backend/public/service";
-import { MaterialIcon } from "@/app/frontend/_components/material-icon";
-import { ThemeToggle } from "@/app/frontend/_components/theme-toggle";
-import { LucideIconByName } from "@/app/frontend/_components/custom-interest-dialog";
+import { MaterialIcon } from "@/app/(frontend)/_components/material-icon";
+import { ThemeToggle } from "@/app/(frontend)/_components/theme-toggle";
+import { LucideIconByName } from "@/app/(frontend)/_components/custom-interest-dialog";
 import { PublicCertificatesGrid } from "./public-certificates-grid";
 
-import "@/app/frontend/page.css"; // Para los estilos del nav y footer de la landing
-import "@/app/frontend/mis-certificados/page.css";
-import "@/app/frontend/mi-cuenta/page.css"; // Para los tags de áreas de interés
+import "@/app/(frontend)/page.css"; // Para los estilos del nav y footer de la landing
+import "@/app/(frontend)/mis-certificados/page.css";
+import "@/app/(frontend)/mi-cuenta/page.css"; // Para los tags de áreas de interés
 
 export const dynamic = "force-dynamic";
 
@@ -62,7 +62,7 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
     <section className="fp-page fp-landing">
       {/* ─── Navbar ─── */}
       <header className="fp-landing__nav">
-        <Link href="/frontend" className="fp-brand" style={{ textDecoration: "none" }}>
+        <Link href="/" className="fp-brand" style={{ textDecoration: "none" }}>
           <span className="fp-brand__icon fp-brand__icon--round">
             <MaterialIcon filled>verified</MaterialIcon>
           </span>
@@ -71,14 +71,14 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
 
         <div className="fp-landing__nav-actions">
           <ThemeToggle />
-          <Link href="/frontend/codigo-qr" className="fp-button fp-button--ghost fp-button--sm">
+          <Link href="/codigo-qr" className="fp-button fp-button--ghost fp-button--sm">
             <MaterialIcon>arrow_back</MaterialIcon>
             Volver
           </Link>
-          <Link className="fp-button fp-button--ghost fp-button--sm" href="/frontend/iniciar-sesion">
+          <Link className="fp-button fp-button--ghost fp-button--sm" href="/iniciar-sesion">
             Iniciar sesión
           </Link>
-          <Link className="fp-button fp-button--accent fp-button--sm" href="/frontend/registro">
+          <Link className="fp-button fp-button--accent fp-button--sm" href="/registro">
             Crear cuenta
           </Link>
         </div>
@@ -175,10 +175,10 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
             </span>
           </div>
           <div className="fp-landing__footer-links fp-body-sm">
-            <Link href={`/frontend/terminos-condiciones?from=${encodedProfileReturnPath}`}>Términos y Condiciones</Link>
-            <Link href={`/frontend/terminos-servicio?from=${encodedProfileReturnPath}`}>Términos de Servicio</Link>
-            <Link href={`/frontend/seguridad?from=${encodedProfileReturnPath}`}>Seguridad</Link>
-            <Link href={`/frontend/contacto?from=${encodedProfileReturnPath}`}>Contacto</Link>
+            <Link href={`/terminos-condiciones?from=${encodedProfileReturnPath}`}>Términos y Condiciones</Link>
+            <Link href={`/terminos-servicio?from=${encodedProfileReturnPath}`}>Términos de Servicio</Link>
+            <Link href={`/seguridad?from=${encodedProfileReturnPath}`}>Seguridad</Link>
+            <Link href={`/contacto?from=${encodedProfileReturnPath}`}>Contacto</Link>
             <a
               href="https://github.com/JuanDav17/project_cv.git"
               target="_blank"

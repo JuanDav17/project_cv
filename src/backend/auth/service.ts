@@ -467,7 +467,7 @@ export async function registerWithPassword(input: RegisterInput) {
     password,
     options: {
       data: { full_name: fullName },
-      emailRedirectTo: `${getAppUrl()}/frontend/iniciar-sesion`,
+      emailRedirectTo: `${getAppUrl()}/iniciar-sesion`,
     },
   });
 
@@ -486,7 +486,7 @@ export async function registerWithPassword(input: RegisterInput) {
       userId: data.user.id,
       email,
       purpose: "login",
-      redirectPath: "/frontend/codigo",
+      redirectPath: "/codigo",
     });
 
     return {
@@ -540,7 +540,7 @@ export async function loginWithPassword(input: LoginInput) {
     userId: data.user.id,
     email,
     purpose: "login",
-    redirectPath: "/frontend/codigo",
+    redirectPath: "/codigo",
   });
 
   return {
@@ -579,7 +579,7 @@ export async function requestPasswordReset(emailInput: unknown) {
     userId: user.id_usuario,
     email,
     purpose: "password_reset",
-    redirectPath: "/frontend/recuperar-contrasena",
+    redirectPath: "/recuperar-contrasena",
   });
 }
 

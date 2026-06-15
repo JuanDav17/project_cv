@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { MaterialIcon } from "@/app/frontend/_components/material-icon";
+import { MaterialIcon } from "@/app/(frontend)/_components/material-icon";
 import { PublicCertificateCard } from "./public-certificate-card";
 import { Award, Clock, X, ChevronDown } from "lucide-react";
 

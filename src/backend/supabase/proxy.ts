@@ -5,12 +5,12 @@ import { AUTH_VERIFIED_COOKIE } from "@/backend/auth/cookies";
 import { getSupabasePublicEnv, hasSupabasePublicEnv } from "@/backend/config/env";
 
 const PRIVATE_FRONTEND_PATHS = [
-  "/frontend/pagina-principal",
-  "/frontend/subir-certificado",
-  "/frontend/mis-certificados",
-  "/frontend/dashboard",
-  "/frontend/codigo-qr",
-  "/frontend/mi-cuenta",
+  "/pagina-principal",
+  "/subir-certificado",
+  "/mis-certificados",
+  "/dashboard",
+  "/codigo-qr",
+  "/mi-cuenta",
 ];
 
 function isPrivateFrontendPath(pathname: string) {
@@ -50,7 +50,7 @@ export async function updateSession(request: NextRequest) {
 
   if (!user && isPrivateFrontendPath(request.nextUrl.pathname)) {
     const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = "/frontend/iniciar-sesion";
+    redirectUrl.pathname = "/iniciar-sesion";
     redirectUrl.searchParams.set("next", request.nextUrl.pathname);
     return NextResponse.redirect(redirectUrl);
   }
@@ -61,7 +61,7 @@ export async function updateSession(request: NextRequest) {
     request.cookies.get(AUTH_VERIFIED_COOKIE)?.value !== "true"
   ) {
     const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = "/frontend/codigo";
+    redirectUrl.pathname = "/codigo";
     redirectUrl.searchParams.set("next", request.nextUrl.pathname);
     return NextResponse.redirect(redirectUrl);
   }
