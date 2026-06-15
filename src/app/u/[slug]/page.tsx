@@ -155,19 +155,6 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
 
           {/* ─── Certificados ─── */}
           <section className="fp-stack-lg">
-            <h2 className="fp-headline-md" style={{ margin: 0 }}>
-              Certificados Públicos
-            </h2>
-
-            {certificados.length === 0 && (
-              <div className="fp-alert">
-                <MaterialIcon>info</MaterialIcon>
-                <p className="fp-body-sm" style={{ margin: 0 }}>
-                  Este perfil aún no tiene certificados públicos.
-                </p>
-              </div>
-            )}
-
             <PublicCertificatesGrid certificados={certificados} />
           </section>
         </section>

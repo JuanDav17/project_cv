@@ -51,3 +51,5 @@ supabase/.temp/
 supabase/.branches/
 *.sqlite
 
+local_schema.sql
+.npmrc

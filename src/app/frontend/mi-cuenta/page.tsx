@@ -222,8 +222,8 @@ export default function MiCuentaPage() {
         }
         footer={
           <div className="fp-stack-md">
-            <Link className="fp-sidebar__link fp-label-md" href="/frontend/ayuda">
-              <MaterialIcon>help</MaterialIcon>
+            <Link className="fp-sidebar__link fp-label-md" href="/frontend/ayuda?from=/frontend/mi-cuenta">
+              <MaterialIcon>support_agent</MaterialIcon>
               <span>Centro de Ayuda</span>
             </Link>
           </div>
@@ -369,7 +369,7 @@ export default function MiCuentaPage() {
                       Las áreas profesionales que definen tu perfil en MyCertify.
                     </p>
                   </div>
-                  <Link href="/frontend/areas-interes" className="fp-button fp-button--ghost">
+                  <Link href="/frontend/editar_areas" className="fp-button fp-button--ghost">
                     <MaterialIcon>edit</MaterialIcon>
                     Editar
                   </Link>
@@ -383,7 +383,7 @@ export default function MiCuentaPage() {
                     <p className="fp-body-md fp-muted" style={{ margin: 0, textAlign: "center" }}>
                       Aún no has seleccionado áreas de interés.
                     </p>
-                    <Link href="/frontend/areas-interes" className="fp-button fp-button--soft">
+                    <Link href="/frontend/editar_areas" className="fp-button fp-button--soft">
                       <MaterialIcon>add</MaterialIcon>
                       Completar perfil
                     </Link>

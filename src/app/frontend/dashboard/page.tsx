@@ -214,8 +214,8 @@ export default function DashboardPage() {
         }
         footer={
           <div className="fp-stack-md">
-            <Link className="fp-sidebar__link fp-label-md" href="/frontend/ayuda">
-              <MaterialIcon>help</MaterialIcon>
+            <Link className="fp-sidebar__link fp-label-md" href="/frontend/ayuda?from=/frontend/dashboard">
+              <MaterialIcon>support_agent</MaterialIcon>
               <span>Centro de Ayuda</span>
             </Link>
           </div>

@@ -157,8 +157,8 @@ export default function SubirCertificadoPage() {
           </>
         }
         footer={
-          <Link className="fp-sidebar__link fp-label-md" href="/frontend/ayuda">
-            <MaterialIcon>help</MaterialIcon>
+          <Link className="fp-sidebar__link fp-label-md" href="/frontend/ayuda?from=/frontend/subir-certificado">
+            <MaterialIcon>support_agent</MaterialIcon>
             <span>Centro de Ayuda</span>
           </Link>
         }
