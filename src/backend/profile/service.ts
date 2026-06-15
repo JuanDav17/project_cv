@@ -32,8 +32,8 @@ function toProfileDto(profile: ProfileRecord, email: string): ProfileDto {
   };
 }
 
-export async function getCurrentProfile(): Promise<ProfileDto> {
-  const { user } = await getAuthenticatedUser();
+export async function getCurrentProfile(options: { require2FA?: boolean } = { require2FA: true }): Promise<ProfileDto> {
+  const { user } = await getAuthenticatedUser(options);
   const synced = await ensureUserRecords(user);
   const admin = createAdminSupabaseClient();
 
@@ -135,5 +135,5 @@ export async function updateCurrentProfile(input: Record<string, unknown>) {
     );
   }
 
-  return getCurrentProfile();
+  return getCurrentProfile({ require2FA: false });
 }
