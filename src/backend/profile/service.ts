@@ -72,7 +72,7 @@ export async function getCurrentProfile(): Promise<ProfileDto> {
 }
 
 export async function updateCurrentProfile(input: Record<string, unknown>) {
-  const { user } = await getAuthenticatedUser();
+  const { user } = await getAuthenticatedUser({ require2FA: false });
   const admin = createAdminSupabaseClient();
   const nombres = assertRequired(
     input.nombres,
