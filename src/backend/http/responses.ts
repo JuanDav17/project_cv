@@ -13,9 +13,8 @@ export function empty(status = 204) {
 }
 
 export function fail(error: unknown) {
-  if (!isBackendError(error)) {
-    console.error("Raw unexpected error:", error);
-  }
+  // Siempre hacemos log del error en la consola para poder debuggear el error 500
+  console.error("🚨 API Route Error:", error);
   
   const backendError = isBackendError(error)
     ? error
