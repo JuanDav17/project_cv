@@ -15,7 +15,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { MaterialIcon } from "../_components/material-icon";
 import { ThemeToggle } from "../_components/theme-toggle";
 
-import "../page.css";
+import "./page.css";
 
 export default function RegistroPage() {
   const router = useRouter();

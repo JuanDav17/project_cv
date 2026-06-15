@@ -19,7 +19,7 @@ import { LucideIconByName } from "../_components/custom-interest-dialog";
 import { MaterialIcon } from "../_components/material-icon";
 import { MobileBrandHeader } from "../_components/mobile-brand-header";
 
-import "../page.css";
+import "./page.css";
 
 /* ─── Helper: icono del área (Material o Lucide) ───────────── */
 

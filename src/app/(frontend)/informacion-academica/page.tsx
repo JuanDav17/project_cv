@@ -11,7 +11,7 @@ import { MaterialIcon } from "../_components/material-icon";
 import { OnboardingStepper } from "../_components/onboarding-stepper";
 import { ThemeToggle } from "../_components/theme-toggle";
 
-import "../page.css";
+import "./page.css";
 
 export default function InformacionAcademicaPage() {
   const careerInputRef = useRef<HTMLInputElement>(null);

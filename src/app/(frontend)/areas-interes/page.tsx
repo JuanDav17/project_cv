@@ -21,7 +21,7 @@ import { OnboardingStepper } from "../_components/onboarding-stepper";
 import { ThemeToggle } from "../_components/theme-toggle";
 
 import "../informacion-academica/page.css";
-import "../page.css";
+import "./page.css";
 
 /* ─── Áreas predefinidas ─────────────────────────────────────── */
 

@@ -6,7 +6,7 @@ import {
 } from "../_components/legal-return";
 import { MaterialIcon } from "../_components/material-icon";
 import { ThemeToggle } from "../_components/theme-toggle";
-import "../page.css";
+import "./page.css";
 
 export default async function SeguridadPage({ searchParams }: LegalPageProps) {
   const backHref = await resolveLegalReturnHref(searchParams);

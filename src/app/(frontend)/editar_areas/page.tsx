@@ -20,7 +20,7 @@ import { MaterialIcon } from "../_components/material-icon";
 import { DashboardSidebar } from "../_components/dashboard-sidebar";
 import { MobileBrandHeader } from "../_components/mobile-brand-header";
 
-import "../page.css";
+import "./page.css";
 
 const PREDEFINED_INTERESTS: InterestItem[] = [
   { id: "frontend", label: "Frontend", icon: "code" },

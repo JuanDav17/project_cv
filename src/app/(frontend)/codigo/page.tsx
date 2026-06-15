@@ -17,7 +17,7 @@ import { MaterialIcon } from "../_components/material-icon";
 import { ThemeToggle } from "../_components/theme-toggle";
 
 import "../iniciar-sesion/page.css";
-import "../page.css";
+import "./page.css";
 
 export default function CodigoPage() {
   const router = useRouter();

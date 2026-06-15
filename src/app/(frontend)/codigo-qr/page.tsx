@@ -12,7 +12,7 @@ import { FrontendFooter } from "../_components/footer";
 import { MaterialIcon } from "../_components/material-icon";
 import { MobileBrandHeader } from "../_components/mobile-brand-header";
 
-import "../page.css";
+import "./page.css";
 
 export default function CodigoQrPage() {
   const [profile, setProfile] = useState<ProfileDto | null>(null);

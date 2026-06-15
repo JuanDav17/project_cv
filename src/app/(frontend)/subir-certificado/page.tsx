@@ -18,7 +18,7 @@ import { MaterialIcon } from "../_components/material-icon";
 import { MobileBrandHeader } from "../_components/mobile-brand-header";
 
 // Importación directa del estilo de la vista, siguiendo el patrón del proyecto
-import "../page.css";
+import "./page.css";
 
 export default function SubirCertificadoPage() {
   const [profile, setProfile] = useState<AuthProfile | null>(null);
